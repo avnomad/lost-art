@@ -1,0 +1,8 @@
+syntax: regexp
+Debug/*
+Release/*
+ipch/*
+syntax: glob
+GUI Builder.opensdf
+GUI Builder.sdf
+GUI Builder.suo
