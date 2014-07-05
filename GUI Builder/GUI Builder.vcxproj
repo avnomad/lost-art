@@ -13,6 +13,9 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="eigen-rational interface code.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{26777C5F-3B14-49DF-B16D-26B073EB1F1F}</ProjectGuid>
     <RootNamespace>GUIBuilder</RootNamespace>
