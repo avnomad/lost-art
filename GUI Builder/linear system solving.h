@@ -49,12 +49,32 @@ Eigen::MatrixBase<Derived> &numericReducedRowEchelonFormNoPivot(Eigen::MatrixBas
  */
 struct LinearSystemProperties
 {
+	// fields
 	size_t nEquations;
 	size_t nVariables;
 	size_t nIndependentEquations;
 	std::vector<size_t> freeVariables;
 	bool isImpossible;
 	bool hasUniqueSolution;
+	
+	// constructors
+	LinearSystemProperties(){/* empty body */}
+	
+	LinearSystemProperties(size_t _nEquations, size_t _nVariables, size_t _nIndependentEquations,
+		std::vector<size_t> _freeVariables, bool _isImpossible, bool _hasUniqueSolution)
+		:nEquations(_nEquations),nVariables(_nVariables),nIndependentEquations(_nIndependentEquations),
+		freeVariables(_freeVariables),isImpossible(_isImpossible),hasUniqueSolution(_hasUniqueSolution)
+	{
+		// empty body
+	} // end LinearSystemProperties constructor
+
+	// operators
+	bool operator==(const LinearSystemProperties &other)
+	{
+		return this->nEquations == other.nEquations && this->nVariables == other.nVariables && this->nIndependentEquations == other.nIndependentEquations
+			&& this->freeVariables == other.freeVariables && this->isImpossible == other.isImpossible && this->hasUniqueSolution == other.hasUniqueSolution;
+	} // end function operator==
+
 }; // end struct LinearSystemProperties
 
 
@@ -68,7 +88,7 @@ LinearSystemProperties numericInvestigateLinearSystem(const Eigen::MatrixBase<De
 
 	LinearSystemProperties properties;
 	properties.nEquations = system.rows();
-	properties.nVariables = system.cols()-1;
+	properties.nVariables = system.cols() > 0 ? system.cols()-1 : 0;
 
 	//properties.freeVariables.reserve(properties.nEquations);
 	IndexType i = 0; // after the for-loop it will contain the number of linearly independent rows
@@ -84,7 +104,7 @@ LinearSystemProperties numericInvestigateLinearSystem(const Eigen::MatrixBase<De
 		properties.freeVariables.push_back(j);
 	properties.nIndependentEquations = i;
 
-	assert(properties.nIndependentEquations + properties.freeVariables.size() == properties.nVariables);
+	assert(properties.nIndependentEquations + properties.freeVariables.size() == properties.nVariables); // sanity check :)
 
 	properties.isImpossible = properties.nIndependentEquations < properties.nEquations && system(i,system.cols()-1) != 0;
 	properties.hasUniqueSolution = !properties.isImpossible && properties.nIndependentEquations == properties.nVariables;
@@ -112,7 +132,8 @@ auto numericSolveLinearSystem(const Eigen::MatrixBase<Derived> &system)->
 	if(properties.hasUniqueSolution)
 	{
 		base.setZero(properties.nVariables,1);
-		offset = system.topRightCorner(properties.nVariables,1);
+		if(system.cols())
+			offset = system.topRightCorner(properties.nVariables,1);
 	}
 	else if(!properties.isImpossible)
 	{
