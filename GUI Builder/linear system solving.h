@@ -1,5 +1,10 @@
-#ifndef LINEAR_SYSTEM_SOLVING_H
+﻿#ifndef LINEAR_SYSTEM_SOLVING_H
 #define LINEAR_SYSTEM_SOLVING_H
+
+#include <utility>
+#include <vector>
+
+#include <cassert>
 
 #include <Eigen/Dense>
 
@@ -39,5 +44,101 @@ Eigen::MatrixBase<Derived> &numericReducedRowEchelonFormNoPivot(Eigen::MatrixBas
 	return input;
 } // end function numericReducedRowEchelonFormNoPivot
 
+
+/** Struct for describing the properties of a linear system.
+ */
+struct LinearSystemProperties
+{
+	size_t nEquations;
+	size_t nVariables;
+	size_t nIndependentEquations;
+	std::vector<size_t> freeVariables;
+	bool isImpossible;
+	bool hasUniqueSolution;
+}; // end struct LinearSystemProperties
+
+
+/** Takes the augmented matrix A|b of a linear system of equations in reduced 
+ *	row echelon form and returns a structure describing the system.
+ */
+template<typename Derived>
+LinearSystemProperties numericInvestigateLinearSystem(const Eigen::MatrixBase<Derived> &system)
+{
+	typedef typename Eigen::MatrixBase<Derived>::Index IndexType;
+
+	LinearSystemProperties properties;
+	properties.nEquations = system.rows();
+	properties.nVariables = system.cols()-1;
+
+	//properties.freeVariables.reserve(properties.nEquations);
+	IndexType i = 0; // after the for-loop it will contain the number of linearly independent rows
+	IndexType j = 0;
+	for( ; i < system.rows() && j+1 < system.cols() ; ++j)
+	{
+		if(system(i,j) != 0)
+			++i;
+		else
+			properties.freeVariables.push_back(j);
+	} // end for
+	for( ; i == system.rows() && j+1 < system.cols() ; ++j)
+		properties.freeVariables.push_back(j);
+	properties.nIndependentEquations = i;
+
+	assert(properties.nIndependentEquations + properties.freeVariables.size() == properties.nVariables);
+
+	properties.isImpossible = properties.nIndependentEquations < properties.nEquations && system(i,system.cols()-1) != 0;
+	properties.hasUniqueSolution = !properties.isImpossible && properties.nIndependentEquations == properties.nVariables;
+
+	return properties;
+} // end function numericInvestigateLinearSystem
+
+
+/** Takes the augmented matrix A|b of a linear system of equations in reduced 
+ *	row echelon form and returns a pair (C,d) such as for each column vector x
+ *	with as many rows as C has columns it holds that A*(C*x+d)==b. In other 
+ *	words, C*x+d is a solution of the system.
+ */
+template<typename Derived>
+auto numericSolveLinearSystem(const Eigen::MatrixBase<Derived> &system)->
+	std::pair<Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>,
+				Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>>
+{
+	typedef typename Eigen::MatrixBase<Derived>::Index IndexType;
+
+	LinearSystemProperties properties = numericInvestigateLinearSystem(system);
+	Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic> base;
+	Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1> offset;
+
+	if(properties.hasUniqueSolution)
+	{
+		base.setZero(properties.nVariables,1);
+		offset = system.topRightCorner(properties.nVariables,1);
+	}
+	else if(!properties.isImpossible)
+	{
+		base.resize(properties.nVariables,properties.freeVariables.size());
+		offset.resize(properties.nVariables,1);
+
+		size_t f = 0;
+		for(IndexType i = 0 ; i < base.rows() ; ++i)
+		{
+			if(f < properties.freeVariables.size() && i == properties.freeVariables[f])
+			{
+				for(IndexType j = 0 ; j < base.cols() ; ++j)
+					base(i,j) = (j==f) ? 1 : 0;
+				offset(i) = 0;
+				++f;
+			}
+			else
+			{
+				for(IndexType j = 0 ; j < base.cols() ; ++j)
+					base(i,j) = -system(i-f,properties.freeVariables[j]);
+				offset(i) = system(i-f,system.cols()-1);
+			} // end else
+		} // end for
+	} // end if
+
+	return std::make_pair(base,offset);
+} // end function numericSolveLinearSystem
 
 #endif // LINEAR_SYSTEM_SOLVING_H
