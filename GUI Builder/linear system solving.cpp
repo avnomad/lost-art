@@ -229,6 +229,10 @@ void runLinearSystemSolvingTestSuite()
 		assert(numericSolveLinearSystem(ech_r[i]).first == base_r[i]);
 		assert(numericSolveLinearSystem(ech_r[i]).second == offs_r[i]);
 
+		assert(numericInvestigateLinearSystem(ech_r[i].cast<double>()) == prop_r[i]);
+		assert(numericSolveLinearSystem(ech_r[i].cast<double>()).first == base_r[i].cast<double>());
+		assert(numericSolveLinearSystem(ech_r[i].cast<double>()).second == offs_r[i].cast<double>());
+
 		assert(semiSymbolicInvestigateLinearSystem(ech_r[i],0) == prop_r[i]);
 		assert(get<0>(semiSymbolicSolveLinearSystem(ech_r[i],0)) == base_r[i]);
 		assert(get<1>(semiSymbolicSolveLinearSystem(ech_r[i],0)) == offs_r[i]);
@@ -241,5 +245,18 @@ void runLinearSystemSolvingTestSuite()
 		assert(get<1>(semiSymbolicSolveLinearSystem(ech_r[i],propU_r[i].nUnknownConstants)) == (Matrix<Rational,Dynamic,1>()));
 		assert(get<2>(semiSymbolicSolveLinearSystem(ech_r[i],propU_r[i].nUnknownConstants)) == base_r[i]);
 		assert(get<3>(semiSymbolicSolveLinearSystem(ech_r[i],propU_r[i].nUnknownConstants)) == offs_r[i]);
+
+		assert(semiSymbolicInvestigateLinearSystem(ech_r[i].cast<double>(),0) == prop_r[i]);
+		assert(get<0>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),0)) == base_r[i].cast<double>());
+		assert(get<1>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),0)) == offs_r[i].cast<double>());
+		assert(get<2>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),0)) == (Matrix<double,Dynamic,Dynamic>(0,!prop_r[i].isImpossible)));
+		assert(get<3>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),0)) == (Matrix<double,Dynamic,1>()));
+
+		assert(semiSymbolicInvestigateLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants) == propU_r[i]);
+		assert(get<0>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == (Matrix<double,Dynamic,Dynamic>(propU_r[i].nVariables,
+			propU_r[i].isImpossible?0:max(size_t(1),propU_r[i].freeVariables.size()+propU_r[i].nUnknownConstants-propU_r[i].boundUnknownConstants.size()))));
+		assert(get<1>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == (Matrix<double,Dynamic,1>()));
+		assert(get<2>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == base_r[i].cast<double>());
+		assert(get<3>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == offs_r[i].cast<double>());
 	} // end for
 } // end function runLinearSystemSolvingTestSuite
