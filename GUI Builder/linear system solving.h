@@ -2,6 +2,7 @@
 #define LINEAR_SYSTEM_SOLVING_H
 
 #include <utility>
+#include <tuple>
 #include <vector>
 #include <stdexcept>
 
@@ -200,5 +201,31 @@ auto numericSolveLinearSystem(const Eigen::MatrixBase<Derived> &system)->
 
 	return std::make_pair(base,offset);
 } // end function numericSolveLinearSystem
+
+
+/** Takes the augmented matrix A|B|b of a linear system of equations that may have a number of unknown constant terms in 
+ *	addition to the known ones. The matrix encodes the variable coefficients in the left columns and the known constant 
+ *	terms in the right column as usual, but has also columns encoding the coefficients of the unknown constants between 
+ *	them. The unknown constants are assumed to be in the left hand side of the equations (that directly relates to the 
+ *	signs of the coefficients) and are otherwise encoded like variables. The matrix must be in reduced row echelon form.
+ *	It returns a tuple of 4 matrices encoding the solution to the system. The first two generate the solutions to the system
+ *	given a vector of values for the free variables and unknown constants (like in the numeric counterpart of the function)
+ *	The other two generate the values of the unknown constants that make the system solvable given a vector of values
+ *	for the free unknown constants.
+ */
+template<typename Derived>
+auto semiSymbolicSolveLinearSystem(const Eigen::MatrixBase<Derived> &system, size_t nUnknownConstants)->
+	std::tuple<Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>,
+				Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>,
+				Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>,
+				Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>>
+{
+	auto properties = semiSymbolicInvestigateLinearSystem(system,nUnknownConstants);
+	auto numSolution = numericSolveLinearSystem(system);
+
+	return std::make_tuple(numSolution.first.topRows(properties.nVariables),numSolution.second.topRows(properties.nVariables),
+			numSolution.first.bottomRightCorner(properties.nUnknownConstants,properties.nUnknownConstants-properties.boundUnknownConstants.size()),
+			numSolution.second.bottomRows(properties.nUnknownConstants));
+} // end function semiSymbolicSolveLinearSystem
 
 #endif // LINEAR_SYSTEM_SOLVING_H

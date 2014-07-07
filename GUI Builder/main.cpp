@@ -9,6 +9,9 @@ using std::numeric_limits;
 #include <cmath>
 using std::log;
 
+#include <tuple>
+using std::get;
+
 #include "eigen-rational interface code.h"
 using boost::rational;
 using Eigen::Matrix;
@@ -36,6 +39,8 @@ int main()
 		<< "\nindependent: " << sp.nIndependentEquations << "\nvariables: " << sp.nVariables 
 		<< "\nunknown: " << sp.nUnknownConstants << "\nbound: " << sp.boundUnknownConstants.size() << "\n\n" << endl;
 
+	auto solution = semiSymbolicSolveLinearSystem(A,3);
+	cout << get<0>(solution) << "\n\n" << get<1>(solution) << "\n\n" << get<2>(solution) << "\n\n" << get<3>(solution) << "\n\n" << endl;
 	system("pause");
 	return 0;
 } // end function main
