@@ -5,6 +5,7 @@
 #include <tuple>
 #include <vector>
 #include <stdexcept>
+#include <algorithm>
 
 #include <cassert>
 
@@ -48,8 +49,8 @@ Eigen::MatrixBase<Derived> &numericReducedRowEchelonFormNoPivot(Eigen::MatrixBas
 
 
 /** Struct for describing the properties of a linear system. It can be used for systems with
- *	unknown constant terms as well. Variable indices in freeVariables are in ascending order.
- *	boundUnknownConstants is in descending order.
+ *	unknown constant terms as well. Variable indices in freeVariables and boundUnknownConstants 
+ *	are in ascending order.
  */
 struct LinearSystemProperties
 {
@@ -141,10 +142,11 @@ LinearSystemProperties semiSymbolicInvestigateLinearSystem(const Eigen::MatrixBa
 	properties.nUnknownConstants = nUnknownConstants;
 
 	for(size_t constant = nUnknownConstants ; constant-- > 0 ; )
-		if(properties.freeVariables.back() == properties.nVariables + constant)
+		if(!properties.freeVariables.empty() && properties.freeVariables.back() == properties.nVariables + constant)
 			properties.freeVariables.pop_back();
 		else
 			properties.boundUnknownConstants.push_back(constant);
+	std::reverse(properties.boundUnknownConstants.begin(),properties.boundUnknownConstants.end());
 
 	properties.nIndependentEquations = properties.nVariables - properties.freeVariables.size();
 	properties.hasUniqueSolution = !properties.isImpossible && properties.freeVariables.empty();
@@ -166,7 +168,7 @@ auto numericSolveLinearSystem(const Eigen::MatrixBase<Derived> &system)->
 	typedef typename Eigen::MatrixBase<Derived>::Index IndexType;
 
 	LinearSystemProperties properties = numericInvestigateLinearSystem(system);
-	Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic> base;
+	Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic> base(properties.nVariables,0);
 	Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1> offset;
 
 	if(properties.hasUniqueSolution)
@@ -220,12 +222,20 @@ auto semiSymbolicSolveLinearSystem(const Eigen::MatrixBase<Derived> &system, siz
 				Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>,
 				Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>>
 {
-	auto properties = semiSymbolicInvestigateLinearSystem(system,nUnknownConstants);
-	auto numSolution = numericSolveLinearSystem(system);
+	typedef Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic> MatrixType;
+	typedef Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1> ColumnType;
 
-	return std::make_tuple(numSolution.first.topRows(properties.nVariables),numSolution.second.topRows(properties.nVariables),
-			numSolution.first.bottomRightCorner(properties.nUnknownConstants,properties.nUnknownConstants-properties.boundUnknownConstants.size()),
-			numSolution.second.bottomRows(properties.nUnknownConstants));
+	LinearSystemProperties properties = semiSymbolicInvestigateLinearSystem(system,nUnknownConstants);
+	auto numSolution = numericSolveLinearSystem(system);
+	
+	MatrixType constBase = properties.isImpossible ? MatrixType(properties.nUnknownConstants,0) 
+		: properties.nUnknownConstants-properties.boundUnknownConstants.size() == 0 ? MatrixType::Zero(properties.nUnknownConstants,1)
+		: numSolution.first.bottomRightCorner(properties.nUnknownConstants,properties.nUnknownConstants-properties.boundUnknownConstants.size()).eval();
+
+	return std::make_tuple(numSolution.first.topRows(properties.nVariables),
+							numSolution.second.topRows(properties.isImpossible ? 0 : properties.nVariables),
+							constBase,
+							numSolution.second.bottomRows(properties.isImpossible ? 0 : properties.nUnknownConstants));
 } // end function semiSymbolicSolveLinearSystem
 
 #endif // LINEAR_SYSTEM_SOLVING_H
