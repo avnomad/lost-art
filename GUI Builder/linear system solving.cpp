@@ -19,17 +19,27 @@ typedef boost::rational<long long int> Rational;
 
 void runLinearSystemSolvingTestSuite()
 {
-	const size_t nTests = 11;
-	vector<Matrix<Rational,Dynamic,Dynamic>> in_r, ech_r, base_r;
-	vector<LinearSystemProperties> prop_r, propU_r;
-	vector<Matrix<Rational,Dynamic,1>> offs_r;
+	const size_t nTestsNumeric = 11;
+	const size_t nTestsSemiSymbolic = 2;
+	vector<Matrix<Rational,Dynamic,Dynamic>> in_r, ech_r, base_r, semiSymIn_r, semiSymVarBase_r, semiSymConstBase_r;
+	vector<LinearSystemProperties> prop_r, propU_r, semiSymProp_r;
+	vector<Matrix<Rational,Dynamic,1>> offs_r, semiSymVarOffset_r, semiSymConstOffset_r;
+	vector<size_t> semiSymNUnknowns;
 
-	in_r.resize(nTests);
-	ech_r.resize(nTests);
-	base_r.resize(nTests);
-	offs_r.resize(nTests);
-	prop_r.resize(nTests);
-	propU_r.resize(nTests);
+	in_r.resize(nTestsNumeric);
+	ech_r.resize(nTestsNumeric);
+	base_r.resize(nTestsNumeric);
+	offs_r.resize(nTestsNumeric);
+	prop_r.resize(nTestsNumeric);
+	propU_r.resize(nTestsNumeric);
+
+	semiSymIn_r.resize(nTestsSemiSymbolic);
+	semiSymVarBase_r.resize(nTestsSemiSymbolic);
+	semiSymVarOffset_r.resize(nTestsSemiSymbolic);
+	semiSymProp_r.resize(nTestsSemiSymbolic);
+	semiSymConstBase_r.resize(nTestsSemiSymbolic);
+	semiSymConstOffset_r.resize(nTestsSemiSymbolic);
+	semiSymNUnknowns.resize(nTestsSemiSymbolic);
 
 	// trivial cases
 	in_r[0].resize(0,0);
@@ -217,8 +227,57 @@ void runLinearSystemSolvingTestSuite()
 	propU_r[10].boundUnknownConstants.push_back(2);
 	propU_r[10].boundUnknownConstants.push_back(3);
 
+	// examples from my linear algebra book for the semi-symbolic solver
+	semiSymIn_r[0].resize(3,8);
+	semiSymIn_r[0] << 3,-2,1,-1,-1, 0, 0,0,
+					  1, 1,1, 1, 0,-1, 0,0,
+					  0, 5,2, 4, 0, 0,-1,0;
+	semiSymNUnknowns[0] = 3;
+	semiSymProp_r[0] = LinearSystemProperties(3,4,2,false,false,3);
+	semiSymProp_r[0].freeVariables.push_back(2);
+	semiSymProp_r[0].freeVariables.push_back(3);
+	semiSymProp_r[0].boundUnknownConstants.push_back(0);
+	semiSymVarBase_r[0].resize(4,4);
+	semiSymVarBase_r[0] << Rational(-3,5),Rational(-1,5),1,Rational(-1,5),
+							Rational(-2,5),Rational(-4,5),0,Rational(1,5),
+							1,0,0,0,
+							0,1,0,0;
+	semiSymVarOffset_r[0].resize(4);
+	semiSymVarOffset_r[0] << 0,0,0,0;
+	semiSymConstBase_r[0].resize(3,2);
+	semiSymConstBase_r[0] << 3,-1,
+							 1,0,
+							 0,1;
+	semiSymConstOffset_r[0].resize(3);
+	semiSymConstOffset_r[0] << 0,0,0;
+
+	// test cases I've run by hand
+	semiSymIn_r[1].resize(6,9);
+	semiSymIn_r[1] << -1,0,0,0,0,-1,1,0,0,
+					   0,1,0,0,0,-1,0,0,0,
+					   0,0,1,0,Rational(-1,2),0,0,0,0,
+					   0,0,0,-1,Rational(-1,2),0,0,1,0,
+					   0,0,-1,1,-1,0,0,0,0,
+					   1,-1,0,0,0,-2,0,0,0;
+	semiSymNUnknowns[1] = 2;
+	semiSymProp_r[1] = LinearSystemProperties(6,6,6,false,true,2);
+	semiSymVarBase_r[1].resize(6,2);
+	semiSymVarBase_r[1] << Rational(3,4),0,
+							Rational(1,4),0,
+							0,Rational(1,4),
+							0,Rational(3,4),
+							0,Rational(1,2),
+							Rational(1,4),0;
+	semiSymVarOffset_r[1].resize(6);
+	semiSymVarOffset_r[1] << 0,0,0,0,0,0;
+	semiSymConstBase_r[1].resize(2,2);
+	semiSymConstBase_r[1] << 1,0,
+							 0,1;
+	semiSymConstOffset_r[1].resize(2);
+	semiSymConstOffset_r[1] << 0,0;
+
 	// do the actual checking
-	assert(in_r.size() == ech_r.size() && ech_r.size() == base_r.size() && base_r.size() == offs_r.size() && offs_r.size() == prop_r.size());
+	assert(in_r.size() == ech_r.size() && ech_r.size() == base_r.size() && base_r.size() == offs_r.size() && offs_r.size() == prop_r.size() && prop_r.size() == propU_r.size());
 	for(size_t i = 0 ; i < in_r.size() ; ++i)
 	{
 		assert(numericReducedRowEchelonFormNoPivot(in_r[i]) == ech_r[i]);
@@ -258,5 +317,25 @@ void runLinearSystemSolvingTestSuite()
 		assert(get<1>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == (Matrix<double,Dynamic,1>()));
 		assert(get<2>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == base_r[i].cast<double>());
 		assert(get<3>(semiSymbolicSolveLinearSystem(ech_r[i].cast<double>(),propU_r[i].nUnknownConstants)) == offs_r[i].cast<double>());
+	} // end for
+
+	assert(semiSymIn_r.size() == semiSymProp_r.size() && semiSymProp_r.size() == semiSymVarBase_r.size() && semiSymVarBase_r.size() == semiSymVarOffset_r.size()
+		&& semiSymVarOffset_r.size() == semiSymConstBase_r.size() && semiSymConstBase_r.size() == semiSymConstOffset_r.size() && semiSymConstOffset_r.size() == semiSymNUnknowns.size());
+	for(size_t i = 0 ; i < semiSymIn_r.size() ; ++i)
+	{
+		Matrix<Rational,Dynamic,Dynamic> rowEchelon_r = semiSymIn_r[i];
+		numericReducedRowEchelonFormNoPivot(rowEchelon_r);
+		assert(semiSymbolicInvestigateLinearSystem(rowEchelon_r,semiSymNUnknowns[i]) == semiSymProp_r[i]);
+		assert(get<0>(semiSymbolicSolveLinearSystem(rowEchelon_r,semiSymNUnknowns[i])) == semiSymVarBase_r[i]);
+		assert(get<1>(semiSymbolicSolveLinearSystem(rowEchelon_r,semiSymNUnknowns[i])) == semiSymVarOffset_r[i]);
+		assert(get<2>(semiSymbolicSolveLinearSystem(rowEchelon_r,semiSymNUnknowns[i])) == semiSymConstBase_r[i]);
+		assert(get<3>(semiSymbolicSolveLinearSystem(rowEchelon_r,semiSymNUnknowns[i])) == semiSymConstOffset_r[i]);
+
+		// should fix comparison with zero in numericReducedRowEchelonFormNoPivot before 
+		// running these test cases on doubles because they produce different results.
+
+		//Matrix<double,Dynamic,Dynamic> rowEchelon_d = semiSymIn_r[i].cast<double>();
+		//numericReducedRowEchelonFormNoPivot(rowEchelon_d);
+		//assert(semiSymbolicInvestigateLinearSystem(rowEchelon_d,semiSymNUnknowns[i]) == semiSymProp_r[i]);
 	} // end for
 } // end function runLinearSystemSolvingTestSuite
