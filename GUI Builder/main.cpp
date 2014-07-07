@@ -23,6 +23,18 @@ int main()
 	// run test suites
 	runLinearSystemSolvingTestSuite();
 
+	Matrix<rational<long long int>,3,8> A;
+	A << 3,-2,1,-1,-1,0,0,0,
+		 1,1,1,1,0,-1,0,0,
+		 0,5,2,4,0,0,-1,0;
+
+	numericReducedRowEchelonFormNoPivot(A);
+	LinearSystemProperties sp = semiSymbolicInvestigateLinearSystem(A,3);
+
+	cout << A << "\n\n" << "\nfree: " << sp.freeVariables.size() << "\nunique: " << sp.hasUniqueSolution
+		<< "\nimpossible: " << sp.isImpossible << "\nequations: " << sp.nEquations
+		<< "\nindependent: " << sp.nIndependentEquations << "\nvariables: " << sp.nVariables 
+		<< "\nunknown: " << sp.nUnknownConstants << "\nbound: " << sp.boundUnknownConstants.size() << "\n\n" << endl;
 
 	system("pause");
 	return 0;

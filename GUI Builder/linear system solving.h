@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
 #include <cassert>
 
@@ -45,7 +46,9 @@ Eigen::MatrixBase<Derived> &numericReducedRowEchelonFormNoPivot(Eigen::MatrixBas
 } // end function numericReducedRowEchelonFormNoPivot
 
 
-/** Struct for describing the properties of a linear system.
+/** Struct for describing the properties of a linear system. It can be used for systems with
+ *	unknown constant terms as well. Variable indices in freeVariables are in ascending order.
+ *	boundUnknownConstants is in descending order.
  */
 struct LinearSystemProperties
 {
@@ -53,7 +56,9 @@ struct LinearSystemProperties
 	size_t nEquations;
 	size_t nVariables;
 	size_t nIndependentEquations;
+	size_t nUnknownConstants;
 	std::vector<size_t> freeVariables;
+	std::vector<size_t> boundUnknownConstants;
 	bool isImpossible;
 	bool hasUniqueSolution;
 	
@@ -61,9 +66,11 @@ struct LinearSystemProperties
 	LinearSystemProperties(){/* empty body */}
 	
 	LinearSystemProperties(size_t _nEquations, size_t _nVariables, size_t _nIndependentEquations,
-		std::vector<size_t> _freeVariables, bool _isImpossible, bool _hasUniqueSolution)
+		bool _isImpossible, bool _hasUniqueSolution, size_t _nUnknownConstants = 0,
+		std::vector<size_t> _freeVariables = std::vector<size_t>(), std::vector<size_t> _boundUnknownConstants = std::vector<size_t>())
 		:nEquations(_nEquations),nVariables(_nVariables),nIndependentEquations(_nIndependentEquations),
-		freeVariables(_freeVariables),isImpossible(_isImpossible),hasUniqueSolution(_hasUniqueSolution)
+		nUnknownConstants(_nUnknownConstants),freeVariables(_freeVariables),boundUnknownConstants(_boundUnknownConstants),
+		isImpossible(_isImpossible),hasUniqueSolution(_hasUniqueSolution)
 	{
 		// empty body
 	} // end LinearSystemProperties constructor
@@ -71,8 +78,10 @@ struct LinearSystemProperties
 	// operators
 	bool operator==(const LinearSystemProperties &other)
 	{
-		return this->nEquations == other.nEquations && this->nVariables == other.nVariables && this->nIndependentEquations == other.nIndependentEquations
-			&& this->freeVariables == other.freeVariables && this->isImpossible == other.isImpossible && this->hasUniqueSolution == other.hasUniqueSolution;
+		return this->nEquations == other.nEquations && this->nVariables == other.nVariables 
+			&& this->nIndependentEquations == other.nIndependentEquations && this->nUnknownConstants == other.nUnknownConstants 
+			&& this->freeVariables == other.freeVariables && this->boundUnknownConstants == other.boundUnknownConstants 
+			&& this->isImpossible == other.isImpossible && this->hasUniqueSolution == other.hasUniqueSolution;
 	} // end function operator==
 
 }; // end struct LinearSystemProperties
@@ -89,6 +98,7 @@ LinearSystemProperties numericInvestigateLinearSystem(const Eigen::MatrixBase<De
 	LinearSystemProperties properties;
 	properties.nEquations = system.rows();
 	properties.nVariables = system.cols() > 0 ? system.cols()-1 : 0;
+	properties.nUnknownConstants = 0;
 
 	//properties.freeVariables.reserve(properties.nEquations);
 	IndexType i = 0; // after the for-loop it will contain the number of linearly independent rows
@@ -111,6 +121,35 @@ LinearSystemProperties numericInvestigateLinearSystem(const Eigen::MatrixBase<De
 
 	return properties;
 } // end function numericInvestigateLinearSystem
+
+
+/** Takes the augmented matrix A|B|b of a linear system of equations that may have a number of unknown constant terms in 
+ *	addition to the known ones. The matrix encodes the variable coefficients in the left columns and the known constant 
+ *	terms in the right column as usual, but has also columns encoding the coefficients of the unknown constants between 
+ *	them. The unknown constants are assumed to be in the left hand side of the equations (that directly relates to the 
+ *	signs of the coefficients) and are otherwise encoded like variables. The matrix must be in reduced row echelon form.
+ *	It returns a structure describing the system.
+ */
+template<typename Derived>
+LinearSystemProperties semiSymbolicInvestigateLinearSystem(const Eigen::MatrixBase<Derived> &system, size_t nUnknownConstants)
+{
+	LinearSystemProperties properties = numericInvestigateLinearSystem(system);
+	if(nUnknownConstants > properties.nVariables)
+		throw std::out_of_range("You can't have more unknown constants than columns!");
+	properties.nVariables -= nUnknownConstants;
+	properties.nUnknownConstants = nUnknownConstants;
+
+	for(size_t constant = nUnknownConstants ; constant-- > 0 ; )
+		if(properties.freeVariables.back() == properties.nVariables + constant)
+			properties.freeVariables.pop_back();
+		else
+			properties.boundUnknownConstants.push_back(constant);
+
+	properties.nIndependentEquations = properties.nVariables - properties.freeVariables.size();
+	properties.hasUniqueSolution = !properties.isImpossible && properties.freeVariables.empty();
+
+	return properties;
+} // end function semiSymbolicInvestigateLinearSystem
 
 
 /** Takes the augmented matrix A|b of a linear system of equations in reduced 
