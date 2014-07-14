@@ -13,10 +13,12 @@
   <ItemGroup>
     <ClCompile Include="linear system solving.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="symbolic computation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="eigen-rational interface code.h" />
     <ClInclude Include="linear system solving.h" />
+    <ClInclude Include="symbolic computation.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{26777C5F-3B14-49DF-B16D-26B073EB1F1F}</ProjectGuid>

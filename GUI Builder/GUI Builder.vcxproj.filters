@@ -21,12 +21,18 @@
     <ClCompile Include="linear system solving.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="symbolic computation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="eigen-rational interface code.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="linear system solving.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="symbolic computation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

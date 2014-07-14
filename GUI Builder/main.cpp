@@ -17,7 +17,7 @@ using boost::rational;
 using Eigen::Matrix;
 
 #include "linear system solving.h"
-
+#include "symbolic computation.h"
 
 
 
@@ -25,6 +25,7 @@ int main()
 {
 	// run test suites
 	runLinearSystemSolvingTestSuite();
+	Symbolic::runTestSuite();
 
 	system("pause");
 	return 0;
