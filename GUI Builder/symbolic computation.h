@@ -41,6 +41,22 @@ namespace Symbolic
 			 */
 			SymbolTable(){/* empty body */}
 
+			SymbolTable(const SymbolTable &other)
+				:names(other.names),IDs(other.IDs.size())
+			{
+				for(auto begin = names.begin() ; begin != names.end() ; ++begin)
+					IDs[begin->second] = begin;
+			} // end SymbolTable copy constructor
+
+
+			/**	Leaves other in a valid, but unspecified state
+			 */
+			SymbolTable(SymbolTable &&other)
+				:names(std::move(other.names)),IDs(std::move(other.IDs))
+			{
+				// empty body
+			} // end SymbolTable move constructor
+
 			/** Construct a symbol table from a sequence of names
 			 */
 			template<typename InputIterator>
@@ -116,6 +132,13 @@ namespace Symbolic
 				IDs.clear();
 				names.clear();
 			} // end method clear
+
+			SymbolTable &operator=(SymbolTable other)
+			{
+				names = std::move(other.names);
+				IDs = std::move(other.IDs);
+				return *this;
+			} // end method operator=
 
 		}; // end class SymbolTable
 

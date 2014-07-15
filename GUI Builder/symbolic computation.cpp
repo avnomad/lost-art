@@ -3,6 +3,8 @@
 #include <string>
 using std::string;
 
+#include <utility>
+
 #include <cassert>
 
 
@@ -59,6 +61,56 @@ namespace Symbolic
 		assert(st.name(1) == "y");
 		assert(st.id("z") == 2);
 		assert(st.name(2) == "z");
+
+		Common::SymbolTable<string,long long int> cp1 = st;
+		assert(cp1.declare("z") == 2);	// should have no effect
+		assert(cp1.size() == 3);
+		assert(cp1.declared("x"));
+		assert(cp1.declared(0));
+		assert(cp1.declared("y"));
+		assert(cp1.declared(1));
+		assert(cp1.declared("z"));
+		assert(cp1.declared(2));
+		assert(cp1.id("x") == 0);
+		assert(cp1.name(0) == "x");
+		assert(cp1.id("y") == 1);
+		assert(cp1.name(1) == "y");
+		assert(cp1.id("z") == 2);
+		assert(cp1.name(2) == "z");
+		assert(cp1.undeclare("z") == 2);
+		assert(cp1.undeclare("y") == 1);
+
+		Common::SymbolTable<string,long long int> cp2;
+		cp2 = st;
+		assert(cp2.declare("z") == 2);	// assert no aliasing
+		assert(cp2.size() == 3);
+		assert(cp2.declared("x"));
+		assert(cp2.declared(0));
+		assert(cp2.declared("y"));
+		assert(cp2.declared(1));
+		assert(cp2.declared("z"));
+		assert(cp2.declared(2));
+		assert(cp2.id("x") == 0);
+		assert(cp2.name(0) == "x");
+		assert(cp2.id("y") == 1);
+		assert(cp2.name(1) == "y");
+		assert(cp2.id("z") == 2);
+		assert(cp2.name(2) == "z");
+		assert(cp2.undeclare("z") == 2);
+		assert(cp2.undeclare("y") == 1);
+		assert(cp2.undeclare("x") == 0);
+
+		cp2 = std::move(cp1);
+		assert(cp2.size() == 1);
+		assert(cp2.declared("x"));
+		assert(cp2.declared(0));
+		assert(!cp2.declared("y"));
+		assert(!cp2.declared(1));
+		assert(!cp2.declared("z"));
+		assert(!cp2.declared(2));
+		assert(cp2.id("x") == 0);
+		assert(cp2.name(0) == "x");
+		assert(cp2.undeclare("x") == 0);
 
 		assert(st.undeclare("z") == 2);
 		assert(st.size() == 2);
