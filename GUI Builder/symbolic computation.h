@@ -10,6 +10,9 @@ namespace Symbolic
 {
 	void runTestSuite();
 
+
+	// perhaps wrap following namespaces in namespace "Formulae"?
+
 	namespace Common
 	{
 		/** Single-scope symbol table for mathematical expressions.
@@ -99,6 +102,11 @@ namespace Symbolic
 			{
 				return IDs.size();
 			} // end method size
+
+			bool empty() const
+			{
+				return IDs.empty();
+			} // end method empty
 
 			IDType declare(const NameType &name)
 			{
