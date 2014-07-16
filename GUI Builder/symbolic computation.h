@@ -3,8 +3,11 @@
 
 #include <map>
 #include <vector>
+#include <string>
+#include <memory>
 #include <utility>
 #include <stdexcept>
+#include <functional>
 
 namespace Symbolic
 {
@@ -155,6 +158,206 @@ namespace Symbolic
 
 	namespace FreeForms
 	{
+		template<typename RationalType, typename NameType = std::string, typename IDType = int>
+		class Formula
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef RationalType rational_type;
+			typedef NameType name_type;
+			typedef IDType id_type;
+
+		private:
+
+			struct AbstractNode
+			{
+				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
+				virtual ~AbstractNode() = 0;
+			}; // end struct AbstractNode
+
+
+			struct LiteralNode : public AbstractNode
+			{
+				// Fields
+				RationalType value;
+
+				// Constructors / Destructor
+				LiteralNode(const RationalType &value_)
+					:value(value_)
+				{
+					// empty body
+				} // end LiteralNode constructor
+
+				virtual ~LiteralNode(){/* empty body */}
+
+				// Methods
+				virtual std::unique_ptr<AbstractNode> deepCopy() const
+				{
+					return std::unique_ptr<AbstractNode>(new LiteralNode(value));
+				} // end method deepCopy
+			}; // end struct LiteralNode
+
+
+			struct VariableNode : public AbstractNode
+			{
+				// Fields
+				IDType id;
+
+				// Constructors / Destructor
+				VariableNode(IDType id_)
+					:id(id_)
+				{
+					// empty body
+				} // end VariableNode constructor
+
+				virtual ~VariableNode(){/* empty body */}
+
+				// Methods
+				virtual std::unique_ptr<AbstractNode> deepCopy() const
+				{
+					return std::unique_ptr<AbstractNode>(new VariableNode(id));
+				} // end method deepCopy
+			}; // end struct VariableNode
+
+
+			template<template<class> class Operator>
+			struct UnaryNode : public AbstractNode
+			{
+				// Fields
+				std::unique_ptr<AbstractNode> child;
+
+				// Constructors / Destructor
+				UnaryNode(std::unique_ptr<AbstractNode> child_)
+					:child(std::move(child_))
+				{
+					// empty body
+				} // end VariableNode constructor
+
+				virtual ~UnaryNode(){/* empty body */}
+
+				// Methods
+				virtual std::unique_ptr<AbstractNode> deepCopy() const
+				{
+					return std::unique_ptr<AbstractNode>(new UnaryNode(child->copy()));
+				} // end method deepCopy
+			}; // end struct UnaryNode
+
+
+			template<template<class> class Operator>
+			struct BinaryNode : public AbstractNode
+			{
+				// Fields
+				std::unique_ptr<AbstractNode> leftChild;
+				std::unique_ptr<AbstractNode> rightChild;
+
+				// Constructors
+				BinaryNode(std::unique_ptr<AbstractNode> leftChild_, std::unique_ptr<AbstractNode> rightChild_)
+					:leftChild(std::move(leftChild_)),rightChild(std::move(rightChild_))
+				{
+					// empty body
+				} // end BinaryNode constructor
+
+				virtual ~BinaryNode(){/* empty body */}
+
+				// Methods
+				virtual std::unique_ptr<AbstractNode> deepCopy() const
+				{
+					return std::unique_ptr<AbstractNode>(new BinaryNode(leftChild->copy(),rightChild->copy()));
+				} // end method deepCopy
+			}; // end struct BinaryNode
+
+
+			/***************
+			*    Fields    *
+			***************/
+
+			Symbolic::Common::SymbolTable<NameType,IDType> symbols;
+			std::unique_ptr<AbstractNode> expressionTree;
+
+
+			/**********************************
+			*    Constructors / Destructor    *
+			**********************************/
+		public:
+			/** Construct an empty Formula
+			 */
+			Formula(){/* empty body */}
+
+			Formula(const Formula &other)
+				:symbols(other.symbols),expressionTree(other.expressionTree->deepCopy())
+			{
+				// empty body
+			} // end Formula copy constructor
+
+			Formula(Formula &&other)
+				:symbols(std::move(other.symbols)),expressionTree(std::move(other.expressionTree))
+			{
+				// empty body
+			} // end Formula move constructor
+
+			///** Construct a formula containing a single literal value
+			// */
+			//Formula(const RationalType &literalValue)
+			//	:expressionTree(new LiteralNode(literalValue))
+			//{
+			//	// empty body
+			//} // end Formula constructor
+
+			///** Construct a formula containing a single symbol
+			// */
+			//Formula(const NameType &variableName)
+			//{
+			//	expressionTree.reset(new VariableNode(symbols.declare(variableName)));
+			//} // end Formula constructor
+
+			///** Construct a formula object form a smaller one and a unary operator
+			// */
+			//template<template<class> class Operator>
+			//Formula(Formula subExpression)
+			//	:symbols(std::move(subExpresion.symbols)),
+			//	expressionTree(new UnaryNode<Operator>(std::move(subExpression.expressionTree)))
+			//{
+			//	// empty body
+			//} // end Formula constructor
+
+			///** Construct a formula object form two smaller ones and a binary operator
+			// */
+			//template<template<class> class Operator>
+			//Formula(Formula leftSubExpression, rightSubExpression)
+			//	:symbols(std::move(leftSubExpression.symbols)),
+			//	expressionTree(new BinaryNode<Operator>(std::move(subExpression.expressionTree)))
+			//{
+			//	// empty body
+			//} // end Formula constructor
+
+
+			~Formula(){/* empty body */}
+
+
+			/****************
+			*    Methods    *
+			****************/
+
+			/******************
+			*    Operators    *
+			******************/
+
+			Formula &operator=(Formula other)
+			{
+				symbols = std::move(other.symbols);
+				expressionTree = std::move(other.expressionTree);
+				return *this;
+			} // end method operator=
+
+		}; // end class Formula
+
+
+		class Relation;
+		class RelationSystem;
+
+
 
 
 	} // end namespace FreeForms
