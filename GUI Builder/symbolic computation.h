@@ -384,6 +384,13 @@ namespace Symbolic
 	{
 		enum /* class */ Primitive {Variable,Constant};
 
+		// Support Metafunction
+		template<Primitive primitive,typename RationalType, typename NameType> struct ArgType;
+		template<typename RationalType, typename NameType>
+		struct ArgType<Primitive::Variable,RationalType,NameType>{typedef NameType type;};
+		template<typename RationalType, typename NameType>
+		struct ArgType<Primitive::Constant,RationalType,NameType>{typedef RationalType type;};
+
 		template<Primitive primitive, typename RationalType, typename NameType = std::string, typename IDType = int>
 		struct ExpressionBuilder
 		{
@@ -394,12 +401,6 @@ namespace Symbolic
 			typedef FreeForms::Expression<RationalType,NameType,IDType> expression_type;
 			typedef typename expression_type::symbol_table_type symbol_table_type;
 	
-			// Metafunctions
-		private:
-			template<Primitive primitive> struct ArgType;
-			template<> struct ArgType<Primitive::Variable>{typedef NameType type;};
-			template<> struct ArgType<Primitive::Constant>{typedef RationalType type;};
-
 			// Fields
 		public:
 			static const Primitive build_primitive = primitive;
@@ -415,11 +416,12 @@ namespace Symbolic
 			} // end ExpressionBuilder default constructor
 
 			// Methods
-			expression_type operator()(const typename ArgType<primitive>::type &argument)
+			expression_type operator()(const typename ArgType<primitive,RationalType,NameType>::type &argument)
 			{
 				return expression_type(argument,spSymbolTable);
 			} // end method operator()
 		}; // end struct template ExpressionBuilder
+
 
 #define UNARY_EXPRESSION(op,tag) \
 		template<typename RationalType, typename NameType, typename IDType> \
@@ -428,13 +430,13 @@ namespace Symbolic
 			return FreeForms::Expression<RationalType,NameType,IDType>::unaryCombine<tag>(std::move(subExpression));\
 		} // end function operator op
 
-		template <class T>	// fill in function object not appearing in standard headers
+		template<typename T>	// fill in function object not appearing in standard headers
 		struct unary_plus
 		{
 			typedef T argument_type;
 			typedef T result_type;
 
-			T operator() (const T& x) const
+			T operator()(const T &x) const
 			{
 				return +x;
 			} // end method operator()
