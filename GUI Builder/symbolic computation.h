@@ -159,7 +159,7 @@ namespace Symbolic
 	namespace FreeForms
 	{
 		template<typename RationalType, typename NameType = std::string, typename IDType = int>
-		class Formula
+		class Expression
 		{
 			/*********************
 			*    Member Types    *
@@ -168,8 +168,10 @@ namespace Symbolic
 			typedef RationalType rational_type;
 			typedef NameType name_type;
 			typedef IDType id_type;
+			typedef Common::SymbolTable<NameType,IDType> symbol_table_type;
 
 		private:
+			typedef std::shared_ptr<symbol_table_type> symbol_table_pointer_type;
 
 			struct AbstractNode
 			{
@@ -273,7 +275,7 @@ namespace Symbolic
 			*    Fields    *
 			***************/
 
-			Symbolic::Common::SymbolTable<NameType,IDType> symbols;
+			std::shared_ptr<Common::SymbolTable<NameType,IDType>> symbols; // should never be a null shared pointer, due to getSymbols method
 			std::unique_ptr<AbstractNode> expressionTree;
 
 
@@ -281,84 +283,94 @@ namespace Symbolic
 			*    Constructors / Destructor    *
 			**********************************/
 		public:
-			/** Construct an empty Formula
+			/** Construct an empty Expression
 			 */
-			Formula(){/* empty body */}
+			Expression(std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+				:symbols(std::move(symbolTable))
+			{
+				// empty body
+			} // end Expression default constructor
 
-			Formula(const Formula &other)
+			Expression(const Expression &other)
 				:symbols(other.symbols),expressionTree(other.expressionTree->deepCopy())
 			{
 				// empty body
-			} // end Formula copy constructor
+			} // end Expression copy constructor
 
-			Formula(Formula &&other)
+			Expression(Expression &&other)
 				:symbols(std::move(other.symbols)),expressionTree(std::move(other.expressionTree))
 			{
 				// empty body
-			} // end Formula move constructor
+			} // end Expression move constructor
 
-			///** Construct a formula containing a single literal value
-			// */
-			//Formula(const RationalType &literalValue)
-			//	:expressionTree(new LiteralNode(literalValue))
-			//{
-			//	// empty body
-			//} // end Formula constructor
+			/** Construct a formula containing a single literal value
+			 */
+			Expression(const RationalType &literalValue, std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+				:symbols(std::move(symbolTable)),expressionTree(new LiteralNode(literalValue))
+			{
+				// empty body
+			} // end Expression constructor
 
-			///** Construct a formula containing a single symbol
-			// */
-			//Formula(const NameType &variableName)
-			//{
-			//	expressionTree.reset(new VariableNode(symbols.declare(variableName)));
-			//} // end Formula constructor
+			/** Construct a formula containing a single symbol.
+			 *	The symbolTable argument plays the role of the namespace.
+			 */
+			Expression(const NameType &variableName, std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+				:symbols(std::move(symbolTable))
+			{
+				expressionTree.reset(new VariableNode(symbols->declare(variableName)));
+			} // end Expression constructor
 
-			///** Construct a formula object form a smaller one and a unary operator
-			// */
-			//template<template<class> class Operator>
-			//Formula(Formula subExpression)
-			//	:symbols(std::move(subExpresion.symbols)),
-			//	expressionTree(new UnaryNode<Operator>(std::move(subExpression.expressionTree)))
-			//{
-			//	// empty body
-			//} // end Formula constructor
-
-			///** Construct a formula object form two smaller ones and a binary operator
-			// */
-			//template<template<class> class Operator>
-			//Formula(Formula leftSubExpression, rightSubExpression)
-			//	:symbols(std::move(leftSubExpression.symbols)),
-			//	expressionTree(new BinaryNode<Operator>(std::move(subExpression.expressionTree)))
-			//{
-			//	// empty body
-			//} // end Formula constructor
-
-
-			~Formula(){/* empty body */}
+			~Expression(){/* empty body */}
 
 
 			/****************
 			*    Methods    *
 			****************/
 
+			const symbol_table_type &getSymbols() const
+			{
+				return *symbols;
+			} // end method getSymbols
+
+			/** Construct a formula object form a smaller one and a unary operator
+			 */
+			template<template<class> class Operator>
+			static Expression unaryCombine(Expression subExpression)
+			{
+				subExpression.expressionTree.reset(new UnaryNode<Operator>(std::move(subExpression.expressionTree)));
+				return subExpression;
+			} // end static method unaryCombine
+
+			/** Construct a formula object form two smaller ones and a binary operator
+			 */
+			template<template<class> class Operator>
+			static Expression binaryCombine(Expression leftSubExpression, Expression rightSubExpression)
+			{
+				if(leftSubExpression.symbols->empty())
+					leftSubExpression.symbols = std::move(rightSubExpression.symbols);
+				else if(leftSubExpression.symbols != rightSubExpression.symbols && !rightSubExpression.symbols->empty())
+					throw std::logic_error("Combining sub-expressions with different symbol tables (or namespaces) is not supported!");
+				leftSubExpression.expressionTree.reset(new BinaryNode<Operator>(std::move(leftSubExpression.expressionTree),std::move(rightSubExpression.expressionTree)));
+				return leftSubExpression;
+			} // end static method binaryCombine
+
+
 			/******************
 			*    Operators    *
 			******************/
 
-			Formula &operator=(Formula other)
+			Expression &operator=(Expression other)
 			{
 				symbols = std::move(other.symbols);
 				expressionTree = std::move(other.expressionTree);
 				return *this;
 			} // end method operator=
 
-		}; // end class Formula
+		}; // end class Expression
 
 
 		class Relation;
 		class RelationSystem;
-
-
-
 
 	} // end namespace FreeForms
 
@@ -370,7 +382,83 @@ namespace Symbolic
 
 	namespace DSEL
 	{
+		enum /* class */ Primitive {Variable,Constant};
 
+		template<Primitive primitive, typename RationalType, typename NameType = std::string, typename IDType = int>
+		struct ExpressionBuilder
+		{
+			// Member Types
+			typedef RationalType rational_type;
+			typedef NameType name_type;
+			typedef IDType id_type;
+			typedef FreeForms::Expression<RationalType,NameType,IDType> expression_type;
+			typedef typename expression_type::symbol_table_type symbol_table_type;
+	
+			// Metafunctions
+		private:
+			template<Primitive primitive> struct ArgType;
+			template<> struct ArgType<Primitive::Variable>{typedef NameType type;};
+			template<> struct ArgType<Primitive::Constant>{typedef RationalType type;};
+
+			// Fields
+		public:
+			static const Primitive build_primitive = primitive;
+		private:
+			std::shared_ptr<symbol_table_type> spSymbolTable;
+
+			// Constructors / Destructor
+		public:
+			ExpressionBuilder(std::shared_ptr<symbol_table_type> spSymbolTable_ = std::make_shared<symbol_table_type>())
+				:spSymbolTable(std::move(spSymbolTable_))
+			{
+				// empty body
+			} // end ExpressionBuilder default constructor
+
+			// Methods
+			expression_type operator()(const typename ArgType<primitive>::type &argument)
+			{
+				return expression_type(argument,spSymbolTable);
+			} // end method operator()
+		}; // end struct template ExpressionBuilder
+
+#define UNARY_EXPRESSION(op,tag) \
+		template<typename RationalType, typename NameType, typename IDType> \
+		FreeForms::Expression<RationalType,NameType,IDType> operator op (FreeForms::Expression<RationalType,NameType,IDType> subExpression) \
+		{\
+			return FreeForms::Expression<RationalType,NameType,IDType>::unaryCombine<tag>(std::move(subExpression));\
+		} // end function operator op
+
+		template <class T>	// fill in function object not appearing in standard headers
+		struct unary_plus
+		{
+			typedef T argument_type;
+			typedef T result_type;
+
+			T operator() (const T& x) const
+			{
+				return +x;
+			} // end method operator()
+		}; // end struct unary_plus
+
+		UNARY_EXPRESSION(+,unary_plus);
+		UNARY_EXPRESSION(-,std::negate);
+#undef UNARY_EXPRESSION
+
+#define BINARY_EXPRESSION(op,tag) \
+		template<typename RationalType, typename NameType, typename IDType> \
+		FreeForms::Expression<RationalType,NameType,IDType> operator op \
+			(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, \
+			 FreeForms::Expression<RationalType,NameType,IDType> rightSubExpression) \
+		{\
+			return FreeForms::Expression<RationalType,NameType,IDType>::binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
+		} // end function operator op
+
+		BINARY_EXPRESSION(+,std::plus);
+		BINARY_EXPRESSION(-,std::minus);
+		BINARY_EXPRESSION(*,std::multiplies);
+		BINARY_EXPRESSION(/,std::divides);
+		BINARY_EXPRESSION(^,std::bit_xor);
+#undef BINARY_EXPRESSION
 
 	} // end namespace DSEL
 
