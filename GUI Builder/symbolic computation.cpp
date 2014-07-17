@@ -7,8 +7,8 @@ using std::string;
 
 #include <cassert>
 
-//#include <boost/rational.hpp>
-//using boost::rational;
+#include <boost/rational.hpp>
+using boost::rational;
 
 
 namespace Symbolic
@@ -164,32 +164,14 @@ namespace Symbolic
 		using namespace Symbolic::DSEL;
 		typedef rational<long long int> Rational;
 
-		//Expression<Rational> c(Rational(3,5));
-		//Expression<Rational> x("x");
-		//Expression<Rational> y("y");
-		//Expression<Rational> e;
+		Expression<Rational> c(Rational(3,5));
+		Expression<Rational> x("x");
+		Expression<Rational> y("y");
+		Expression<Rational> e;
 
-		//x+c;
-		//y+c;
-		//x+y;
+		auto s1 = x+c;
+		auto s2 = y+c;
+		// x+y; // should throw exception!
 	} // end function testExpression
 
 } // end namespace Symbolic
-
-namespace bar
-{
-int foo();
-
-
-}
-
-namespace baz
-{
-	struct T
-	{
-		int test(std::shared_ptr<int> x = std::make_shared<int>())
-		{
-			return *x;
-		}
-	};
-}

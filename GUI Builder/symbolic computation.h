@@ -176,7 +176,7 @@ namespace Symbolic
 			struct AbstractNode
 			{
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
-				virtual ~AbstractNode() = 0;
+				virtual ~AbstractNode(){/* empty body */}
 			}; // end struct AbstractNode
 
 
@@ -266,7 +266,7 @@ namespace Symbolic
 				// Methods
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
-					return std::unique_ptr<AbstractNode>(new BinaryNode(leftChild->copy(),rightChild->copy()));
+					return std::unique_ptr<AbstractNode>(new BinaryNode(leftChild->deepCopy(),rightChild->deepCopy()));
 				} // end method deepCopy
 			}; // end struct BinaryNode
 
@@ -285,7 +285,7 @@ namespace Symbolic
 		public:
 			/** Construct an empty Expression
 			 */
-			Expression(std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+			Expression(std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type())) // make_shared doesn't work for some reason...
 				:symbols(std::move(symbolTable))
 			{
 				// empty body
@@ -305,7 +305,7 @@ namespace Symbolic
 
 			/** Construct a formula containing a single literal value
 			 */
-			Expression(const RationalType &literalValue, std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+			Expression(const RationalType &literalValue, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
 				:symbols(std::move(symbolTable)),expressionTree(new LiteralNode(literalValue))
 			{
 				// empty body
@@ -314,7 +314,7 @@ namespace Symbolic
 			/** Construct a formula containing a single symbol.
 			 *	The symbolTable argument plays the role of the namespace.
 			 */
-			Expression(const NameType &variableName, std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+			Expression(const NameType &variableName, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
 				:symbols(std::move(symbolTable))
 			{
 				expressionTree.reset(new VariableNode(symbols->declare(variableName)));
@@ -382,7 +382,7 @@ namespace Symbolic
 
 	namespace DSEL
 	{
-		enum /* class */ Primitive {Variable,Constant};
+		enum class Primitive {Variable,Constant};
 
 		// Support Metafunction
 		template<Primitive primitive,typename RationalType, typename NameType> struct ArgType;
