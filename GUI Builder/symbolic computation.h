@@ -13,7 +13,6 @@ namespace Symbolic
 {
 	void runTestSuite();
 
-
 	// perhaps wrap following namespaces in namespace "Formulae"?
 
 	namespace Common
@@ -242,7 +241,7 @@ namespace Symbolic
 				// Methods
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
-					return std::unique_ptr<AbstractNode>(new UnaryNode(child->copy()));
+					return std::unique_ptr<AbstractNode>(new UnaryNode(child->deepCopy()));
 				} // end method deepCopy
 			}; // end struct UnaryNode
 
@@ -303,7 +302,7 @@ namespace Symbolic
 				// empty body
 			} // end Expression move constructor
 
-			/** Construct a formula containing a single literal value
+			/** Construct an expression containing a single literal value
 			 */
 			Expression(const RationalType &literalValue, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
 				:symbols(std::move(symbolTable)),expressionTree(new LiteralNode(literalValue))
@@ -311,7 +310,7 @@ namespace Symbolic
 				// empty body
 			} // end Expression constructor
 
-			/** Construct a formula containing a single symbol.
+			/** Construct an expression containing a single symbol.
 			 *	The symbolTable argument plays the role of the namespace.
 			 */
 			Expression(const NameType &variableName, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
@@ -332,7 +331,7 @@ namespace Symbolic
 				return *symbols;
 			} // end method getSymbols
 
-			/** Construct a formula object form a smaller one and a unary operator
+			/** Construct an expression object form a smaller one and a unary operator
 			 */
 			template<template<class> class Operator>
 			static Expression unaryCombine(Expression subExpression)
@@ -341,7 +340,7 @@ namespace Symbolic
 				return subExpression;
 			} // end static method unaryCombine
 
-			/** Construct a formula object form two smaller ones and a binary operator
+			/** Construct an expression object form two smaller ones and a binary operator
 			 */
 			template<template<class> class Operator>
 			static Expression binaryCombine(Expression leftSubExpression, Expression rightSubExpression)
@@ -425,7 +424,7 @@ namespace Symbolic
 
 #define UNARY_EXPRESSION(op,tag) \
 		template<typename RationalType, typename NameType, typename IDType> \
-		FreeForms::Expression<RationalType,NameType,IDType> operator op (FreeForms::Expression<RationalType,NameType,IDType> subExpression) \
+		inline FreeForms::Expression<RationalType,NameType,IDType> operator op (FreeForms::Expression<RationalType,NameType,IDType> subExpression) \
 		{\
 			return FreeForms::Expression<RationalType,NameType,IDType>::unaryCombine<tag>(std::move(subExpression));\
 		} // end function operator op
@@ -448,21 +447,21 @@ namespace Symbolic
 
 #define BINARY_EXPRESSION(op,tag) \
 		template<typename RationalType, typename NameType, typename IDType> \
-		auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, decltype(leftSubExpression) rightSubExpression)->decltype(leftSubExpression) \
+		inline auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, decltype(leftSubExpression) rightSubExpression)->decltype(leftSubExpression) \
 		{\
 			return FreeForms::Expression<RationalType,NameType,IDType>::\
 				binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
 		} /* end function operator op*/\
 		\
 		template<typename RationalType, typename NameType, typename IDType, typename OtherOpType> \
-		auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, const OtherOpType &rightSubExpression)->decltype(leftSubExpression) \
+		inline auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, const OtherOpType &rightSubExpression)->decltype(leftSubExpression) \
 		{\
 			return FreeForms::Expression<RationalType,NameType,IDType>::\
 				binaryCombine<tag>(std::move(leftSubExpression),decltype(leftSubExpression)(rightSubExpression));\
 		} /* end function operator op*/\
 		\
 		template<typename RationalType, typename NameType, typename IDType, typename OtherOpType> \
-		auto operator op(const OtherOpType &leftSubExpression, FreeForms::Expression<RationalType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
+		inline auto operator op(const OtherOpType &leftSubExpression, FreeForms::Expression<RationalType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
 		{\
 			return FreeForms::Expression<RationalType,NameType,IDType>::\
 				binaryCombine<tag>(decltype(rightSubExpression)(leftSubExpression),std::move(rightSubExpression));\
@@ -474,7 +473,6 @@ namespace Symbolic
 		BINARY_EXPRESSION(/,std::divides);
 		BINARY_EXPRESSION(^,std::bit_xor);
 #undef BINARY_EXPRESSION
-
 	} // end namespace DSEL
 
 } // end namespace Symbolic
