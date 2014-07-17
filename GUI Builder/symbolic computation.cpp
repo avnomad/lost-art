@@ -182,6 +182,9 @@ namespace Symbolic
 		auto s7 = Var("x") + Rational(2) / Var("y");
 		auto s8 = Var("x") + 2 / Var("y");
 		// x+y; // should throw exception!
+
+		string s = "1 - 2 + 3 - 4 + 5";
+		Expression<Rational> expr(s.begin(),s.end());
 	} // end function testExpression
 
 } // end namespace Symbolic

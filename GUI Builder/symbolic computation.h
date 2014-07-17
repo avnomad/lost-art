@@ -9,6 +9,9 @@
 #include <stdexcept>
 #include <functional>
 
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+
 namespace Symbolic
 {
 	void runTestSuite();
@@ -157,6 +160,25 @@ namespace Symbolic
 
 	namespace FreeForms
 	{
+		// Using and namespace declarations to easy development with Spirit
+		namespace qi = boost::spirit::qi;
+		namespace ascii = boost::spirit::ascii;
+		namespace phoenix = boost::phoenix;
+		using qi::rule;
+		using qi::_val;
+		using qi::_r1;
+		using qi::_1;
+		using qi::int_;
+		using phoenix::bind;
+		using phoenix::construct;
+		using phoenix::new_;
+		using phoenix::arg_names::arg1;
+		using phoenix::arg_names::arg2;
+		using ascii::space_type;
+
+
+		/** A class to represent free-form mathematical expressions.
+		 */
 		template<typename RationalType, typename NameType = std::string, typename IDType = int>
 		class Expression
 		{
@@ -319,6 +341,20 @@ namespace Symbolic
 				expressionTree.reset(new VariableNode(symbols->declare(variableName)));
 			} // end Expression constructor
 
+			/** Construct an expression object from a sequence of characters.
+			 *	The constructor parses the sequence as if it was a string and 
+			 *	creates an expression object representing the string.
+			 */
+			template<typename ForwardIterator>
+			Expression(ForwardIterator begin, ForwardIterator end, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
+				:symbols(symbolTable)
+			{
+				ExpressionGrammar<ForwardIterator> grammar;
+				bool success = qi::phrase_parse(begin,end,grammar(symbols),ascii::space,expressionTree);
+				if(!success || begin != end)
+					throw std::runtime_error("Error parsing mathematical expression!");
+			} // end Expression constructor
+
 			~Expression(){/* empty body */}
 
 
@@ -364,6 +400,73 @@ namespace Symbolic
 				expressionTree = std::move(other.expressionTree);
 				return *this;
 			} // end method operator=
+
+
+			/***********************
+			*    Parser Support    *
+			***********************/
+		private:
+			typedef std::unique_ptr<AbstractNode> attribute_signature(std::shared_ptr<symbol_table_type>);
+
+			template<typename ForwardIterator>
+			struct ExpressionGrammar : public boost::spirit::qi::grammar<ForwardIterator,attribute_signature,boost::spirit::ascii::space_type>
+			{
+				// Operator parsers
+				struct AdditiveOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression,Expression)>
+				{
+					AdditiveOperator()
+					{
+						add("+",binaryCombine<std::plus>)
+						   ("-",binaryCombine<std::minus>);
+					} // end AdditiveOperator constructor
+				} additiveOperator; // end struct AdditiveOperator
+
+				struct MultiplicativeOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression,Expression)>
+				{
+					MultiplicativeOperator()
+					{
+						add("*",binaryCombine<std::multiplies>)
+						   ("/",binaryCombine<std::divides>);
+					} // end MultiplicativeOperator constructor
+				} multiplicativeOperator; // end struct MultiplicativeOperator
+
+				struct ExponentiationOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression,Expression)>
+				{
+					ExponentiationOperator()
+					{
+						add("^",binaryCombine<std::bit_xor>);
+					} // end ExponentiationOperator constructor
+				} exponentiationOperator; // end struct ExponentiationOperator
+
+				struct PrefixOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression)>
+				{
+					PrefixOperator()
+					{
+						add("+",unaryCombine<DSEL::unary_plus>)
+						   ("-",unaryCombine<std::negate>);
+					} // end PrefixOperator constructor
+				} prefixOperator; // end struct PrefixOperator
+
+				// Non-Terminals
+				rule<ForwardIterator,attribute_signature,space_type> expression;
+				rule<ForwardIterator,attribute_signature,space_type> term;
+				rule<ForwardIterator,attribute_signature,space_type> factor;
+				rule<ForwardIterator,attribute_signature,space_type> prefix;
+				rule<ForwardIterator,attribute_signature,space_type> primary;
+				rule<ForwardIterator,std::unique_ptr<AbstractNode>(),space_type> literal;
+
+				// Rules
+				ExpressionGrammar()
+					:ExpressionGrammar::base_type(expression)
+				{
+					expression = term(_r1) >> *(additiveOperator >> term(_r1));
+					term = factor(_r1) >> *(multiplicativeOperator >> factor(_r1));
+					factor = prefixOperator >> prefix(_r1);
+					prefix = primary(_r1)[_val = _1] >> *(exponentiationOperator >> int_)[_val = _1];
+					primary = literal[_val = _1] | '(' >> expression(_r1)[_val = _1] >> ')';
+					literal = int_[_val = construct<std::unique_ptr<AbstractNode>>(_1)] /*>> -('.' >> int_)*/;					
+				} // end ExpressionGrammar constructor
+			}; // end struct ExpressionGrammar
 
 		}; // end class Expression
 
