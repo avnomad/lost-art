@@ -160,6 +160,7 @@ namespace Symbolic
 
 	void testExpression()
 	{
+		using Symbolic::Common::SymbolTable;
 		using Symbolic::FreeForms::Expression;
 		using namespace Symbolic::DSEL;
 		typedef rational<long long int> Rational;
@@ -169,8 +170,17 @@ namespace Symbolic
 		Expression<Rational> y("y");
 		Expression<Rational> e;
 
+		std::shared_ptr<SymbolTable<string,int>> st(new SymbolTable<string,int>());
+		auto Var = ExpressionBuilder<Primitive::Variable,Rational>(st);
+		auto Con = ExpressionBuilder<Primitive::Constant,Rational>(st);
 		auto s1 = x+c;
 		auto s2 = y+c;
+		auto s3 = Var("x") + Var("y") / Con(2);
+		auto s4 = Var("x") + Var("y") / Rational(2);
+		auto s5 = Var("x") + Var("y") / 2;
+		auto s6 = Var("x") + Con(2) / Var("y");
+		auto s7 = Var("x") + Rational(2) / Var("y");
+		auto s8 = Var("x") + 2 / Var("y");
 		// x+y; // should throw exception!
 	} // end function testExpression
 

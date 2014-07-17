@@ -448,12 +448,25 @@ namespace Symbolic
 
 #define BINARY_EXPRESSION(op,tag) \
 		template<typename RationalType, typename NameType, typename IDType> \
-		FreeForms::Expression<RationalType,NameType,IDType> operator op \
-			(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, \
-			 FreeForms::Expression<RationalType,NameType,IDType> rightSubExpression) \
+		auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, decltype(leftSubExpression) rightSubExpression)->decltype(leftSubExpression) \
 		{\
-			return FreeForms::Expression<RationalType,NameType,IDType>::binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
-		} // end function operator op
+			return FreeForms::Expression<RationalType,NameType,IDType>::\
+				binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
+		} /* end function operator op*/\
+		\
+		template<typename RationalType, typename NameType, typename IDType, typename OtherOpType> \
+		auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, const OtherOpType &rightSubExpression)->decltype(leftSubExpression) \
+		{\
+			return FreeForms::Expression<RationalType,NameType,IDType>::\
+				binaryCombine<tag>(std::move(leftSubExpression),decltype(leftSubExpression)(rightSubExpression));\
+		} /* end function operator op*/\
+		\
+		template<typename RationalType, typename NameType, typename IDType, typename OtherOpType> \
+		auto operator op(const OtherOpType &leftSubExpression, FreeForms::Expression<RationalType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
+		{\
+			return FreeForms::Expression<RationalType,NameType,IDType>::\
+				binaryCombine<tag>(decltype(rightSubExpression)(leftSubExpression),std::move(rightSubExpression));\
+		} /* end function operator op*/
 
 		BINARY_EXPRESSION(+,std::plus);
 		BINARY_EXPRESSION(-,std::minus);
