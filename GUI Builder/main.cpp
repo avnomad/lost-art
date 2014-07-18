@@ -23,9 +23,16 @@ using Eigen::Matrix;
 
 int main()
 {
-	// run test suites
-	runLinearSystemSolvingTestSuite();
-	Symbolic::runTestSuite();
+	try
+	{
+		// run test suites
+		runLinearSystemSolvingTestSuite();
+		Symbolic::runTestSuite();
+	}
+	catch(std::exception &e)
+	{
+		cout << e.what() << endl;
+	}
 
 	system("pause");
 	return 0;

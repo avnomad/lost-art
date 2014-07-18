@@ -5,7 +5,10 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <sstream>
+#include <iomanip>
 #include <utility>
+#include <iterator>
 #include <stdexcept>
 #include <functional>
 
@@ -169,7 +172,11 @@ namespace Symbolic
 		using qi::_r1;
 		using qi::_1;
 		using qi::_2;
+		using qi::_3;
+		using qi::_4;
 		using qi::int_;
+		using phoenix::val;
+		using phoenix::ref;
 		using phoenix::bind;
 		using phoenix::construct;
 		using phoenix::new_;
@@ -348,16 +355,17 @@ namespace Symbolic
 			 */
 			template<typename ForwardIterator>
 			Expression(ForwardIterator begin, ForwardIterator end, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
-				:symbols(symbolTable)
+				:symbols(std::move(symbolTable))
 			{
-				ExpressionGrammar<ForwardIterator> grammar;
+				std::stringstream sout;
+				ExpressionGrammar<ForwardIterator> grammar(sout);
 				AbstractNode *parseTree = nullptr;
 
 				bool success = qi::phrase_parse(begin,end,grammar(symbols.get()),ascii::space,parseTree);
 				expressionTree.reset(parseTree);
 
 				if(!success || begin != end)
-					throw std::runtime_error("Error parsing mathematical expression!");
+					throw std::runtime_error(sout.str().empty() ? "Parse error reading mathematical expression!" : sout.str());
 			} // end Expression constructor
 
 			~Expression(){/* empty body */}
@@ -461,19 +469,33 @@ namespace Symbolic
 				rule<ForwardIterator,AbstractNode *(),space_type> literal;
 
 				// Rules
-				ExpressionGrammar()
+				ExpressionGrammar(std::ostream &errorStream)
 					:ExpressionGrammar::base_type(expression)
 				{
-					expression = term(_r1)[_val = _1] >> *(additiveOperator >> term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
-					term = factor(_r1)[_val = _1] >> *(multiplicativeOperator >> factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
-					factor = prefix(_r1)[_val = _1] | (prefixOperator >> prefix(_r1))[_val = bind(indirectCall,_1,_2)];
-					prefix = primary(_r1)[_val = _1] >> *(exponentiationOperator >> literal)[_val = bind(indirectCall,_1,_val,_2)];
-					primary = literal[_val = _1] | '(' >> expression(_r1)[_val = _1] >> ')';
-					literal = int_[_val = new_<LiteralNode>(_1)] /*>> -('.' >> int_)*/;					
+					expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
+					term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
+					factor = prefix(_r1)[_val = _1] | (prefixOperator > prefix(_r1))[_val = bind(indirectCall,_1,_2)];
+					prefix = primary(_r1)[_val = _1] > *(exponentiationOperator > literal)[_val = bind(indirectCall,_1,_val,_2)];
+					primary = literal[_val = _1] | '(' > expression(_r1)[_val = _1] > ')';
+					literal = int_[_val = new_<LiteralNode>(_1)] /*>> -('.' >> int_)*/;
+
+					expression.name("expression");
+					term.name("term");
+					factor.name("factor");
+					prefix.name("prefix-expression");
+					primary.name("primary-expression");
+					literal.name("numeric-literal");
+
+					qi::on_error<qi::fail>
+					(
+						expression, errorStream << val("Parse error: \"") << construct<std::string>(_1, _2) << "\"!\n"
+												<< val("Here:         ") << construct<std::string>(bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
+												<< "Exprected a " << _4 << ".\n"
+					);
 				} // end ExpressionGrammar constructor
 
 			private:
-				// Boost::Spirit and Boost::Phoenix workarounds:
+				// Boost::Spirit and Boost::Phoenix work-arrounds:
 				template<template<class> class Operator>
 				static AbstractNode *unaryCombine(AbstractNode *subExpression)
 				{
