@@ -168,12 +168,11 @@ namespace Symbolic
 		using qi::_val;
 		using qi::_r1;
 		using qi::_1;
+		using qi::_2;
 		using qi::int_;
 		using phoenix::bind;
 		using phoenix::construct;
 		using phoenix::new_;
-		using phoenix::arg_names::arg1;
-		using phoenix::arg_names::arg2;
 		using ascii::space_type;
 
 
@@ -417,41 +416,41 @@ namespace Symbolic
 			template<typename ForwardIterator>
 			struct ExpressionGrammar : public qi::grammar<ForwardIterator,attribute_signature,ascii::space_type>
 			{
-			//	// Operator parsers
-			//	struct AdditiveOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression,Expression)>
-			//	{
-			//		AdditiveOperator()
-			//		{
-			//			add("+",binaryCombine<std::plus>)
-			//			   ("-",binaryCombine<std::minus>);
-			//		} // end AdditiveOperator constructor
-			//	} additiveOperator; // end struct AdditiveOperator
+				// Operator parsers
+				struct AdditiveOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
+				{
+					AdditiveOperator()
+					{
+						add("+",binaryCombine<std::plus>)
+						   ("-",binaryCombine<std::minus>);
+					} // end AdditiveOperator constructor
+				} additiveOperator; // end struct AdditiveOperator
 
-			//	struct MultiplicativeOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression,Expression)>
-			//	{
-			//		MultiplicativeOperator()
-			//		{
-			//			add("*",binaryCombine<std::multiplies>)
-			//			   ("/",binaryCombine<std::divides>);
-			//		} // end MultiplicativeOperator constructor
-			//	} multiplicativeOperator; // end struct MultiplicativeOperator
+				struct MultiplicativeOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
+				{
+					MultiplicativeOperator()
+					{
+						add("*",binaryCombine<std::multiplies>)
+						   ("/",binaryCombine<std::divides>);
+					} // end MultiplicativeOperator constructor
+				} multiplicativeOperator; // end struct MultiplicativeOperator
 
-			//	struct ExponentiationOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression,Expression)>
-			//	{
-			//		ExponentiationOperator()
-			//		{
-			//			add("^",binaryCombine<std::bit_xor>);
-			//		} // end ExponentiationOperator constructor
-			//	} exponentiationOperator; // end struct ExponentiationOperator
+				struct ExponentiationOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
+				{
+					ExponentiationOperator()
+					{
+						add("^",binaryCombine<std::bit_xor>);
+					} // end ExponentiationOperator constructor
+				} exponentiationOperator; // end struct ExponentiationOperator
 
-			//	struct PrefixOperator : public boost::spirit::qi::symbols<char,Expression (*)(Expression)>
-			//	{
-			//		PrefixOperator()
-			//		{
-			//			add("+",unaryCombine<DSEL::unary_plus>)
-			//			   ("-",unaryCombine<std::negate>);
-			//		} // end PrefixOperator constructor
-			//	} prefixOperator; // end struct PrefixOperator
+				struct PrefixOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *)>
+				{
+					PrefixOperator()
+					{
+						add("+",unaryCombine<DSEL::unary_plus>)
+						   ("-",unaryCombine<std::negate>);
+					} // end PrefixOperator constructor
+				} prefixOperator; // end struct PrefixOperator
 
 				// Non-Terminals
 				rule<ForwardIterator,attribute_signature,space_type> expression;
@@ -465,10 +464,10 @@ namespace Symbolic
 				ExpressionGrammar()
 					:ExpressionGrammar::base_type(expression)
 				{
-					expression = term(_r1)[_val = _1] >> *('+' >> term(_r1)[_val = bind(binaryCombine<std::plus>,_val,_1)] | '-' >> term(_r1)[_val = bind(binaryCombine<std::minus>,_val,_1)]);
-					term = factor(_r1)[_val = _1] >> *('*' >> factor(_r1)[_val = bind(binaryCombine<std::multiplies>,_val,_1)] | '/' >> factor(_r1)[_val = bind(binaryCombine<std::divides>,_val,_1)]);
-					factor = prefix(_r1)[_val = _1] | '+' >> prefix(_r1)[_val = bind(unaryCombine<DSEL::unary_plus>,_1)] | '-' >> prefix(_r1)[_val = bind(unaryCombine<std::negate>,_1)];
-					prefix = primary(_r1)[_val = _1] >> *('^' >> literal[_val = bind(binaryCombine<std::bit_xor>,_val,_1)]);
+					expression = term(_r1)[_val = _1] >> *(additiveOperator >> term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
+					term = factor(_r1)[_val = _1] >> *(multiplicativeOperator >> factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
+					factor = prefix(_r1)[_val = _1] | (prefixOperator >> prefix(_r1))[_val = bind(indirectCall,_1,_2)];
+					prefix = primary(_r1)[_val = _1] >> *(exponentiationOperator >> literal)[_val = bind(indirectCall,_1,_val,_2)];
 					primary = literal[_val = _1] | '(' >> expression(_r1)[_val = _1] >> ')';
 					literal = int_[_val = new_<LiteralNode>(_1)] /*>> -('.' >> int_)*/;					
 				} // end ExpressionGrammar constructor
@@ -487,6 +486,15 @@ namespace Symbolic
 					return new BinaryNode<Operator>(std::unique_ptr<AbstractNode>(leftSubExpression),std::unique_ptr<AbstractNode>(rightSubExpression));
 				} // end function binaryCombine
 
+				static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *),AbstractNode *arg)
+				{
+					return f(arg);
+				} // end function inderectCall
+
+				static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *,AbstractNode *),AbstractNode *arg1, AbstractNode *arg2)
+				{
+					return f(arg1,arg2);
+				} // end function indirectCall
 			}; // end struct ExpressionGrammar
 
 		}; // end class Expression
