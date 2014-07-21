@@ -13,6 +13,7 @@
 #include <functional>
 
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/lex_lexertl.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
 namespace Symbolic
@@ -166,6 +167,7 @@ namespace Symbolic
 		// Using and namespace declarations to easy development with Spirit
 		namespace qi = boost::spirit::qi;
 		namespace ascii = boost::spirit::ascii;
+		namespace lex = boost::spirit::lex;
 		namespace phoenix = boost::phoenix;
 		using qi::rule;
 		using qi::_val;
@@ -198,7 +200,6 @@ namespace Symbolic
 			typedef Common::SymbolTable<NameType,IDType> symbol_table_type;
 
 		private:
-			typedef std::shared_ptr<symbol_table_type> symbol_table_pointer_type;
 
 			struct AbstractNode
 			{
@@ -357,11 +358,16 @@ namespace Symbolic
 			Expression(ForwardIterator begin, ForwardIterator end, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
 				:symbols(std::move(symbolTable))
 			{
+				typedef lex::lexertl::token<ForwardIterator,boost::mpl::vector<NameType>,boost::mpl::false_> token_type;
+				typedef lex::lexertl::actor_lexer<token_type> lexer_type;
+				typedef typename lexer_type::iterator_type iterator_type;
+
 				std::stringstream sout;
-				ExpressionGrammar<ForwardIterator> grammar(sout);
+				Grammar<lexer_type> scanner(sout);
+				Syntax<iterator_type> parser(scanner,sout);
 				AbstractNode *parseTree = nullptr;
 
-				bool success = qi::phrase_parse(begin,end,grammar(symbols.get()),ascii::space,parseTree);
+				bool success = lex::tokenize_and_parse(begin,end,scanner,parser(symbols.get()),parseTree);
 				expressionTree.reset(parseTree);
 
 				if(!success || begin != end)
@@ -419,10 +425,39 @@ namespace Symbolic
 			*    Parser Support    *
 			***********************/
 		private:
+			template<typename Lexer>
+			struct Grammar : public lex::lexer<Lexer>
+			{
+				// Tokens
+				lex::token_def<NameType> identifier;
+				lex::token_def<NameType> rationalLiteral;
+				lex::token_def<NameType> whiteSpace;
+				lex::token_def<NameType> illegalCharacter;
+
+				// Regular Expressions
+				/** A Grammar object should not outlive the std::ostream 
+				 *	one given as argument to its constructor.
+				 */
+				Grammar(std::ostream &errorStream)
+					:identifier("[a-zA-Z_][a-zA-Z_0-9]*"),
+					rationalLiteral("[0-9]+(\\.[0-9]+)?"),
+					whiteSpace("[ \t\v\f\n\r]"),
+					illegalCharacter(".")
+				{
+					this->self
+						= identifier | rationalLiteral
+						| '(' | ')' | '+' | '-' | '*' | '/' | '^'
+						| whiteSpace[lex::_pass = lex::pass_flags::pass_ignore]
+						| illegalCharacter[errorStream << val("Ignoring invalid character '") << *lex::_start << "' in input!\n"
+											, lex::_pass = lex::pass_flags::pass_ignore];
+							// should be pass_fail but spirit parser loops forever on failure...
+				} // end Grammar constructor
+			}; // end struct Grammar
+
 			typedef AbstractNode *attribute_signature(symbol_table_type *);
 
 			template<typename ForwardIterator>
-			struct ExpressionGrammar : public qi::grammar<ForwardIterator,attribute_signature,ascii::space_type>
+			struct Syntax : public qi::grammar<ForwardIterator,attribute_signature>
 			{
 				// Operator parsers
 				struct AdditiveOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
@@ -461,30 +496,33 @@ namespace Symbolic
 				} prefixOperator; // end struct PrefixOperator
 
 				// Non-Terminals
-				rule<ForwardIterator,attribute_signature,space_type> expression;
-				rule<ForwardIterator,attribute_signature,space_type> term;
-				rule<ForwardIterator,attribute_signature,space_type> factor;
-				rule<ForwardIterator,attribute_signature,space_type> prefix;
-				rule<ForwardIterator,attribute_signature,space_type> primary;
-				rule<ForwardIterator,AbstractNode *(),space_type> literal;
+				rule<ForwardIterator,attribute_signature> expression;
+				rule<ForwardIterator,attribute_signature> term;
+				rule<ForwardIterator,attribute_signature> factor;
+				rule<ForwardIterator,attribute_signature> prefix;
+				rule<ForwardIterator,attribute_signature> primary;
 
 				// Rules
-				ExpressionGrammar(std::ostream &errorStream)
-					:ExpressionGrammar::base_type(expression)
+				/** A Syntax object should not outlive the std::ostream and 
+				 *	Grammar ones given as arguments to its constructor.
+				 */
+				template<typename Lexer>
+				Syntax(const Grammar<Lexer> &g, std::ostream &errorStream)
+					:Syntax::base_type(expression)
 				{
 					expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
 					term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
 					factor = prefix(_r1)[_val = _1] | (prefixOperator > prefix(_r1))[_val = bind(indirectCall,_1,_2)];
-					prefix = primary(_r1)[_val = _1] > *(exponentiationOperator > literal)[_val = bind(indirectCall,_1,_val,_2)];
-					primary = literal[_val = _1] | '(' > expression(_r1)[_val = _1] > ')';
-					literal = int_[_val = new_<LiteralNode>(_1)] /*>> -('.' >> int_)*/;
+					prefix = primary(_r1)[_val = _1] > *(exponentiationOperator > primary(_r1))[_val = bind(indirectCall,_1,_val,_2)];	// parses more expressions
+					primary = g.rationalLiteral[_val = new_<LiteralNode>(bind(stringToRational,_1))] // than I can currently bring to canonical form
+							| g.identifier[_val = bind(createVariable,_1,_r1)]	// but I should issue proper error messages form transformation routines.
+							| '(' > expression(_r1)[_val = _1] > ')';
 
 					expression.name("expression");
 					term.name("term");
 					factor.name("factor");
 					prefix.name("prefix-expression");
 					primary.name("primary-expression");
-					literal.name("numeric-literal");
 
 					qi::on_error<qi::fail>
 					(
@@ -492,7 +530,7 @@ namespace Symbolic
 												<< val("Here:         ") << construct<std::string>(bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
 												<< "Exprected a " << _4 << ".\n"
 					);
-				} // end ExpressionGrammar constructor
+				} // end Syntax constructor
 
 			private:
 				// Boost::Spirit and Boost::Phoenix work-arrounds:
@@ -517,7 +555,40 @@ namespace Symbolic
 				{
 					return f(arg1,arg2);
 				} // end function indirectCall
-			}; // end struct ExpressionGrammar
+
+				static AbstractNode *createVariable(const NameType &name, symbol_table_type *symbolTable)
+				{
+					return new VariableNode(symbolTable->declare(name));
+				} // end function createVariable
+
+				/**	s must be a string of digits [0-9] containing zero or one '.'.
+				 */
+				static RationalType stringToRational(const NameType &s)
+				{
+					RationalType::int_type nominator = 0, denominator = 1;
+					auto inBegin = s.begin();
+					auto inEnd = s.end();
+
+					while(inBegin != inEnd && *inBegin != '.')
+					{
+						nominator *= 10;
+						nominator += *inBegin - '0';
+						++inBegin;
+					} // end while
+					if(inBegin != inEnd)
+						++inBegin;
+					while(inBegin != inEnd)
+					{
+						nominator *= 10;
+						nominator += *inBegin - '0';
+						denominator *= 10;
+						++inBegin;
+					} // end while
+
+					return RationalType(nominator,denominator);
+				} // end function sequenceToRational
+
+			}; // end struct Syntax
 
 		}; // end class Expression
 
