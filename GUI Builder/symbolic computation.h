@@ -188,6 +188,7 @@ namespace Symbolic
 		{
 			typedef int priority_type;
 
+			const priority_type minUsedPriority = 5;
 			const priority_type additivePriority = 5;
 			const priority_type multiplicativePriority = 7;
 			const priority_type unaryPriority = 9;
@@ -272,10 +273,14 @@ namespace Symbolic
 			typedef Common::SymbolTable<NameType,IDType> symbol_table_type;
 
 		private:
+			enum class Child{LEFT,RIGHT};
 
 			struct AbstractNode
 			{
 				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const = 0;
+				// Currently assumes all binary operators are left associative. Should generalize later...
+				// Also assumes unary operators do not share priority with other operators.
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const = 0;
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
 				virtual ~AbstractNode(){/* empty body */}
 			}; // end struct AbstractNode
@@ -304,6 +309,21 @@ namespace Symbolic
 					out << ')';
 				} // end function print1DFullParen
 
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
+				{
+					bool needsParenthesis = parentPriority > OpTags::divides<RationalType>::priority 
+							|| parentPriority == OpTags::divides<RationalType>::priority && thisChild == Child::RIGHT;
+
+					if(value.denominator() != 1)
+					{
+						if(needsParenthesis) out << '(';
+						out << value.numerator() << '/' << value.denominator();
+						if(needsParenthesis) out << ')';
+					}
+					else
+						out << value.numerator();
+				} // end function print1D
+
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
 					return std::unique_ptr<AbstractNode>(new LiteralNode(value));
@@ -330,6 +350,11 @@ namespace Symbolic
 				{
 					out << '(' << symbols.name(id) << ')';
 				} // end function print1DFullParen
+
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
+				{
+					out << symbols.name(id);
+				} // end function print1D
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -360,6 +385,16 @@ namespace Symbolic
 					child->print1DFullParen(out,symbols);
 					out << ')';
 				} // end function print1DFullParen
+
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
+				{
+					bool needsParenthesis = parentPriority > Operator<RationalType>::priority;
+
+					if(needsParenthesis) out << '(';
+					out << Operator<RationalType>::symbol;
+					child->print1D(out,symbols,Operator<RationalType>::priority,Child::RIGHT);
+					if(needsParenthesis) out << ')';
+				} // end function print1D
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -393,6 +428,18 @@ namespace Symbolic
 					rightChild->print1DFullParen(out,symbols);
 					out << ')';
 				} // end function print1DFullParen
+
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
+				{
+					bool needsParenthesis = parentPriority > Operator<RationalType>::priority 
+							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
+
+					if(needsParenthesis) out << '(';
+					leftChild->print1D(out,symbols,Operator<RationalType>::priority,Child::LEFT);
+					out << Operator<RationalType>::symbol;
+					rightChild->print1D(out,symbols,Operator<RationalType>::priority,Child::RIGHT);
+					if(needsParenthesis) out << ')';
+				} // end function print1D
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -492,6 +539,11 @@ namespace Symbolic
 			{
 				expressionTree->print1DFullParen(out,*symbols);
 			} // end function print1DFullParen
+
+			void print1D(std::ostream &out) const
+			{
+				expressionTree->print1D(out,*symbols,OpTags::minUsedPriority-1,Child::LEFT);
+			} // end function print1D
 
 			/** Construct an expression object form a smaller one and a unary operator
 			 */
