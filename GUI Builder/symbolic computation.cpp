@@ -170,23 +170,55 @@ namespace Symbolic
 		typedef rational<long long int> Rational;
 
 		Expression<Rational> c(Rational(3,5));
-		Expression<Rational> x("x");
-		Expression<Rational> y("y");
+		Expression<Rational> a("a");
+		Expression<Rational> b("b");
 		Expression<Rational> e;
 
 		std::shared_ptr<SymbolTable<string,int>> st(new SymbolTable<string,int>());
 		auto Var = ExpressionBuilder<Primitive::Variable,Rational>(st);
 		auto Con = ExpressionBuilder<Primitive::Constant,Rational>(st);
-		auto s1 = x+c;
-		auto s2 = y+c;
+		auto s1 = a+c;
+		auto s2 = b+c;
 		auto s3 = Var("x") + Var("y") / Con(2);
 		auto s4 = Var("x") + Var("y") / Rational(2);
 		auto s5 = Var("x") + Var("y") / 2;
 		auto s6 = Var("x") + Con(2) / Var("y");
 		auto s7 = Var("x") + Rational(2) / Var("y");
 		auto s8 = Var("x") + 2 / Var("y");
+		Expression<Rational> x("x",st);
+		Expression<Rational> y("y",st);
+		Expression<Rational> z("z",st);
+		auto s9 = Con(1) - 2 + 3 - 4 + 5;
+		auto s10 = Con(1) - 2 + 3 - 4 /+ Con(5);
+		auto s11 = (3*x+1)/(1 + x/(2 + x/(3 + x/(4 + x/(5 + x)))));
+		auto s12 = (((x+1)^2)/(y-Rational(223,100)))/((z+1)/(y+2));
+
 		// x+y; // should throw exception!
 
+		s1.print1DFullParen(cout);
+		cout << endl;
+		s2.print1DFullParen(cout);
+		cout << endl;
+		s3.print1DFullParen(cout);
+		cout << endl;
+		s4.print1DFullParen(cout);
+		cout << endl;
+		s5.print1DFullParen(cout);
+		cout << endl;
+		s6.print1DFullParen(cout);
+		cout << endl;
+		s7.print1DFullParen(cout);
+		cout << endl;
+		s8.print1DFullParen(cout);
+		cout << endl;
+		s9.print1DFullParen(cout);
+		cout << endl;
+		s10.print1DFullParen(cout);
+		cout << endl;
+		s11.print1DFullParen(cout);
+		cout << endl;
+		s12.print1DFullParen(cout);
+		cout << endl;
 
 		//string s = "1 - 2 + 3 - 4 + 5";
 		//Expression<Rational> expr1(s.begin(),s.end());

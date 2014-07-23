@@ -275,6 +275,7 @@ namespace Symbolic
 
 			struct AbstractNode
 			{
+				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const = 0;
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
 				virtual ~AbstractNode(){/* empty body */}
 			}; // end struct AbstractNode
@@ -295,6 +296,14 @@ namespace Symbolic
 				virtual ~LiteralNode(){/* empty body */}
 
 				// Methods
+				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const
+				{
+					out << '(' << value.numerator();
+					if(value.denominator() != 1)
+						out << '/' << value.denominator();
+					out << ')';
+				} // end function print1DFullParen
+
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
 					return std::unique_ptr<AbstractNode>(new LiteralNode(value));
@@ -317,6 +326,11 @@ namespace Symbolic
 				virtual ~VariableNode(){/* empty body */}
 
 				// Methods
+				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const
+				{
+					out << '(' << symbols.name(id) << ')';
+				} // end function print1DFullParen
+
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
 					return std::unique_ptr<AbstractNode>(new VariableNode(id));
@@ -340,6 +354,13 @@ namespace Symbolic
 				virtual ~UnaryNode(){/* empty body */}
 
 				// Methods
+				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const
+				{
+					out << '(' << Operator<RationalType>::symbol;
+					child->print1DFullParen(out,symbols);
+					out << ')';
+				} // end function print1DFullParen
+
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
 					return std::unique_ptr<AbstractNode>(new UnaryNode(child->deepCopy()));
@@ -364,6 +385,15 @@ namespace Symbolic
 				virtual ~BinaryNode(){/* empty body */}
 
 				// Methods
+				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const
+				{
+					out << '(';
+					leftChild->print1DFullParen(out,symbols);
+					out << Operator<RationalType>::symbol;
+					rightChild->print1DFullParen(out,symbols);
+					out << ')';
+				} // end function print1DFullParen
+
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
 					return std::unique_ptr<AbstractNode>(new BinaryNode(leftChild->deepCopy(),rightChild->deepCopy()));
@@ -457,6 +487,11 @@ namespace Symbolic
 			{
 				return *symbols;
 			} // end method getSymbols
+
+			void print1DFullParen(std::ostream &out) const
+			{
+				expressionTree->print1DFullParen(out,*symbols);
+			} // end function print1DFullParen
 
 			/** Construct an expression object form a smaller one and a unary operator
 			 */
@@ -637,27 +672,27 @@ namespace Symbolic
 			//	 */
 			//	static RationalType stringToRational(const NameType &s)
 			//	{
-			//		RationalType::int_type nominator = 0, denominator = 1;
+			//		RationalType::int_type numerator = 0, denominator = 1;
 			//		auto inBegin = s.begin();
 			//		auto inEnd = s.end();
 
 			//		while(inBegin != inEnd && *inBegin != '.')
 			//		{
-			//			nominator *= 10;
-			//			nominator += *inBegin - '0';
+			//			numerator *= 10;
+			//			numerator += *inBegin - '0';
 			//			++inBegin;
 			//		} // end while
 			//		if(inBegin != inEnd)
 			//			++inBegin;
 			//		while(inBegin != inEnd)
 			//		{
-			//			nominator *= 10;
-			//			nominator += *inBegin - '0';
+			//			numerator *= 10;
+			//			numerator += *inBegin - '0';
 			//			denominator *= 10;
 			//			++inBegin;
 			//		} // end while
 
-			//		return RationalType(nominator,denominator);
+			//		return RationalType(numerator,denominator);
 			//	} // end function sequenceToRational
 
 			//}; // end struct Syntax
