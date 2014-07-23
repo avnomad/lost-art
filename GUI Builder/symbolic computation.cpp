@@ -188,28 +188,28 @@ namespace Symbolic
 		// x+y; // should throw exception!
 
 
-		string s = "1 - 2 + 3 - 4 + 5";
-		Expression<Rational> expr1(s.begin(),s.end());
-		s = "1 - 2 + 3 - 4 /+ 5";
-		Expression<Rational> expr2(s.begin(),s.end());
-		try	{
-			s = "1 - 2 + 3 - 4 +/ 5";
-			Expression<Rational> expr3(s.begin(),s.end());
-		}catch(std::exception &e){
-			cout << e.what() << endl;
-		} // end catch
-		s = "(3*x+1)/(1 + x/(2 + x/(3 + x/(4 + x/(5 + x)))))";
-		Expression<Rational> expr4(s.begin(),s.end());
-		s = "((x+1)/(x-2))/((x+1)/(x+2))";
-		Expression<Rational> expr5(s.begin(),s.end());
-		s = "((x+1)^2/(y-2.23))/((z+1)/(y+2))";
-		Expression<Rational> expr6(s.begin(),s.end());
-		try	{
-			s = "((x+1)^2/(y-@2.23))/((z+1)/(y+2))";
-			Expression<Rational> expr7(s.begin(),s.end());
-		}catch(std::exception &e){
-			cout << e.what() << endl;
-		} // end catch
+		//string s = "1 - 2 + 3 - 4 + 5";
+		//Expression<Rational> expr1(s.begin(),s.end());
+		//s = "1 - 2 + 3 - 4 /+ 5";
+		//Expression<Rational> expr2(s.begin(),s.end());
+		//try	{
+		//	s = "1 - 2 + 3 - 4 +/ 5";
+		//	Expression<Rational> expr3(s.begin(),s.end());
+		//}catch(std::exception &e){
+		//	cout << e.what() << endl;
+		//} // end catch
+		//s = "(3*x+1)/(1 + x/(2 + x/(3 + x/(4 + x/(5 + x)))))";
+		//Expression<Rational> expr4(s.begin(),s.end());
+		//s = "((x+1)/(x-2))/((x+1)/(x+2))";
+		//Expression<Rational> expr5(s.begin(),s.end());
+		//s = "((x+1)^2/(y-2.23))/((z+1)/(y+2))";
+		//Expression<Rational> expr6(s.begin(),s.end());
+		//try	{
+		//	s = "((x+1)^2/(y-@2.23))/((z+1)/(y+2))";
+		//	Expression<Rational> expr7(s.begin(),s.end());
+		//}catch(std::exception &e){
+		//	cout << e.what() << endl;
+		//} // end catch
 	} // end function testExpression
 
 } // end namespace Symbolic
