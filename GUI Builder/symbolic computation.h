@@ -1,4 +1,4 @@
-#ifndef SYMBOLIC_COMPUTATION_H
+﻿#ifndef SYMBOLIC_COMPUTATION_H
 #define SYMBOLIC_COMPUTATION_H
 
 #include <map>
@@ -294,6 +294,8 @@ namespace Symbolic
 			}; // end struct Extends
 
 			typedef std::vector<Extends> extends_container; // I would like to make that a template parameter...
+			static const char quotientSymbol = '\304'; // probably should change to something more portable...
+				// '_' is too low and '-' creates ambiguities with minus which must be resolved with extra parenthesis...
 
 			struct AbstractNode
 			{
@@ -310,7 +312,8 @@ namespace Symbolic
 				virtual Extends getPrint2DFullParenExtends(const symbol_table_type &symbols, extends_container &extends) const = 0;
 				// uses the property rev(preorder(t) == postorder(reflect(t)) to cache the node attributes outside the nodes!
 				// Should probably cache the serialized literal nodes as well...
-				//virtual void print2DFullParen(std::ostream &out, const symbol_table_type &symbols, typename extends_container::const_reverse_iterator currentExtends) const = 0;
+				virtual void print2DFullParen(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, 
+												typename extends_container::const_reverse_iterator &currentExtends) const = 0;
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
 				virtual ~AbstractNode(){/* empty body */}
 			}; // end struct AbstractNode
@@ -337,7 +340,7 @@ namespace Symbolic
 					if(value.denominator() != 1)
 						out << '/' << value.denominator();
 					out << ')';
-				} // end function print1DFullParen
+				} // end method print1DFullParen
 
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
 				{
@@ -352,7 +355,7 @@ namespace Symbolic
 					}
 					else
 						out << value.numerator();
-				} // end function print1D
+				} // end method print1D
 
 				virtual Extends getPrint2DFullParenExtends(const symbol_table_type &symbols, extends_container &extends) const
 				{
@@ -365,7 +368,31 @@ namespace Symbolic
 
 					extends.push_back(result);
 					return result;
-				} // end function getPrint2DFullParenExtends
+				} // end method getPrint2DFullParenExtends
+
+				virtual void print2DFullParen(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, 
+												typename extends_container::const_reverse_iterator &currentExtends) const
+				{
+					NameType snumout, sdenout;
+					std::ostringstream numout, denout;
+
+					numout << value.numerator();
+					denout << value.denominator();
+
+					snumout = numout.str();
+					sdenout = denout.str();
+
+					std::copy(snumout.begin(),snumout.end(),out[top].begin() + (left + ((currentExtends->width - snumout.size()) >> 1))); // can handle parenthesis
+					out[top+currentExtends->aboveBaseLine][left] = '(';
+					out[top+currentExtends->aboveBaseLine][left + currentExtends->width-1] = ')';
+					if(value.denominator() != 1)
+					{
+						std::fill_n(out[top+1].begin() + (left+1),currentExtends->width-2,quotientSymbol);
+						std::copy(sdenout.begin(),sdenout.end(),out[top+2].begin() + (left + ((currentExtends->width - sdenout.size()) >> 1)));
+					} // end if
+
+					++currentExtends;
+				} // end method print2DFullParen
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -392,12 +419,12 @@ namespace Symbolic
 				virtual void print1DFullParen(std::ostream &out, const symbol_table_type &symbols) const
 				{
 					out << '(' << symbols.name(id) << ')';
-				} // end function print1DFullParen
+				} // end method print1DFullParen
 
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
 				{
 					out << symbols.name(id);
-				} // end function print1D
+				} // end method print1D
 
 				virtual Extends getPrint2DFullParenExtends(const symbol_table_type &symbols, extends_container &extends) const
 				{
@@ -405,7 +432,17 @@ namespace Symbolic
 
 					extends.push_back(result);
 					return result;
-				} // end function getPrint2DFullParenExtends
+				} // end method getPrint2DFullParenExtends
+
+				virtual void print2DFullParen(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, 
+												typename extends_container::const_reverse_iterator &currentExtends) const
+				{
+					out[top][left] = '(';
+					out[top][left + currentExtends->width-1] = ')';
+					std::copy(symbols.name(id).begin(),symbols.name(id).end(),out[top].begin() + (left+1)); // can handle parenthesis
+
+					++currentExtends;
+				} // end method print2DFullParen
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -435,7 +472,7 @@ namespace Symbolic
 					out << '(' << Operator<RationalType>::symbol;
 					child->print1DFullParen(out,symbols);
 					out << ')';
-				} // end function print1DFullParen
+				} // end method print1DFullParen
 
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
 				{
@@ -445,7 +482,7 @@ namespace Symbolic
 					out << Operator<RationalType>::symbol;
 					child->print1D(out,symbols,Operator<RationalType>::priority,Child::RIGHT);
 					if(needsParenthesis) out << ')';
-				} // end function print1D
+				} // end method print1D
 
 				virtual Extends getPrint2DFullParenExtends(const symbol_table_type &symbols, extends_container &extends) const
 				{
@@ -454,7 +491,19 @@ namespace Symbolic
 
 					extends.push_back(result);
 					return result;
-				} // end function getPrint2DFullParenExtends
+				} // end method getPrint2DFullParenExtends
+
+				virtual void print2DFullParen(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, 
+												typename extends_container::const_reverse_iterator &currentExtends) const
+				{
+					out[top + currentExtends->aboveBaseLine][left] = '(';
+					out[top + currentExtends->aboveBaseLine][left+1] = Operator<RationalType>::symbol;
+					out[top + currentExtends->aboveBaseLine][left + currentExtends->width-1] = ')';
+
+					++currentExtends;
+
+					child->print2DFullParen(out,left+2,top,symbols,currentExtends);
+				} // end method print2DFullParen
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -487,7 +536,7 @@ namespace Symbolic
 					out << Operator<RationalType>::symbol;
 					rightChild->print1DFullParen(out,symbols);
 					out << ')';
-				} // end function print1DFullParen
+				} // end method print1DFullParen
 
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, OpTags::priority_type parentPriority, Child thisChild) const
 				{
@@ -499,7 +548,7 @@ namespace Symbolic
 					out << Operator<RationalType>::symbol;
 					rightChild->print1D(out,symbols,Operator<RationalType>::priority,Child::RIGHT);
 					if(needsParenthesis) out << ')';
-				} // end function print1D
+				} // end method print1D
 
 				virtual Extends getPrint2DFullParenExtends(const symbol_table_type &symbols, extends_container &extends) const
 				{
@@ -529,7 +578,42 @@ namespace Symbolic
 
 					extends.push_back(result);
 					return result;
-				} // end function getPrint2DFullParenExtends
+				} // end method getPrint2DFullParenExtends
+
+				virtual void print2DFullParen(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, 
+												typename extends_container::const_reverse_iterator &currentExtends) const
+				{
+					auto &thisExtends = *currentExtends;
+					++currentExtends;
+
+					out[top + thisExtends.aboveBaseLine][left] = '(';
+					out[top + thisExtends.aboveBaseLine][left + thisExtends.width-1] = ')';
+
+					if(Operator<RationalType>::symbol == '/')
+					{
+						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+left+1,thisExtends.width-2,quotientSymbol);
+						leftChild->print2DFullParen(out,left + ((thisExtends.width-currentExtends->width) >> 1),top,symbols,currentExtends);
+						rightChild->print2DFullParen(out,left + ((thisExtends.width-currentExtends->width) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends);
+					}
+					else if(Operator<RationalType>::symbol == '^')
+					{
+						leftChild->print2DFullParen(out,left+1,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),symbols,currentExtends);
+						rightChild->print2DFullParen(out,left+thisExtends.width-1 - currentExtends->width,top,symbols,currentExtends);
+					}
+					else
+					{
+						if(Operator<RationalType>::symbol == '*')
+							out[top + thisExtends.aboveBaseLine][left+1+currentExtends->width] = Operator<RationalType>::symbol;
+						else
+						{
+							out[top + thisExtends.aboveBaseLine][left+1+currentExtends->width] = ' ';
+							out[top + thisExtends.aboveBaseLine][left+2+currentExtends->width] = Operator<RationalType>::symbol;
+							out[top + thisExtends.aboveBaseLine][left+3+currentExtends->width] = ' ';
+						} // end else
+						leftChild->print2DFullParen(out,left+1,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),symbols,currentExtends);
+						rightChild->print2DFullParen(out,left+thisExtends.width-1 - currentExtends->width,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),symbols,currentExtends);
+					} // end else
+				} // end method print2DFullParen
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
 				{
@@ -628,12 +712,25 @@ namespace Symbolic
 			void print1DFullParen(std::ostream &out) const
 			{
 				expressionTree->print1DFullParen(out,*symbols);
-			} // end function print1DFullParen
+			} // end method print1DFullParen
 
 			void print1D(std::ostream &out) const
 			{
 				expressionTree->print1D(out,*symbols,OpTags::minUsedPriority-1,Child::LEFT);
-			} // end function print1D
+			} // end method print1D
+
+			void print2DFullParen(std::ostream &out) const
+			{
+				extends_container extends;
+				Extends rootExtends = expressionTree->getPrint2DFullParenExtends(*symbols,extends);
+
+				std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
+				std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
+
+				expressionTree->print2DFullParen(temporaryStorage,0,0,*symbols,extends.crbegin());
+
+				std::copy(temporaryStorage.begin(),temporaryStorage.end(),std::ostream_iterator<NameType>(out,"\n"));
+			} // end method print2DFullParen
 
 			/** Construct an expression object form a smaller one and a unary operator
 			 */
