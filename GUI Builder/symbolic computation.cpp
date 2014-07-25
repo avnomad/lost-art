@@ -270,6 +270,31 @@ namespace Symbolic
 		s12.print2DFullParen(cout);
 		cout << endl;
 
+		s1.print2D(cout);
+		cout << endl;
+		s2.print2D(cout);
+		cout << endl;
+		s3.print2D(cout);
+		cout << endl;
+		s4.print2D(cout);
+		cout << endl;
+		s5.print2D(cout);
+		cout << endl;
+		s6.print2D(cout);
+		cout << endl;
+		s7.print2D(cout);
+		cout << endl;
+		s8.print2D(cout);
+		cout << endl;
+		s9.print2D(cout);
+		cout << endl;
+		s10.print2D(cout);
+		cout << endl;
+		s11.print2D(cout);
+		cout << endl;
+		s12.print2D(cout);
+		cout << endl;
+
 		//string s = "1 - 2 + 3 - 4 + 5";
 		//Expression<Rational> expr1(s.begin(),s.end());
 		//s = "1 - 2 + 3 - 4 /+ 5";
