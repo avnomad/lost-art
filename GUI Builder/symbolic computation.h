@@ -705,8 +705,9 @@ namespace Symbolic
 					bool needsParenthesis = parentPriority > Operator<RationalType>::priority 
 							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
 
-					Extends rightExtends = rightChild->getPrint2DExtends(symbols,extends,Operator<RationalType>::priority,Child::RIGHT); // must be the right first!
-					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,Operator<RationalType>::priority,Child::LEFT);
+					auto priority = Operator<RationalType>::symbol == '/' ? OpTags::minUsedPriority-1 : Operator<RationalType>::priority; // numerator and denominator don't need parenthesis
+					Extends rightExtends = rightChild->getPrint2DExtends(symbols,extends,priority,Child::RIGHT); // must be the right first!
+					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,priority,Child::LEFT);
 					Extends result;
 
 					if(Operator<RationalType>::symbol == '/')
@@ -752,8 +753,8 @@ namespace Symbolic
 					if(Operator<RationalType>::symbol == '/')
 					{
 						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+left,thisExtends.width,quotientSymbol);
-						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width) >> 1),top,symbols,currentExtends,Operator<RationalType>::priority,Child::LEFT);
-						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends,Operator<RationalType>::priority,Child::RIGHT);
+						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width) >> 1),top,symbols,currentExtends,OpTags::minUsedPriority-1,Child::LEFT); // numerator does not need parenthesis
+						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends,OpTags::minUsedPriority-1,Child::RIGHT); // neither denominator
 					}
 					else if(Operator<RationalType>::symbol == '^')
 					{
