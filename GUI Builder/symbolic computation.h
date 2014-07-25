@@ -388,13 +388,13 @@ namespace Symbolic
 					snumout = numout.str();
 					sdenout = denout.str();
 
-					std::copy(snumout.begin(),snumout.end(),out[top].begin() + (left + ((currentExtends->width - snumout.size()) >> 1))); // can handle parenthesis
+					std::copy(snumout.begin(),snumout.end(),out[top].begin() + (left + ((currentExtends->width-snumout.size()+1) >> 1))); // can handle parenthesis
 					out[top+currentExtends->aboveBaseLine][left] = '(';
 					out[top+currentExtends->aboveBaseLine][left + currentExtends->width-1] = ')';
 					if(value.denominator() != 1)
 					{
 						std::fill_n(out[top+1].begin() + (left+1),currentExtends->width-2,quotientSymbol);
-						std::copy(sdenout.begin(),sdenout.end(),out[top+2].begin() + (left + ((currentExtends->width - sdenout.size()) >> 1)));
+						std::copy(sdenout.begin(),sdenout.end(),out[top+2].begin() + (left + ((currentExtends->width-sdenout.size()+1) >> 1)));
 					} // end if
 
 					++currentExtends;
@@ -427,11 +427,11 @@ namespace Symbolic
 					snumout = numout.str();
 					sdenout = denout.str();
 
-					std::copy(snumout.begin(),snumout.end(),out[top].begin() + (left + ((currentExtends->width - snumout.size()) >> 1))); // can handle parenthesis
+					std::copy(snumout.begin(),snumout.end(),out[top].begin() + (left + ((currentExtends->width-snumout.size()+1) >> 1))); // can handle parenthesis
 					if(value.denominator() != 1)
 					{
 						std::fill_n(out[top+1].begin() + left,currentExtends->width,quotientSymbol);
-						std::copy(sdenout.begin(),sdenout.end(),out[top+2].begin() + (left + ((currentExtends->width - sdenout.size()) >> 1)));
+						std::copy(sdenout.begin(),sdenout.end(),out[top+2].begin() + (left + ((currentExtends->width-sdenout.size()+1) >> 1)));
 					} // end if
 
 					++currentExtends;
@@ -677,8 +677,8 @@ namespace Symbolic
 					if(Operator<RationalType>::symbol == '/')
 					{
 						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+left+1,thisExtends.width-2,quotientSymbol);
-						leftChild->print2DFullParen(out,left + ((thisExtends.width-currentExtends->width) >> 1),top,symbols,currentExtends);
-						rightChild->print2DFullParen(out,left + ((thisExtends.width-currentExtends->width) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends);
+						leftChild->print2DFullParen(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top,symbols,currentExtends);
+						rightChild->print2DFullParen(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends);
 					}
 					else if(Operator<RationalType>::symbol == '^')
 					{
@@ -753,8 +753,8 @@ namespace Symbolic
 					if(Operator<RationalType>::symbol == '/')
 					{
 						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+left,thisExtends.width,quotientSymbol);
-						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width) >> 1),top,symbols,currentExtends,OpTags::minUsedPriority-1,Child::LEFT); // numerator does not need parenthesis
-						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends,OpTags::minUsedPriority-1,Child::RIGHT); // neither denominator
+						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top,symbols,currentExtends,OpTags::minUsedPriority-1,Child::LEFT); // numerator does not need parenthesis
+						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top+thisExtends.aboveBaseLine+1,symbols,currentExtends,OpTags::minUsedPriority-1,Child::RIGHT); // neither denominator
 					}
 					else if(Operator<RationalType>::symbol == '^')
 					{
