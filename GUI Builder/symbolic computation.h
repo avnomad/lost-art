@@ -323,8 +323,8 @@ namespace Symbolic
 				RationalType value;
 
 				// Constructors / Destructor
-				LiteralNode(const RationalType &value_)
-					:value(value_)
+				LiteralNode(const RationalType &value)
+					:value(value)
 				{
 					// empty body
 				} // end LiteralNode constructor
@@ -400,8 +400,8 @@ namespace Symbolic
 				IDType id;
 
 				// Constructors / Destructor
-				VariableNode(IDType id_)
-					:id(id_)
+				VariableNode(IDType id)
+					:id(id)
 				{
 					// empty body
 				} // end VariableNode constructor
@@ -452,8 +452,8 @@ namespace Symbolic
 				std::unique_ptr<AbstractNode> child;
 
 				// Constructors / Destructor
-				UnaryNode(std::unique_ptr<AbstractNode> child_)
-					:child(std::move(child_))
+				UnaryNode(std::unique_ptr<AbstractNode> child)
+					:child(std::move(child))
 				{
 					// empty body
 				} // end VariableNode constructor
@@ -512,8 +512,8 @@ namespace Symbolic
 				std::unique_ptr<AbstractNode> rightChild;
 
 				// Constructors
-				BinaryNode(std::unique_ptr<AbstractNode> leftChild_, std::unique_ptr<AbstractNode> rightChild_)
-					:leftChild(std::move(leftChild_)),rightChild(std::move(rightChild_))
+				BinaryNode(std::unique_ptr<AbstractNode> leftChild, std::unique_ptr<AbstractNode> rightChild)
+					:leftChild(std::move(leftChild)),rightChild(std::move(rightChild))
 				{
 					// empty body
 				} // end BinaryNode constructor
@@ -975,8 +975,8 @@ namespace Symbolic
 
 			// Constructors / Destructor
 		public:
-			ExpressionBuilder(std::shared_ptr<symbol_table_type> spSymbolTable_ = std::make_shared<symbol_table_type>())
-				:spSymbolTable(std::move(spSymbolTable_))
+			ExpressionBuilder(std::shared_ptr<symbol_table_type> spSymbolTable = std::make_shared<symbol_table_type>())
+				:spSymbolTable(std::move(spSymbolTable))
 			{
 				// empty body
 			} // end ExpressionBuilder default constructor
