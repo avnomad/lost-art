@@ -192,32 +192,35 @@ namespace Symbolic
 		auto s10 = Con(1) - 2 + 3 - 4 /+ Con(5);
 		auto s11 = (3*x+1)/(1 + x/(2 + x/(3 + x/(4 + x/(5 + x)))));
 		auto s12 = (((x+1)^2)/(y-Rational(223,100)))/((z+1)/(y+2));
+		auto s13 = Con(Rational(5,3)) / Con(Rational(7,2));
 
 		// x+y; // should throw exception!
 
-		s1.print1DFullParen(cout);
+		s1.print1D(cout,true);
 		cout << endl;
-		s2.print1DFullParen(cout);
+		s2.print1D(cout,true);
 		cout << endl;
-		s3.print1DFullParen(cout);
+		s3.print1D(cout,true);
 		cout << endl;
-		s4.print1DFullParen(cout);
+		s4.print1D(cout,true);
 		cout << endl;
-		s5.print1DFullParen(cout);
+		s5.print1D(cout,true);
 		cout << endl;
-		s6.print1DFullParen(cout);
+		s6.print1D(cout,true);
 		cout << endl;
-		s7.print1DFullParen(cout);
+		s7.print1D(cout,true);
 		cout << endl;
-		s8.print1DFullParen(cout);
+		s8.print1D(cout,true);
 		cout << endl;
-		s9.print1DFullParen(cout);
+		s9.print1D(cout,true);
 		cout << endl;
-		s10.print1DFullParen(cout);
+		s10.print1D(cout,true);
 		cout << endl;
-		s11.print1DFullParen(cout);
+		s11.print1D(cout,true);
 		cout << endl;
-		s12.print1DFullParen(cout);
+		s12.print1D(cout,true);
+		cout << endl;
+		s13.print1D(cout,true);
 		cout << endl;
 
 		s1.print1D(cout);
@@ -244,30 +247,34 @@ namespace Symbolic
 		cout << endl;
 		s12.print1D(cout);
 		cout << endl;
+		s13.print1D(cout);
+		cout << endl;
 
-		s1.print2DFullParen(cout);
+		s1.print2D(cout,true);
 		cout << endl;
-		s2.print2DFullParen(cout);
+		s2.print2D(cout,true);
 		cout << endl;
-		s3.print2DFullParen(cout);
+		s3.print2D(cout,true);
 		cout << endl;
-		s4.print2DFullParen(cout);
+		s4.print2D(cout,true);
 		cout << endl;
-		s5.print2DFullParen(cout);
+		s5.print2D(cout,true);
 		cout << endl;
-		s6.print2DFullParen(cout);
+		s6.print2D(cout,true);
 		cout << endl;
-		s7.print2DFullParen(cout);
+		s7.print2D(cout,true);
 		cout << endl;
-		s8.print2DFullParen(cout);
+		s8.print2D(cout,true);
 		cout << endl;
-		s9.print2DFullParen(cout);
+		s9.print2D(cout,true);
 		cout << endl;
-		s10.print2DFullParen(cout);
+		s10.print2D(cout,true);
 		cout << endl;
-		s11.print2DFullParen(cout);
+		s11.print2D(cout,true);
 		cout << endl;
-		s12.print2DFullParen(cout);
+		s12.print2D(cout,true);
+		cout << endl;
+		s13.print2D(cout,true);
 		cout << endl;
 
 		s1.print2D(cout);
@@ -293,6 +300,8 @@ namespace Symbolic
 		s11.print2D(cout);
 		cout << endl;
 		s12.print2D(cout);
+		cout << endl;
+		s13.print2D(cout);
 		cout << endl;
 
 		//string s = "1 - 2 + 3 - 4 + 5";
