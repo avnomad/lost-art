@@ -306,7 +306,7 @@ namespace Symbolic
 				 *	printed in 2D in the vector extends in right postorder (right subtree before 
 				 *	left subtree). Returns the extends of the subtree it's called on.
 				 */
-				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const = 0;
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const = 0;
 				// uses the property rev(preorder(t) == postorder(reflect(t)) to cache the node attributes outside the nodes!
 				// Should probably cache the serialized literal nodes as well...
 				// TODO: change top to bottom and have (0,0) be in the bottom-left corner to somewhat simplify code.
@@ -344,7 +344,7 @@ namespace Symbolic
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
 				{
 					// Unless I'm missing something it never needs parenthesis. The size of the fraction bar disambiguates!
 					// Need to make parent's fraction bar wider some times though...
@@ -356,7 +356,7 @@ namespace Symbolic
 					result = Extends(std::max(numout.str().size(),denout.str().size())+(fullyParenthesized<<1) , value.denominator() != 1 , value.denominator() != 1);
 
 					extends.push_back(result);
-					return result;
+					return std::make_pair(result,value.denominator() != 1); // report whether we use a fraction bar.
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
@@ -416,12 +416,12 @@ namespace Symbolic
 					if(fullyParenthesized) out << ')';
 				} // end method print1D
 
-				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
 				{
 					auto result = Extends(symbols.name(id).size() + (fullyParenthesized<<1) , 0 , 0);
 
 					extends.push_back(result);
-					return result;
+					return std::make_pair(result,false); // we do not use a fraction bar
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
@@ -471,14 +471,14 @@ namespace Symbolic
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
 				{
 					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority;
-					auto result = child->getPrint2DExtends(symbols,extends,fullyParenthesized,Operator<RationalType>::priority,Child::RIGHT);
+					Extends result = child->getPrint2DExtends(symbols,extends,fullyParenthesized,Operator<RationalType>::priority,Child::RIGHT).first;
 					result.width += needsParenthesis ? 1 + 2 : 1;
 
 					extends.push_back(result);
-					return result;
+					return std::make_pair(result,false); // we do not use a fraction bar
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
@@ -533,21 +533,21 @@ namespace Symbolic
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
 				{
 					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority 
 							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
 
 					auto priority = Operator<RationalType>::symbol == '/' ? OpTags::noParenPriority : Operator<RationalType>::priority; // numerator and denominator don't need parenthesis
-					Extends rightExtends = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::RIGHT); // must be the right first!
-					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::LEFT);
-					Extends result;
+					Extends leftExtends, rightExtends, result;
+					bool leftUsesFractionBar, rightUsesFractionBar;
+					std::tie(rightExtends,rightUsesFractionBar) = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::RIGHT); // must be the right first!
+					std::tie(leftExtends,leftUsesFractionBar) = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::LEFT);
 
 					if(Operator<RationalType>::symbol == '/')
 					{
 						// size of fraction bar disambiguates instead of parenthesis!
-						result.width = std::max(rightExtends.width,leftExtends.width) + (fullyParenthesized<<1)
-							+ (typeid(*rightChild)==typeid(BinaryNode<OpTags::divides>) || typeid(*leftChild)==typeid(BinaryNode<OpTags::divides>) ? 2 : 0);
+						result.width = std::max(rightExtends.width+((rightUsesFractionBar && !fullyParenthesized)<<1) , leftExtends.width+((leftUsesFractionBar && !fullyParenthesized)<<1)) + (fullyParenthesized<<1);
 						result.aboveBaseLine = leftExtends.aboveBaseLine + leftExtends.belowBaseLine + 1;
 						result.belowBaseLine = rightExtends.aboveBaseLine + rightExtends.belowBaseLine + 1;
 					}
@@ -565,7 +565,7 @@ namespace Symbolic
 					} // end else
 
 					extends.push_back(result);
-					return result;
+					return std::make_pair(result,Operator<RationalType>::symbol == '/'); // report whether we use a fraction bar.
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
@@ -718,7 +718,7 @@ namespace Symbolic
 			void print2D(std::ostream &out, bool fullyParenthesized = false) const
 			{
 				extends_container extends;
-				Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
+				Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::noParenPriority,Child::LEFT).first;
 
 				std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
 				std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
