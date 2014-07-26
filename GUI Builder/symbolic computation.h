@@ -189,7 +189,7 @@ namespace Symbolic
 		{
 			typedef int priority_type;
 
-			const priority_type minUsedPriority = 5;
+			const priority_type noParenPriority = 0; // should be less than any other priority
 			const priority_type additivePriority = 5;
 			const priority_type multiplicativePriority = 7;
 			const priority_type unaryPriority = 9;
@@ -538,7 +538,7 @@ namespace Symbolic
 					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority 
 							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
 
-					auto priority = Operator<RationalType>::symbol == '/' ? OpTags::minUsedPriority-1 : Operator<RationalType>::priority; // numerator and denominator don't need parenthesis
+					auto priority = Operator<RationalType>::symbol == '/' ? OpTags::noParenPriority : Operator<RationalType>::priority; // numerator and denominator don't need parenthesis
 					Extends rightExtends = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::RIGHT); // must be the right first!
 					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::LEFT);
 					Extends result;
@@ -587,9 +587,9 @@ namespace Symbolic
 					{
 						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+(left+fullyParenthesized),thisExtends.width-(fullyParenthesized<<1),quotientSymbol);
 						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top,
-											symbols,fullyParenthesized,currentExtends,OpTags::minUsedPriority-1,Child::LEFT); // numerator does not need parenthesis...
+											symbols,fullyParenthesized,currentExtends,OpTags::noParenPriority,Child::LEFT); // numerator does not need parenthesis...
 						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top+thisExtends.aboveBaseLine+1,
-											symbols,fullyParenthesized,currentExtends,OpTags::minUsedPriority-1,Child::RIGHT); // ...neither denominator (unless fully parenthesized)
+											symbols,fullyParenthesized,currentExtends,OpTags::noParenPriority,Child::RIGHT); // ...neither denominator (unless fully parenthesized)
 					}
 					else if(Operator<RationalType>::symbol == '^')
 					{
@@ -712,18 +712,18 @@ namespace Symbolic
 
 			void print1D(std::ostream &out, bool fullyParenthesized = false) const
 			{
-				expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::minUsedPriority-1,Child::LEFT);
+				expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
 			} // end method print1D
 
 			void print2D(std::ostream &out, bool fullyParenthesized = false) const
 			{
 				extends_container extends;
-				Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::minUsedPriority-1,Child::LEFT);
+				Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
 
 				std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
 				std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
 
-				expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::minUsedPriority-1,Child::LEFT);
+				expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::noParenPriority,Child::LEFT);
 
 				std::copy(temporaryStorage.begin(),temporaryStorage.end(),std::ostream_iterator<NameType>(out,"\n"));
 			} // end method print2D
