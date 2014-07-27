@@ -627,7 +627,7 @@ namespace Symbolic
 			*    Fields    *
 			***************/
 
-			std::shared_ptr<Common::SymbolTable<NameType,IDType>> symbols; // should never be a null shared pointer, due to getSymbols method
+			std::shared_ptr<symbol_table_type> symbols; // should never be a null shared pointer, due to getSymbols method
 			std::unique_ptr<AbstractNode> expressionTree;
 
 
@@ -710,6 +710,14 @@ namespace Symbolic
 				return *symbols;
 			} // end method getSymbols
 
+			/** Checks whether an expression is empty. i.e. Constructed with the default constructor
+			 *	and not assigned a non-empty expression.
+			 */
+			bool empty() const
+			{
+				return !expressionTree;
+			} // end function empty
+
 			void print1D(std::ostream &out, bool fullyParenthesized = false) const
 			{
 				expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
@@ -733,6 +741,8 @@ namespace Symbolic
 			template<template<class> class Operator>
 			static Expression unaryCombine(Expression subExpression)
 			{
+				if(subExpression.empty())
+					throw std::logic_error("Empty Expression objects cannot be used to construct larger Expression objects!");
 				subExpression.expressionTree.reset(new UnaryNode<Operator>(std::move(subExpression.expressionTree)));
 				return subExpression;
 			} // end static method unaryCombine
@@ -742,6 +752,8 @@ namespace Symbolic
 			template<template<class> class Operator>
 			static Expression binaryCombine(Expression leftSubExpression, Expression rightSubExpression)
 			{
+				if(leftSubExpression.empty() || rightSubExpression.empty())
+					throw std::logic_error("Empty Expression objects cannot be used to construct larger Expression objects!");
 				if(leftSubExpression.symbols->empty())
 					leftSubExpression.symbols = std::move(rightSubExpression.symbols);
 				else if(leftSubExpression.symbols != rightSubExpression.symbols && !rightSubExpression.symbols->empty())

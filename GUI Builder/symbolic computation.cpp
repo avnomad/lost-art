@@ -169,14 +169,185 @@ namespace Symbolic
 		using namespace Symbolic::DSEL;
 		typedef rational<long long int> Rational;
 
+		// test DSEL, print methods and parser.
+		const size_t nTests = 157;
+		auto st = std::make_shared<SymbolTable<string,int>>();
+		auto Var = ExpressionBuilder<Primitive::Variable,Rational>(st);
+		auto Con = ExpressionBuilder<Primitive::Constant,Rational>(st);
+		Expression<Rational> x("x",st), y("y",st);
+
+		Expression<Rational> dselExpressions[nTests] = {
+			// height == 0
+			Expression<Rational>(),
+			// height == 1
+			x,
+			Con(5),
+			Con(Rational(3,5)),
+			// height == 2
+			+y,
+			+Con(0),
+			+Con(Rational(7,2)),
+			-x,
+			-Con(-2),
+			-Con(Rational(-32,3)),
+			x + y,
+			x + -3,
+			x + Rational(-3,2),
+			-2 + y,
+			-2 + Con(-3),
+			-2 + Con(Rational(-3,2)),
+			Rational(-2,7) + y,
+			Rational(-2,7) + Con(-3),
+			Rational(-2,7) + Con(Rational(-3,2)),
+			x - x,
+			x - -4,
+			x - Rational(2,4),
+			-2 - x,
+			-2 - Con(-4),
+			-2 - Con(Rational(2,4)),
+			Rational(-2,7) - x,
+			Rational(-2,7) - Con(-4),
+			Rational(-2,7) - Con(Rational(2,4)),
+			y * x,
+			y * -5,
+			y * Rational(2,3),
+			-2 * x,
+			-2 * Con(-5),
+			-2 * Con(Rational(2,3)),
+			Rational(-2,7) * x,
+			Rational(-2,7) * Con(-5),
+			Rational(-2,7) * Con(Rational(2,3)),
+			y / y,
+			y / 5,
+			y / Rational(-3,2),
+			-2 / y,
+			-2 / Con(5),
+			-2 / Con(Rational(-3,2)),
+			Rational(-2,7) / y,
+			Rational(-2,7) / Con(5),
+			Rational(-2,7) / Con(Rational(-3,2)),
+			x ^ y,
+			x ^ -1,
+			x ^ Rational(-1/200),
+			-2 ^ y,
+			-2 ^ Con(-1),
+			-2 ^ Con(Rational(-1/200)),
+			Rational(-2,7) ^ y,
+			Rational(-2,7) ^ Con(-1),
+			Rational(-2,7) ^ Con(Rational(-1/200)),
+			// height == 3
+			+ +x,
+			+ +Con(-5),
+			+ +Con(Rational(3,-5)),
+			+ -y,
+			+ -Con(-2),
+			+ -Con(Rational(-3,-5)),
+			+(x + y),
+			+(x + -3),
+			+(x + Rational(-3,2)),
+			+(-2 + y),
+			+(-2 + Con(-3)),
+			+(-2 + Con(Rational(-3,2))),
+			+(Rational(-2,7) + y),
+			+(Rational(-2,7) + Con(-3)),
+			+(Rational(-2,7) + Con(Rational(-3,2))),
+			+(x - x),
+			+(x - -4),
+			+(x - Rational(2,4)),
+			+(-2 - x),
+			+(-2 - Con(-4)),
+			+(-2 - Con(Rational(2,4))),
+			+(Rational(-2,7) - x),
+			+(Rational(-2,7) - Con(-4)),
+			+(Rational(-2,7) - Con(Rational(2,4))),
+			+(y * x),
+			+(y * -5),
+			+(y * Rational(2,3)),
+			+(-2 * x),
+			+(-2 * Con(-5)),
+			+(-2 * Con(Rational(2,3))),
+			+(Rational(-2,7) * x),
+			+(Rational(-2,7) * Con(-5)),
+			+(Rational(-2,7) * Con(Rational(2,3))),
+			+(y / y),
+			+(y / 5),
+			+(y / Rational(-3,2)),
+			+(-2 / y),
+			+(-2 / Con(5)),
+			+(-2 / Con(Rational(-3,2))),
+			+(Rational(-2,7) / y),
+			+(Rational(-2,7) / Con(5)),
+			+(Rational(-2,7) / Con(Rational(-3,2))),
+			+(x ^ y),
+			+(x ^ -1),
+			+(x ^ Rational(-1/200)),
+			+(-2 ^ y),
+			+(-2 ^ Con(-1)),
+			+(-2 ^ Con(Rational(-1/200))),
+			+(Rational(-2,7) ^ y),
+			+(Rational(-2,7) ^ Con(-1)),
+			+(Rational(-2,7) ^ Con(Rational(-1/200))),
+			- +x,
+			- +Con(2),
+			- +Con(Rational(3,5)),
+			- -y,
+			- -Con(2),
+			- -Con(Rational(3,5)),
+			-(x + y),
+			-(x + -3),
+			-(x + Rational(-3,2)),
+			-(-2 + y),
+			-(-2 + Con(-3)),
+			-(-2 + Con(Rational(-3,2))),
+			-(Rational(-2,7) + y),
+			-(Rational(-2,7) + Con(-3)),
+			-(Rational(-2,7) + Con(Rational(-3,2))),
+			-(x - x),
+			-(x - -4),
+			-(x - Rational(2,4)),
+			-(-2 - x),
+			-(-2 - Con(-4)),
+			-(-2 - Con(Rational(2,4))),
+			-(Rational(-2,7) - x),
+			-(Rational(-2,7) - Con(-4)),
+			-(Rational(-2,7) - Con(Rational(2,4))),
+			-(y * x),
+			-(y * -5),
+			-(y * Rational(2,3)),
+			-(-2 * x),
+			-(-2 * Con(-5)),
+			-(-2 * Con(Rational(2,3))),
+			-(Rational(-2,7) * x),
+			-(Rational(-2,7) * Con(-5)),
+			-(Rational(-2,7) * Con(Rational(2,3))),
+			-(y / y),
+			-(y / 5),
+			-(y / Rational(-3,2)),
+			-(-2 / y),
+			-(-2 / Con(5)),
+			-(-2 / Con(Rational(-3,2))),
+			-(Rational(-2,7) / y),
+			-(Rational(-2,7) / Con(5)),
+			-(Rational(-2,7) / Con(Rational(-3,2))),
+			-(x ^ y),
+			-(x ^ -1),
+			-(x ^ Rational(-1/200)),
+			-(-2 ^ y),
+			-(-2 ^ Con(-1)),
+			-(-2 ^ Con(Rational(-1/200))),
+			-(Rational(-2,7) ^ y),
+			-(Rational(-2,7) ^ Con(-1)),
+			-(Rational(-2,7) ^ Con(Rational(-1/200))),
+		}; // end dselExpressions initializer
+
+		// -3/5^2, -3^2
+
+
 		Expression<Rational> c(Rational(3,5));
 		Expression<Rational> a("a");
 		Expression<Rational> b("b");
 		Expression<Rational> e;
 
-		std::shared_ptr<SymbolTable<string,int>> st(new SymbolTable<string,int>());
-		auto Var = ExpressionBuilder<Primitive::Variable,Rational>(st);
-		auto Con = ExpressionBuilder<Primitive::Constant,Rational>(st);
 		auto s1 = a+c;
 		auto s2 = b+c;
 		auto s3 = Var("x") + Var("y") / Con(2);
@@ -185,8 +356,6 @@ namespace Symbolic
 		auto s6 = Var("x") + Con(2) / Var("y");
 		auto s7 = Var("x") + Rational(2) / Var("y");
 		auto s8 = Var("x") + 2 / Var("y");
-		Expression<Rational> x("x",st);
-		Expression<Rational> y("y",st);
 		Expression<Rational> z("z",st);
 		auto s9 = Con(1) - 2 + 3 - 4 + 5;
 		auto s10 = Con(1) - 2 + 3 - 4 /+ Con(5);
