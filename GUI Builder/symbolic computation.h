@@ -720,20 +720,23 @@ namespace Symbolic
 
 			void print1D(std::ostream &out, bool fullyParenthesized = false) const
 			{
-				expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
+				if(expressionTree) expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
 			} // end method print1D
 
 			void print2D(std::ostream &out, bool fullyParenthesized = false) const
 			{
-				extends_container extends;
-				Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::noParenPriority,Child::LEFT).first;
+				if(expressionTree)
+				{
+					extends_container extends;
+					Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::noParenPriority,Child::LEFT).first;
 
-				std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
-				std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
+					std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
+					std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
 
-				expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::noParenPriority,Child::LEFT);
+					expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::noParenPriority,Child::LEFT);
 
-				std::copy(temporaryStorage.begin(),temporaryStorage.end(),std::ostream_iterator<NameType>(out,"\n"));
+					std::copy(temporaryStorage.begin(),temporaryStorage.end(),std::ostream_iterator<NameType>(out,"\n"));
+				} // end if
 			} // end method print2D
 
 			/** Construct an expression object form a smaller one and a unary operator
