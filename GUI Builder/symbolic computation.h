@@ -188,12 +188,36 @@ namespace Symbolic
 		namespace OpTags
 		{
 			typedef int priority_type;
+			enum class Associativity {LEFT,RIGHT};
+			enum class Child{LEFT,RIGHT};
+
+			struct OpTraits
+			{
+				// Fields
+				char symbol;
+				priority_type priority;
+				Associativity associativity;
+
+				// Constructors
+				OpTraits(char symbol, priority_type priority, Associativity associativity)
+					:symbol(symbol), priority(priority), associativity(associativity)
+				{
+					// empty body
+				} // end OpTraits constructor
+			}; // end struct OpTraits
 
 			const priority_type noParenPriority = 0; // should be less than any other priority
 			const priority_type additivePriority = 5;
 			const priority_type multiplicativePriority = 7;
 			const priority_type unaryPriority = 9;
 			const priority_type exponentiationPriority = 11;
+
+			inline bool needsParenthesis(OpTags::OpTraits parentTraits, OpTags::OpTraits thisTraits, Child thisChild)
+			{
+				return parentTraits.priority > thisTraits.priority || parentTraits.priority == thisTraits.priority 
+					&& (parentTraits.associativity != thisTraits.associativity || thisTraits.associativity == OpTags::Associativity::LEFT
+					&& thisChild == Child::RIGHT || thisTraits.associativity == OpTags::Associativity::RIGHT && thisChild == Child::LEFT);
+			} // end function needsParenthesis
 
 			// fill in function object not appearing in standard headers
 			template<typename T>
@@ -207,8 +231,10 @@ namespace Symbolic
 					return +x;
 				} // end method operator()
 
-				static const char symbol = '+';
-				static const priority_type priority = unaryPriority;
+				static OpTraits traits()
+				{
+					return OpTraits('+',unaryPriority,Associativity::RIGHT);
+				} // end function traits
 			}; // end struct unary_plus
 
 			// extend function objects appearing in standard headers
@@ -216,43 +242,55 @@ namespace Symbolic
 			template<typename T>
 			struct negate : public std::negate<T>
 			{
-				static const char symbol = '-';
-				static const priority_type priority = unaryPriority;
+				static OpTraits traits()
+				{
+					return OpTraits('-',unaryPriority,Associativity::RIGHT);
+				} // end function traits
 			}; // end struct negate
 
 			template<typename T>
 			struct plus : public std::plus<T>
 			{
-				static const char symbol = '+';
-				static const priority_type priority = additivePriority;
+				static OpTraits traits()
+				{
+					return OpTraits('+',additivePriority,Associativity::LEFT);
+				} // end function traits
 			}; // end struct plus
 
 			template<typename T>
 			struct minus : public std::minus<T>
 			{
-				static const char symbol = '-';
-				static const priority_type priority = additivePriority;
+				static OpTraits traits()
+				{
+					return OpTraits('-',additivePriority,Associativity::LEFT);
+				} // end function traits
 			}; // end struct minus
 
 			template<typename T>
 			struct multiplies : public std::multiplies<T>
 			{
-				static const char symbol = '*';
-				static const priority_type priority = multiplicativePriority;
+				static OpTraits traits()
+				{
+					return OpTraits('*',multiplicativePriority,Associativity::LEFT);
+				} // end function traits
 			}; // end struct multiplies
 
 			template<typename T>
 			struct divides : public std::divides<T>
 			{
-				static const char symbol = '/';
-				static const priority_type priority = multiplicativePriority;
+				static OpTraits traits()
+				{
+					return OpTraits('/',multiplicativePriority,Associativity::LEFT);
+				} // end function traits
 			}; // end struct divides
 
 			template<typename T>
 			struct bit_xor : public std::bit_xor<T>
 			{
-				static const char symbol = '^';
-				static const priority_type priority = exponentiationPriority;
+				static OpTraits traits()
+				{
+					return OpTraits('^',exponentiationPriority,Associativity::RIGHT);
+				} // end function traits
 			}; // end struct bit_xor
 
 		} // end namespace OpTags
@@ -274,8 +312,6 @@ namespace Symbolic
 			typedef Common::SymbolTable<NameType,IDType> symbol_table_type;
 
 		private:
-			enum class Child{LEFT,RIGHT};
-
 			struct Extends
 			{
 				// Fields
@@ -299,19 +335,18 @@ namespace Symbolic
 
 			struct AbstractNode
 			{
-				// Currently assumes all binary operators are left associative. Should generalize later...
-				// Also assumes unary operators do not share priority with other operators.
-				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const = 0;
+			public:
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				/** Stores the extends of the rectangle an expression subtree will occupy when 
 				 *	printed in 2D in the vector extends in right postorder (right subtree before 
 				 *	left subtree). Returns the extends of the subtree it's called on.
 				 */
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const = 0;
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				// uses the property rev(preorder(t) == postorder(reflect(t)) to cache the node attributes outside the nodes!
 				// Should probably cache the serialized literal nodes as well...
 				// TODO: change top to bottom and have (0,0) be in the bottom-left corner to somewhat simplify code.
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
-										typename extends_container::const_reverse_iterator &currentExtends, OpTags::priority_type parentPriority, Child thisChild) const = 0;
+										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
 				virtual ~AbstractNode(){/* empty body */}
 			}; // end struct AbstractNode
@@ -332,10 +367,10 @@ namespace Symbolic
 				virtual ~LiteralNode(){/* empty body */}
 
 				// Methods
-				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || value.denominator() != 1 && (parentPriority > OpTags::divides<RationalType>::priority 
-							|| parentPriority == OpTags::divides<RationalType>::priority && thisChild == Child::RIGHT);
+					// this creterion need updating for right associativities and negative literals
+					bool needsParenthesis = fullyParenthesized || value.denominator() != 1 && OpTags::needsParenthesis(parentTraits,OpTags::divides<RationalType>::traits(),thisChild); 
 
 					if(needsParenthesis) out << '(';
 					out << value.numerator();
@@ -344,7 +379,7 @@ namespace Symbolic
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					// Unless I'm missing something it never needs parenthesis. The size of the fraction bar disambiguates!
 					// Need to make parent's fraction bar wider some times though...
@@ -360,7 +395,7 @@ namespace Symbolic
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
-										typename extends_container::const_reverse_iterator &currentExtends, OpTags::priority_type parentPriority, Child thisChild) const
+										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					// Unless I'm missing something it never needs parenthesis. The size of the fraction bar disambiguates!
 					NameType snumout, sdenout;
@@ -409,14 +444,14 @@ namespace Symbolic
 				virtual ~VariableNode(){/* empty body */}
 
 				// Methods
-				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					if(fullyParenthesized) out << '(';
 					out << symbols.name(id);
 					if(fullyParenthesized) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					auto result = Extends(symbols.name(id).size() + (fullyParenthesized<<1) , 0 , 0);
 
@@ -425,7 +460,7 @@ namespace Symbolic
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
-										typename extends_container::const_reverse_iterator &currentExtends, OpTags::priority_type parentPriority, Child thisChild) const
+										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					if(fullyParenthesized)
 					{
@@ -461,20 +496,20 @@ namespace Symbolic
 				virtual ~UnaryNode(){/* empty body */}
 
 				// Methods
-				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
 
 					if(needsParenthesis) out << '(';
-					out << Operator<RationalType>::symbol;
-					child->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::priority,Child::RIGHT);
+					out << Operator<RationalType>::traits().symbol;
+					child->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority;
-					Extends result = child->getPrint2DExtends(symbols,extends,fullyParenthesized,Operator<RationalType>::priority,Child::RIGHT).first;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
+					Extends result = child->getPrint2DExtends(symbols,extends,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::RIGHT).first;
 					result.width += needsParenthesis ? 1 + 2 : 1;
 
 					extends.push_back(result);
@@ -482,19 +517,19 @@ namespace Symbolic
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
-										typename extends_container::const_reverse_iterator &currentExtends, OpTags::priority_type parentPriority, Child thisChild) const
+										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
 					if(needsParenthesis)
 					{
 						out[top + currentExtends->aboveBaseLine][left] = '(';
 						out[top + currentExtends->aboveBaseLine][left + currentExtends->width-1] = ')';
 					} // end if
-					out[top + currentExtends->aboveBaseLine][left+needsParenthesis] = Operator<RationalType>::symbol;
+					out[top + currentExtends->aboveBaseLine][left+needsParenthesis] = Operator<RationalType>::traits().symbol;
 
 					++currentExtends;
 
-					child->print2D(out,left+1+needsParenthesis,top,symbols,fullyParenthesized,currentExtends,Operator<RationalType>::priority,Child::RIGHT);
+					child->print2D(out,left+1+needsParenthesis,top,symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
 				} // end method print2D
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
@@ -521,37 +556,38 @@ namespace Symbolic
 				virtual ~BinaryNode(){/* empty body */}
 
 				// Methods
-				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority 
-							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
 
 					if(needsParenthesis) out << '(';
-					leftChild->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::priority,Child::LEFT);
-					out << Operator<RationalType>::symbol;
-					rightChild->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::priority,Child::RIGHT);
+					leftChild->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::LEFT);
+					out << Operator<RationalType>::traits().symbol;
+					rightChild->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::priority_type parentPriority, Child thisChild) const
+				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority 
-							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
 
-					auto priority = Operator<RationalType>::symbol == '/' ? OpTags::noParenPriority : Operator<RationalType>::priority; // numerator and denominator don't need parenthesis
+					auto traits = Operator<RationalType>::traits();
+					if(traits.symbol == '/')
+						traits.priority = OpTags::noParenPriority;	// numerator and denominator don't need parenthesis
+
 					Extends leftExtends, rightExtends, result;
 					bool leftUsesFractionBar, rightUsesFractionBar;
-					std::tie(rightExtends,rightUsesFractionBar) = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::RIGHT); // must be the right first!
-					std::tie(leftExtends,leftUsesFractionBar) = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,priority,Child::LEFT);
+					std::tie(rightExtends,rightUsesFractionBar) = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::RIGHT); // must be the right first!
+					std::tie(leftExtends,leftUsesFractionBar) = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::LEFT);
 
-					if(Operator<RationalType>::symbol == '/')
+					if(Operator<RationalType>::traits().symbol == '/')
 					{
 						// size of fraction bar disambiguates instead of parenthesis!
 						result.width = std::max(rightExtends.width+((rightUsesFractionBar && !fullyParenthesized)<<1) , leftExtends.width+((leftUsesFractionBar && !fullyParenthesized)<<1)) + (fullyParenthesized<<1);
 						result.aboveBaseLine = leftExtends.aboveBaseLine + leftExtends.belowBaseLine + 1;
 						result.belowBaseLine = rightExtends.aboveBaseLine + rightExtends.belowBaseLine + 1;
 					}
-					else if(Operator<RationalType>::symbol == '^')
+					else if(Operator<RationalType>::traits().symbol == '^')
 					{
 						result.width = leftExtends.width + rightExtends.width + (needsParenthesis<<1);
 						result.aboveBaseLine = leftExtends.aboveBaseLine + rightExtends.aboveBaseLine + rightExtends.belowBaseLine + 1;
@@ -559,20 +595,19 @@ namespace Symbolic
 					}
 					else
 					{
-						result.width = rightExtends.width + leftExtends.width + (needsParenthesis<<1) + (Operator<RationalType>::symbol == '*' ? 1 : 3);
+						result.width = rightExtends.width + leftExtends.width + (needsParenthesis<<1) + (Operator<RationalType>::traits().symbol == '*' ? 1 : 3);
 						result.aboveBaseLine = std::max(rightExtends.aboveBaseLine,leftExtends.aboveBaseLine);
 						result.belowBaseLine = std::max(rightExtends.belowBaseLine,leftExtends.belowBaseLine);
 					} // end else
 
 					extends.push_back(result);
-					return std::make_pair(result,Operator<RationalType>::symbol == '/'); // report whether we use a fraction bar.
+					return std::make_pair(result,Operator<RationalType>::traits().symbol == '/'); // report whether we use a fraction bar.
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
-										typename extends_container::const_reverse_iterator &currentExtends, OpTags::priority_type parentPriority, Child thisChild) const
+										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || parentPriority > Operator<RationalType>::priority 
-							|| parentPriority == Operator<RationalType>::priority && thisChild == Child::RIGHT;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
 
 					auto &thisExtends = *currentExtends;
 					++currentExtends;
@@ -583,36 +618,38 @@ namespace Symbolic
 						out[top + thisExtends.aboveBaseLine][left + thisExtends.width-1] = ')';
 					} // end if
 
-					if(Operator<RationalType>::symbol == '/')
+					if(Operator<RationalType>::traits().symbol == '/')
 					{
+						auto traits = Operator<RationalType>::traits();
+						traits.priority = OpTags::noParenPriority;
 						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+(left+fullyParenthesized),thisExtends.width-(fullyParenthesized<<1),quotientSymbol);
 						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top,
-											symbols,fullyParenthesized,currentExtends,OpTags::noParenPriority,Child::LEFT); // numerator does not need parenthesis...
+											symbols,fullyParenthesized,currentExtends,traits,OpTags::Child::LEFT); // numerator does not need parenthesis...
 						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top+thisExtends.aboveBaseLine+1,
-											symbols,fullyParenthesized,currentExtends,OpTags::noParenPriority,Child::RIGHT); // ...neither denominator (unless fully parenthesized)
+											symbols,fullyParenthesized,currentExtends,traits,OpTags::Child::RIGHT); // ...neither denominator (unless fully parenthesized)
 					}
-					else if(Operator<RationalType>::symbol == '^')
+					else if(Operator<RationalType>::traits().symbol == '^')
 					{
 						leftChild->print2D(out,left+needsParenthesis,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::priority,Child::LEFT);
+											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::LEFT);
 						rightChild->print2D(out,left+thisExtends.width-needsParenthesis - currentExtends->width,top,
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::priority,Child::RIGHT);
+											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
 					}
 					else
 					{
-						if(Operator<RationalType>::symbol == '*')
-							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+currentExtends->width] = Operator<RationalType>::symbol;
+						if(Operator<RationalType>::traits().symbol == '*')
+							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+currentExtends->width] = Operator<RationalType>::traits().symbol;
 						else
 						{
 							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+currentExtends->width] = ' ';
-							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+1+currentExtends->width] = Operator<RationalType>::symbol;
+							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+1+currentExtends->width] = Operator<RationalType>::traits().symbol;
 							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+2+currentExtends->width] = ' ';
 						} // end else
 						leftChild->print2D(out,left+needsParenthesis,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::priority,Child::LEFT);
+											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::LEFT);
 						rightChild->print2D(out,left+thisExtends.width-needsParenthesis - currentExtends->width,
 											top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::priority,Child::RIGHT);
+											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
 					} // end else
 				} // end method print2D
 
@@ -720,7 +757,7 @@ namespace Symbolic
 
 			void print1D(std::ostream &out, bool fullyParenthesized = false) const
 			{
-				if(expressionTree) expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::noParenPriority,Child::LEFT);
+				if(expressionTree) expressionTree->print1D(out,*symbols,fullyParenthesized,OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT);
 			} // end method print1D
 
 			void print2D(std::ostream &out, bool fullyParenthesized = false) const
@@ -728,12 +765,12 @@ namespace Symbolic
 				if(expressionTree)
 				{
 					extends_container extends;
-					Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::noParenPriority,Child::LEFT).first;
+					Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT).first;
 
 					std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
 					std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
 
-					expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::noParenPriority,Child::LEFT);
+					expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT);
 
 					std::copy(temporaryStorage.begin(),temporaryStorage.end(),std::ostream_iterator<NameType>(out,"\n"));
 				} // end if
