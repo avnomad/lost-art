@@ -204,6 +204,25 @@ namespace Symbolic
 				{
 					// empty body
 				} // end OpTraits constructor
+
+				// Methods
+				OpTraits &setSymbol(char symbol)
+				{
+					this->symbol = symbol;
+					return *this;
+				} // end method setSymbol
+
+				OpTraits &setPriority(priority_type priority)
+				{
+					this->priority = priority;
+					return *this;
+				} // end method setPriority
+
+				OpTraits &setAssociativity(Associativity associativity)
+				{
+					this->associativity = associativity;
+					return *this;
+				} // end method setAssociativity
 			}; // end struct OpTraits
 
 			const priority_type noParenPriority = 0; // should be less than any other priority
@@ -572,12 +591,14 @@ namespace Symbolic
 					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
 
 					auto traits = Operator<RationalType>::traits();
-					if(traits.symbol == '/')
+					if(traits.symbol == '/' || traits.symbol == '^')
 						traits.priority = OpTags::noParenPriority;	// numerator and denominator don't need parenthesis
 
 					Extends leftExtends, rightExtends, result;
 					bool leftUsesFractionBar, rightUsesFractionBar;
 					std::tie(rightExtends,rightUsesFractionBar) = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::RIGHT); // must be the right first!
+					if(traits.symbol == '^')
+						traits.priority = Operator<RationalType>::traits().priority; // restore priority for left child.
 					std::tie(leftExtends,leftUsesFractionBar) = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::LEFT);
 
 					if(Operator<RationalType>::traits().symbol == '/')
@@ -633,7 +654,7 @@ namespace Symbolic
 						leftChild->print2D(out,left+needsParenthesis,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
 											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::LEFT);
 						rightChild->print2D(out,left+thisExtends.width-needsParenthesis - currentExtends->width,top,
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
+											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits().setPriority(OpTags::noParenPriority),OpTags::Child::RIGHT);
 					}
 					else
 					{
