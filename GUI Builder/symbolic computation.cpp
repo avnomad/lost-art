@@ -6,6 +6,9 @@ using std::string;
 #include <sstream>
 using std::ostringstream;
 
+#include <set>
+using std::set;
+
 #include <utility>
 
 #include <cassert>
@@ -1487,7 +1490,18 @@ namespace Symbolic
 			                                                                                                                             "(x     )      \n"        }, // ^
 		}; // end tests initializer
 
+		// assert no two different test cases have the same result 
+		// (otherwise there would be an ambiguity which is a specification error)
+		set<string> prints[4];
+		for(size_t i = 0 ; i < nTests ; ++i)
+		{
+			assert(prints[0].insert(tests[i].fullParen1D).second);
+			assert(prints[1].insert(tests[i].minParen1D).second);
+			assert(prints[2].insert(tests[i].fullParen2D).second);
+			assert(prints[3].insert(tests[i].minParen2D).second);
+		} // end for
 
+		// run tests
 		for(size_t i = 0 ; i < nTests ; ++i)
 		{
 			ostringstream strout;
