@@ -13,9 +13,6 @@ using std::set;
 
 #include <cassert>
 
-#include <boost/rational.hpp>
-using boost::rational;
-
 
 namespace Symbolic
 {
@@ -169,18 +166,17 @@ namespace Symbolic
 		using Symbolic::Common::SymbolTable;
 		using Symbolic::FreeForms::Expression;
 		using namespace Symbolic::DSEL;
-		typedef rational<long long int> Rational;
 
 		// test DSEL, print methods and parser.
 		const size_t nTests = 390;
 		auto st = std::make_shared<SymbolTable<string,int>>();
-		auto Var = ExpressionBuilder<Primitive::Variable,Rational>(st);
-		auto Con = ExpressionBuilder<Primitive::Constant,Rational>(st);
-		Expression<Rational> x("x",st), y("y",st);
+		auto Var = ExpressionBuilder<Primitive::Variable>(st);
+		auto Con = ExpressionBuilder<Primitive::Constant>(st);
+		Expression<> x("x",st), y("y",st);
 
 		struct Test
 		{
-			Expression<Rational> dsel;
+			Expression<> dsel;
 			string fullParen1D;
 			string minParen1D;
 			string fullParen2D;
@@ -189,7 +185,7 @@ namespace Symbolic
 
 		Test tests[nTests] = {
 			// height == 0
-			{Expression<Rational>(),    ""                             , ""                   , ""                                     , ""                         },
+			{Expression<>(),    ""                             , ""                   , ""                                     , ""                         },
 			// height == 1
 			{x,                         "(x)"                          , "x"                  , "(x)\n"                                , "x\n"                      },
 			{Con(32775),                "(32775)"                      , "32775"              , "(32775)\n"                            , "32775\n"                  },

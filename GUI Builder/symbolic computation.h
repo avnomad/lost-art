@@ -2,6 +2,7 @@
 #define SYMBOLIC_COMPUTATION_H
 
 #include <map>
+#include <limits>
 #include <vector>
 #include <string>
 #include <memory>
@@ -317,15 +318,25 @@ namespace Symbolic
 
 
 		/** A class to represent free-form mathematical expressions.
+		 *  Unsigned integral (natural) numbers are represented internally as UIntType.
+		 *	Signed, rational and fixed point real numbers are represented using negation,
+		 *	divition and natural numbers.
 		 */
-		template<typename RationalType, typename NameType = std::string, typename IDType = int>
+		template<typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = int>
 		class Expression
 		{
+			/**********************
+			*    Consept Check    *
+			**********************/
+
+			static_assert(std::numeric_limits<UIntType>::is_integer && !std::numeric_limits<UIntType>::is_signed, 
+				"Expression can only be instantiated with unsigned integral types!");
+
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef RationalType rational_type;
+			typedef UIntType uint_type;
 			typedef NameType name_type;
 			typedef IDType id_type;
 			typedef Common::SymbolTable<NameType,IDType> symbol_table_type;
@@ -360,7 +371,7 @@ namespace Symbolic
 				 *	printed in 2D in the vector extends in right postorder (right subtree before 
 				 *	left subtree). Returns the extends of the subtree it's called on.
 				 */
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
+				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				// uses the property rev(preorder(t) == postorder(reflect(t)) to cache the node attributes outside the nodes!
 				// Should probably cache the serialized literal nodes as well...
 				// TODO: change top to bottom and have (0,0) be in the bottom-left corner to somewhat simplify code.
@@ -374,10 +385,10 @@ namespace Symbolic
 			struct LiteralNode : public AbstractNode
 			{
 				// Fields
-				RationalType value;
+				UIntType value;
 
 				// Constructors / Destructor
-				LiteralNode(const RationalType &value)
+				LiteralNode(const UIntType &value)
 					:value(value)
 				{
 					// empty body
@@ -388,54 +399,35 @@ namespace Symbolic
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					// this creterion need updating for right associativities and negative literals
-					bool needsParenthesis = fullyParenthesized || value.denominator() != 1 && OpTags::needsParenthesis(parentTraits,OpTags::divides<RationalType>::traits(),thisChild); 
-
-					if(needsParenthesis) out << '(';
-					out << value.numerator();
-					if(value.denominator() != 1)
-						out << '/' << value.denominator();
-					if(needsParenthesis) out << ')';
+					if(fullyParenthesized) out << '(';
+					out << value;
+					if(fullyParenthesized) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
+				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					// Unless I'm missing something it never needs parenthesis. The size of the fraction bar disambiguates!
-					// Need to make parent's fraction bar wider some times though...
-					std::ostringstream numout, denout;
+					std::ostringstream sstrout;
 					Extends result;
 
-					numout << value.numerator();
-					denout << value.denominator();
-					result = Extends(std::max(numout.str().size(),denout.str().size())+(fullyParenthesized<<1) , value.denominator() != 1 , value.denominator() != 1);
+					sstrout << value;
+					result = Extends(sstrout.str().size()+(fullyParenthesized<<1),0,0);
 
 					extends.push_back(result);
-					return std::make_pair(result,value.denominator() != 1); // report whether we use a fraction bar.
+					return result;
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					// Unless I'm missing something it never needs parenthesis. The size of the fraction bar disambiguates!
-					NameType snumout, sdenout;
-					std::ostringstream numout, denout;
+					std::ostringstream sstrout;
+					sstrout << value;
+					NameType strout = sstrout.str();
 
-					numout << value.numerator();
-					denout << value.denominator();
-
-					snumout = numout.str();
-					sdenout = denout.str();
-
-					std::copy(snumout.begin(),snumout.end(),out[top].begin() + (left + ((currentExtends->width-snumout.size()+1) >> 1))); // can handle parenthesis
+					std::copy(strout.begin(),strout.end(),out[top].begin() + (left+fullyParenthesized)); // can handle parenthesis
 					if(fullyParenthesized)
 					{
 						out[top+currentExtends->aboveBaseLine][left] = '(';
 						out[top+currentExtends->aboveBaseLine][left + currentExtends->width-1] = ')';
-					} // end if
-					if(value.denominator() != 1)
-					{
-						std::fill_n(out[top+1].begin() + (left+fullyParenthesized),currentExtends->width-(fullyParenthesized<<1),quotientSymbol);
-						std::copy(sdenout.begin(),sdenout.end(),out[top+2].begin() + (left + ((currentExtends->width-sdenout.size()+1) >> 1))); // can handle parenthesis
 					} // end if
 
 					++currentExtends;
@@ -470,12 +462,12 @@ namespace Symbolic
 					if(fullyParenthesized) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
+				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					auto result = Extends(symbols.name(id).size() + (fullyParenthesized<<1) , 0 , 0);
 
 					extends.push_back(result);
-					return std::make_pair(result,false); // we do not use a fraction bar
+					return result;
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
@@ -517,38 +509,38 @@ namespace Symbolic
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
 
 					if(needsParenthesis) out << '(';
-					out << Operator<RationalType>::traits().symbol;
-					child->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
+					out << Operator<UIntType>::traits().symbol;
+					child->print1D(out,symbols,fullyParenthesized,Operator<UIntType>::traits(),OpTags::Child::RIGHT);
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
+				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
-					Extends result = child->getPrint2DExtends(symbols,extends,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::RIGHT).first;
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
+					Extends result = child->getPrint2DExtends(symbols,extends,fullyParenthesized,Operator<UIntType>::traits(),OpTags::Child::RIGHT);
 					result.width += needsParenthesis ? 1 + 2 : 1;
 
 					extends.push_back(result);
-					return std::make_pair(result,false); // we do not use a fraction bar
+					return result;
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
 					if(needsParenthesis)
 					{
 						out[top + currentExtends->aboveBaseLine][left] = '(';
 						out[top + currentExtends->aboveBaseLine][left + currentExtends->width-1] = ')';
 					} // end if
-					out[top + currentExtends->aboveBaseLine][left+needsParenthesis] = Operator<RationalType>::traits().symbol;
+					out[top + currentExtends->aboveBaseLine][left+needsParenthesis] = Operator<UIntType>::traits().symbol;
 
 					++currentExtends;
 
-					child->print2D(out,left+1+needsParenthesis,top,symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
+					child->print2D(out,left+1+needsParenthesis,top,symbols,fullyParenthesized,currentExtends,Operator<UIntType>::traits(),OpTags::Child::RIGHT);
 				} // end method print2D
 
 				virtual std::unique_ptr<AbstractNode> deepCopy() const
@@ -577,38 +569,38 @@ namespace Symbolic
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
 
 					if(needsParenthesis) out << '(';
-					leftChild->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::LEFT);
-					out << Operator<RationalType>::traits().symbol;
-					rightChild->print1D(out,symbols,fullyParenthesized,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
+					leftChild->print1D(out,symbols,fullyParenthesized,Operator<UIntType>::traits(),OpTags::Child::LEFT);
+					out << Operator<UIntType>::traits().symbol;
+					rightChild->print1D(out,symbols,fullyParenthesized,Operator<UIntType>::traits(),OpTags::Child::RIGHT);
 					if(needsParenthesis) out << ')';
 				} // end method print1D
 
-				virtual std::pair<Extends,bool> getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
+				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
 
-					auto traits = Operator<RationalType>::traits();
+					auto traits = Operator<UIntType>::traits();
 					if(traits.symbol == '/' || traits.symbol == '^')
 						traits.priority = OpTags::noParenPriority;	// numerator and denominator don't need parenthesis
 
-					Extends leftExtends, rightExtends, result;
-					bool leftUsesFractionBar, rightUsesFractionBar;
-					std::tie(rightExtends,rightUsesFractionBar) = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::RIGHT); // must be the right first!
+					Extends rightExtends = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::RIGHT); // must be the right first!
 					if(traits.symbol == '^')
-						traits.priority = Operator<RationalType>::traits().priority; // restore priority for left child.
-					std::tie(leftExtends,leftUsesFractionBar) = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::LEFT);
+						traits.priority = Operator<UIntType>::traits().priority; // restore priority for left child.
+					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::LEFT); 
+					Extends result;
 
-					if(Operator<RationalType>::traits().symbol == '/')
+					if(Operator<UIntType>::traits().symbol == '/')
 					{
 						// size of fraction bar disambiguates instead of parenthesis!
-						result.width = std::max(rightExtends.width+((rightUsesFractionBar && !fullyParenthesized)<<1) , leftExtends.width+((leftUsesFractionBar && !fullyParenthesized)<<1)) + (fullyParenthesized<<1);
+						result.width = std::max(rightExtends.width+((typeid(*rightChild) == typeid(BinaryNode<OpTags::divides>) && !fullyParenthesized)<<1) , 
+												leftExtends.width+((typeid(*leftChild) == typeid(BinaryNode<OpTags::divides>) && !fullyParenthesized)<<1)) + (fullyParenthesized<<1);
 						result.aboveBaseLine = leftExtends.aboveBaseLine + leftExtends.belowBaseLine + 1;
 						result.belowBaseLine = rightExtends.aboveBaseLine + rightExtends.belowBaseLine + 1;
 					}
-					else if(Operator<RationalType>::traits().symbol == '^')
+					else if(Operator<UIntType>::traits().symbol == '^')
 					{
 						result.width = leftExtends.width + rightExtends.width + (needsParenthesis<<1);
 						result.aboveBaseLine = leftExtends.aboveBaseLine + rightExtends.aboveBaseLine + rightExtends.belowBaseLine + 1;
@@ -616,19 +608,19 @@ namespace Symbolic
 					}
 					else
 					{
-						result.width = rightExtends.width + leftExtends.width + (needsParenthesis<<1) + (Operator<RationalType>::traits().symbol == '*' ? 1 : 3);
+						result.width = rightExtends.width + leftExtends.width + (needsParenthesis<<1) + (Operator<UIntType>::traits().symbol == '*' ? 1 : 3);
 						result.aboveBaseLine = std::max(rightExtends.aboveBaseLine,leftExtends.aboveBaseLine);
 						result.belowBaseLine = std::max(rightExtends.belowBaseLine,leftExtends.belowBaseLine);
 					} // end else
 
 					extends.push_back(result);
-					return std::make_pair(result,Operator<RationalType>::traits().symbol == '/'); // report whether we use a fraction bar.
+					return result;
 				} // end method getPrint2DExtends
 
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
-					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<RationalType>::traits(),thisChild);
+					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
 
 					auto &thisExtends = *currentExtends;
 					++currentExtends;
@@ -639,9 +631,9 @@ namespace Symbolic
 						out[top + thisExtends.aboveBaseLine][left + thisExtends.width-1] = ')';
 					} // end if
 
-					if(Operator<RationalType>::traits().symbol == '/')
+					if(Operator<UIntType>::traits().symbol == '/')
 					{
-						auto traits = Operator<RationalType>::traits();
+						auto traits = Operator<UIntType>::traits();
 						traits.priority = OpTags::noParenPriority;
 						std::fill_n(out[top+thisExtends.aboveBaseLine].begin()+(left+fullyParenthesized),thisExtends.width-(fullyParenthesized<<1),quotientSymbol);
 						leftChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top,
@@ -649,28 +641,28 @@ namespace Symbolic
 						rightChild->print2D(out,left + ((thisExtends.width-currentExtends->width+1) >> 1),top+thisExtends.aboveBaseLine+1,
 											symbols,fullyParenthesized,currentExtends,traits,OpTags::Child::RIGHT); // ...neither denominator (unless fully parenthesized)
 					}
-					else if(Operator<RationalType>::traits().symbol == '^')
+					else if(Operator<UIntType>::traits().symbol == '^')
 					{
 						leftChild->print2D(out,left+needsParenthesis,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::LEFT);
+											symbols,fullyParenthesized,currentExtends,Operator<UIntType>::traits(),OpTags::Child::LEFT);
 						rightChild->print2D(out,left+thisExtends.width-needsParenthesis - currentExtends->width,top,
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits().setPriority(OpTags::noParenPriority),OpTags::Child::RIGHT);
+											symbols,fullyParenthesized,currentExtends,Operator<UIntType>::traits().setPriority(OpTags::noParenPriority),OpTags::Child::RIGHT);
 					}
 					else
 					{
-						if(Operator<RationalType>::traits().symbol == '*')
-							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+currentExtends->width] = Operator<RationalType>::traits().symbol;
+						if(Operator<UIntType>::traits().symbol == '*')
+							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+currentExtends->width] = Operator<UIntType>::traits().symbol;
 						else
 						{
 							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+currentExtends->width] = ' ';
-							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+1+currentExtends->width] = Operator<RationalType>::traits().symbol;
+							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+1+currentExtends->width] = Operator<UIntType>::traits().symbol;
 							out[top + thisExtends.aboveBaseLine][left+needsParenthesis+2+currentExtends->width] = ' ';
 						} // end else
 						leftChild->print2D(out,left+needsParenthesis,top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::LEFT);
+											symbols,fullyParenthesized,currentExtends,Operator<UIntType>::traits(),OpTags::Child::LEFT);
 						rightChild->print2D(out,left+thisExtends.width-needsParenthesis - currentExtends->width,
 											top + (thisExtends.aboveBaseLine-currentExtends->aboveBaseLine),
-											symbols,fullyParenthesized,currentExtends,Operator<RationalType>::traits(),OpTags::Child::RIGHT);
+											symbols,fullyParenthesized,currentExtends,Operator<UIntType>::traits(),OpTags::Child::RIGHT);
 					} // end else
 				} // end method print2D
 
@@ -715,7 +707,7 @@ namespace Symbolic
 
 			/** Construct an expression containing a single literal value
 			 */
-			Expression(const RationalType &literalValue, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
+			Expression(const UIntType &literalValue, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
 				:symbols(std::move(symbolTable)),expressionTree(new LiteralNode(literalValue))
 			{
 				// empty body
@@ -786,7 +778,7 @@ namespace Symbolic
 				if(expressionTree)
 				{
 					extends_container extends;
-					Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT).first;
+					Extends rootExtends = expressionTree->getPrint2DExtends(*symbols,extends,fullyParenthesized,OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT);
 
 					std::vector<NameType> temporaryStorage(rootExtends.aboveBaseLine+rootExtends.belowBaseLine+1);
 					std::for_each(temporaryStorage.begin(),temporaryStorage.end(),[&rootExtends](NameType &row){row.resize(rootExtends.width,' ');});
@@ -978,9 +970,9 @@ namespace Symbolic
 
 			//	/**	s must be a string of digits [0-9] containing zero or one '.'.
 			//	 */
-			//	static RationalType stringToRational(const NameType &s)
+			//	static UIntType stringToRational(const NameType &s)
 			//	{
-			//		RationalType::int_type numerator = 0, denominator = 1;
+			//		UIntType::int_type numerator = 0, denominator = 1;
 			//		auto inBegin = s.begin();
 			//		auto inEnd = s.end();
 
@@ -1000,7 +992,7 @@ namespace Symbolic
 			//			++inBegin;
 			//		} // end while
 
-			//		return RationalType(numerator,denominator);
+			//		return UIntType(numerator,denominator);
 			//	} // end function sequenceToRational
 
 			//}; // end struct Syntax
@@ -1024,20 +1016,20 @@ namespace Symbolic
 		enum class Primitive {Variable,Constant};
 
 		// Support Metafunction
-		template<Primitive primitive,typename RationalType, typename NameType> struct ArgType;
-		template<typename RationalType, typename NameType>
-		struct ArgType<Primitive::Variable,RationalType,NameType>{typedef NameType type;};
-		template<typename RationalType, typename NameType>
-		struct ArgType<Primitive::Constant,RationalType,NameType>{typedef RationalType type;};
+		template<Primitive primitive,typename UIntType, typename NameType> struct ArgType;
+		template<typename UIntType, typename NameType>
+		struct ArgType<Primitive::Variable,UIntType,NameType>{typedef NameType type;};
+		template<typename UIntType, typename NameType>
+		struct ArgType<Primitive::Constant,UIntType,NameType>{typedef UIntType type;};
 
-		template<Primitive primitive, typename RationalType, typename NameType = std::string, typename IDType = int>
+		template<Primitive primitive, typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = int>
 		struct ExpressionBuilder
 		{
 			// Member Types
-			typedef RationalType rational_type;
+			typedef UIntType uint_type;
 			typedef NameType name_type;
 			typedef IDType id_type;
-			typedef FreeForms::Expression<RationalType,NameType,IDType> expression_type;
+			typedef FreeForms::Expression<UIntType,NameType,IDType> expression_type;
 			typedef typename expression_type::symbol_table_type symbol_table_type;
 	
 			// Fields
@@ -1055,7 +1047,7 @@ namespace Symbolic
 			} // end ExpressionBuilder default constructor
 
 			// Methods
-			expression_type operator()(const typename ArgType<primitive,RationalType,NameType>::type &argument)
+			expression_type operator()(const typename ArgType<primitive,UIntType,NameType>::type &argument)
 			{
 				return expression_type(argument,spSymbolTable);
 			} // end method operator()
@@ -1063,10 +1055,10 @@ namespace Symbolic
 
 
 #define UNARY_EXPRESSION(op,tag) \
-		template<typename RationalType, typename NameType, typename IDType> \
-		inline FreeForms::Expression<RationalType,NameType,IDType> operator op (FreeForms::Expression<RationalType,NameType,IDType> subExpression) \
+		template<typename UIntType, typename NameType, typename IDType> \
+		inline FreeForms::Expression<UIntType,NameType,IDType> operator op (FreeForms::Expression<UIntType,NameType,IDType> subExpression) \
 		{\
-			return FreeForms::Expression<RationalType,NameType,IDType>::unaryCombine<tag>(std::move(subExpression));\
+			return FreeForms::Expression<UIntType,NameType,IDType>::unaryCombine<tag>(std::move(subExpression));\
 		} // end function operator op
 
 		UNARY_EXPRESSION(+,FreeForms::OpTags::unary_plus);
@@ -1074,24 +1066,24 @@ namespace Symbolic
 #undef UNARY_EXPRESSION
 
 #define BINARY_EXPRESSION(op,tag) \
-		template<typename RationalType, typename NameType, typename IDType> \
-		inline auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, decltype(leftSubExpression) rightSubExpression)->decltype(leftSubExpression) \
+		template<typename UIntType, typename NameType, typename IDType> \
+		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, decltype(leftSubExpression) rightSubExpression)->decltype(leftSubExpression) \
 		{\
-			return FreeForms::Expression<RationalType,NameType,IDType>::\
+			return FreeForms::Expression<UIntType,NameType,IDType>::\
 				binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
 		} /* end function operator op*/\
 		\
-		template<typename RationalType, typename NameType, typename IDType, typename OtherOpType> \
-		inline auto operator op(FreeForms::Expression<RationalType,NameType,IDType> leftSubExpression, const OtherOpType &rightSubExpression)->decltype(leftSubExpression) \
+		template<typename UIntType, typename NameType, typename IDType, typename OtherOpType> \
+		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, const OtherOpType &rightSubExpression)->decltype(leftSubExpression) \
 		{\
-			return FreeForms::Expression<RationalType,NameType,IDType>::\
+			return FreeForms::Expression<UIntType,NameType,IDType>::\
 				binaryCombine<tag>(std::move(leftSubExpression),decltype(leftSubExpression)(rightSubExpression));\
 		} /* end function operator op*/\
 		\
-		template<typename RationalType, typename NameType, typename IDType, typename OtherOpType> \
-		inline auto operator op(const OtherOpType &leftSubExpression, FreeForms::Expression<RationalType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
+		template<typename UIntType, typename NameType, typename IDType, typename OtherOpType> \
+		inline auto operator op(const OtherOpType &leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
 		{\
-			return FreeForms::Expression<RationalType,NameType,IDType>::\
+			return FreeForms::Expression<UIntType,NameType,IDType>::\
 				binaryCombine<tag>(decltype(rightSubExpression)(leftSubExpression),std::move(rightSubExpression));\
 		} /* end function operator op*/
 
