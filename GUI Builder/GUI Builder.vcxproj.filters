@@ -24,6 +24,9 @@
     <ClCompile Include="symbolic computation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gui model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="eigen-rational interface code.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="symbolic computation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

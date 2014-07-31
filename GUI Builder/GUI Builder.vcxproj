@@ -11,12 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="gui model.cpp" />
     <ClCompile Include="linear system solving.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="symbolic computation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="eigen-rational interface code.h" />
+    <ClInclude Include="gui model.h" />
     <ClInclude Include="linear system solving.h" />
     <ClInclude Include="symbolic computation.h" />
   </ItemGroup>
