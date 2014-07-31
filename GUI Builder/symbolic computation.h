@@ -14,9 +14,9 @@
 #include <stdexcept>
 #include <functional>
 
-//#include <boost/spirit/include/qi.hpp>
-//#include <boost/spirit/include/lex_lexertl.hpp>
-//#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/lex_lexertl.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 
 namespace Symbolic
 {
@@ -167,24 +167,25 @@ namespace Symbolic
 	namespace FreeForms
 	{
 		// Using and namespace declarations to easy development with Spirit
-		//namespace qi = boost::spirit::qi;
-		//namespace ascii = boost::spirit::ascii;
-		//namespace lex = boost::spirit::lex;
-		//namespace phoenix = boost::phoenix;
-		//using qi::rule;
-		//using qi::_val;
-		//using qi::_r1;
-		//using qi::_1;
-		//using qi::_2;
-		//using qi::_3;
-		//using qi::_4;
-		//using qi::int_;
-		//using phoenix::val;
-		//using phoenix::ref;
-		//using phoenix::bind;
-		//using phoenix::construct;
-		//using phoenix::new_;
-		//using ascii::space_type;
+		namespace qi = boost::spirit::qi;
+		namespace ascii = boost::spirit::ascii;
+		namespace lex = boost::spirit::lex;
+		namespace phoenix = boost::phoenix;
+		using qi::rule;
+		using qi::_val;
+		using qi::_r1;
+		using qi::_1;
+		using qi::_2;
+		using qi::_3;
+		using qi::_4;
+		using qi::eps;
+		using qi::int_;
+		using phoenix::val;
+		using phoenix::ref;
+		using phoenix::bind;
+		using phoenix::construct;
+		using phoenix::new_;
+		using ascii::space_type;
 
 		namespace OpTags
 		{
@@ -728,25 +729,25 @@ namespace Symbolic
 			 *
 			 *	Spirit does not support unique_ptrs so this may leak in case exceptions are thrown...
 			 */
-			//template<typename ForwardIterator>
-			//Expression(ForwardIterator begin, ForwardIterator end, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
-			//	:symbols(std::move(symbolTable))
-			//{
-			//	typedef lex::lexertl::token<ForwardIterator,boost::mpl::vector<NameType>,boost::mpl::false_> token_type;
-			//	typedef lex::lexertl::actor_lexer<token_type> lexer_type;
-			//	typedef typename lexer_type::iterator_type iterator_type;
+			template<typename ForwardIterator>
+			Expression(ForwardIterator begin, ForwardIterator end, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
+				:symbols(std::move(symbolTable))
+			{
+				typedef lex::lexertl::token<ForwardIterator,boost::mpl::vector<NameType>,boost::mpl::false_> token_type;
+				typedef lex::lexertl::actor_lexer<token_type> lexer_type;
+				typedef typename lexer_type::iterator_type iterator_type;
 
-			//	std::stringstream sout;
-			//	Grammar<lexer_type> scanner(sout);
-			//	Syntax<iterator_type> parser(scanner,sout);
-			//	AbstractNode *parseTree = nullptr;
+				std::stringstream sout;
+				Grammar<lexer_type> scanner(sout);
+				Syntax<iterator_type> parser(scanner,sout);
+				AbstractNode *parseTree = nullptr;
 
-			//	bool success = lex::tokenize_and_parse(begin,end,scanner,parser(symbols.get()),parseTree);
-			//	expressionTree.reset(parseTree);
+				bool success = lex::tokenize_and_parse(begin,end,scanner,parser(symbols.get()),parseTree);
+				expressionTree.reset(parseTree);
 
-			//	if(!success || begin != end)
-			//		throw std::runtime_error(sout.str().empty() ? "Parse error reading mathematical expression!" : sout.str());
-			//} // end Expression constructor
+				if(!success || begin != end)
+					throw std::runtime_error(sout.str().empty() ? "Parse error reading mathematical expression!" : sout.str());
+			} // end Expression constructor
 
 			~Expression(){/* empty body */}
 
@@ -832,170 +833,176 @@ namespace Symbolic
 			*    Parser Support    *
 			***********************/
 		private:
-			//template<typename Lexer>
-			//struct Grammar : public lex::lexer<Lexer>
-			//{
-			//	// Tokens
-			//	lex::token_def<NameType> identifier;
-			//	lex::token_def<NameType> rationalLiteral;
-			//	lex::token_def<NameType> whiteSpace;
-			//	lex::token_def<NameType> illegalCharacter;
+			template<typename Lexer>
+			struct Grammar : public lex::lexer<Lexer>
+			{
+				// Tokens
+				lex::token_def<NameType> identifier;
+				lex::token_def<NameType> rationalLiteral;
+				lex::token_def<NameType> whiteSpace;
+				lex::token_def<NameType> illegalCharacter;
 
-			//	// Regular Expressions
-			//	/** A Grammar object should not outlive the std::ostream 
-			//	 *	one given as argument to its constructor.
-			//	 */
-			//	Grammar(std::ostream &errorStream)
-			//		:identifier("[a-zA-Z_][a-zA-Z_0-9]*"),
-			//		rationalLiteral("[0-9]+(\\.[0-9]+)?"),
-			//		whiteSpace("[ \t\v\f\n\r]"),
-			//		illegalCharacter(".")
-			//	{
-			//		this->self
-			//			= identifier | rationalLiteral
-			//			| '(' | ')' | '+' | '-' | '*' | '/' | '^'
-			//			| whiteSpace[lex::_pass = lex::pass_flags::pass_ignore]
-			//			| illegalCharacter[errorStream << val("Ignoring invalid character '") << *lex::_start << "' in input!\n"
-			//								, lex::_pass = lex::pass_flags::pass_ignore];
-			//				// should be pass_fail but spirit parser loops forever on failure...
-			//	} // end Grammar constructor
-			//}; // end struct Grammar
+				// Regular Expressions
+				/** A Grammar object should not outlive the std::ostream 
+				 *	one given as argument to its constructor.
+				 */
+				Grammar(std::ostream &errorStream)
+					:identifier("[a-zA-Z_][a-zA-Z_0-9]*"),
+					rationalLiteral("[0-9]+(\\.[0-9]+)?"),
+					whiteSpace("[ \t\v\f\n\r]"),
+					illegalCharacter(".")
+				{
+					this->self
+						= identifier | rationalLiteral
+						| '(' | ')' | '+' | '-' | '*' | '/' | '^'
+						| whiteSpace[lex::_pass = lex::pass_flags::pass_ignore]
+						| illegalCharacter[errorStream << val("Ignoring invalid character '") << *lex::_start << "' in input!\n"
+											, lex::_pass = lex::pass_flags::pass_ignore];
+							// should be pass_fail but spirit parser loops forever on failure...
+				} // end Grammar constructor
+			}; // end struct Grammar
 
-			//typedef AbstractNode *attribute_signature(symbol_table_type *);
+			typedef AbstractNode *attribute_signature(symbol_table_type *);
 
-			//template<typename ForwardIterator>
-			//struct Syntax : public qi::grammar<ForwardIterator,attribute_signature>
-			//{
-			//	// Operator parsers
-			//	struct AdditiveOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
-			//	{
-			//		AdditiveOperator()
-			//		{
-			//			add("+",binaryCombine<OpTags::plus>)
-			//			   ("-",binaryCombine<OpTags::minus>);
-			//		} // end AdditiveOperator constructor
-			//	} additiveOperator; // end struct AdditiveOperator
+			template<typename ForwardIterator>
+			struct Syntax : public qi::grammar<ForwardIterator,attribute_signature>
+			{
+				// Operator parsers
+				struct AdditiveOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
+				{
+					AdditiveOperator()
+					{
+						add("+",binaryCombine<OpTags::plus>)
+						   ("-",binaryCombine<OpTags::minus>);
+					} // end AdditiveOperator constructor
+				} additiveOperator; // end struct AdditiveOperator
 
-			//	struct MultiplicativeOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
-			//	{
-			//		MultiplicativeOperator()
-			//		{
-			//			add("*",binaryCombine<OpTags::multiplies>)
-			//			   ("/",binaryCombine<OpTags::divides>);
-			//		} // end MultiplicativeOperator constructor
-			//	} multiplicativeOperator; // end struct MultiplicativeOperator
+				struct MultiplicativeOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
+				{
+					MultiplicativeOperator()
+					{
+						add("*",binaryCombine<OpTags::multiplies>)
+						   ("/",binaryCombine<OpTags::divides>);
+					} // end MultiplicativeOperator constructor
+				} multiplicativeOperator; // end struct MultiplicativeOperator
 
-			//	struct ExponentiationOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
-			//	{
-			//		ExponentiationOperator()
-			//		{
-			//			add("^",binaryCombine<OpTags::bit_xor>);
-			//		} // end ExponentiationOperator constructor
-			//	} exponentiationOperator; // end struct ExponentiationOperator
+				struct ExponentiationOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *,AbstractNode *)>
+				{
+					ExponentiationOperator()
+					{
+						add("^",binaryCombine<OpTags::bit_xor>);
+					} // end ExponentiationOperator constructor
+				} exponentiationOperator; // end struct ExponentiationOperator
 
-			//	struct PrefixOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *)>
-			//	{
-			//		PrefixOperator()
-			//		{
-			//			add("+",unaryCombine<OpTags::unary_plus>)
-			//			   ("-",unaryCombine<std::negate>);
-			//		} // end PrefixOperator constructor
-			//	} prefixOperator; // end struct PrefixOperator
+				struct PrefixOperator : public qi::symbols<char,AbstractNode *(*)(AbstractNode *)>
+				{
+					PrefixOperator()
+					{
+						add("+",unaryCombine<OpTags::unary_plus>)
+						   ("-",unaryCombine<OpTags::negate>);
+					} // end PrefixOperator constructor
+				} prefixOperator; // end struct PrefixOperator
 
-			//	// Non-Terminals
-			//	rule<ForwardIterator,attribute_signature> expression;
-			//	rule<ForwardIterator,attribute_signature> term;
-			//	rule<ForwardIterator,attribute_signature> factor;
-			//	rule<ForwardIterator,attribute_signature> prefix;
-			//	rule<ForwardIterator,attribute_signature> primary;
+				// Non-Terminals
+				rule<ForwardIterator,attribute_signature> start;
+				rule<ForwardIterator,attribute_signature> expression;
+				rule<ForwardIterator,attribute_signature> term;
+				rule<ForwardIterator,attribute_signature> factor;
+				rule<ForwardIterator,attribute_signature> prefix;
+				rule<ForwardIterator,attribute_signature> primary;
 
-			//	// Rules
-			//	/** A Syntax object should not outlive the std::ostream and 
-			//	 *	Grammar ones given as arguments to its constructor.
-			//	 */
-			//	template<typename Lexer>
-			//	Syntax(const Grammar<Lexer> &g, std::ostream &errorStream)
-			//		:Syntax::base_type(expression)
-			//	{
-			//		expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
-			//		term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
-			//		factor = prefix(_r1)[_val = _1] | (prefixOperator > prefix(_r1))[_val = bind(indirectCall,_1,_2)];
-			//		prefix = primary(_r1)[_val = _1] > *(exponentiationOperator > primary(_r1))[_val = bind(indirectCall,_1,_val,_2)];	// parses more expressions
-			//		primary = g.rationalLiteral[_val = new_<LiteralNode>(bind(stringToRational,_1))] // than I can currently bring to canonical form
-			//				| g.identifier[_val = bind(createVariable,_1,_r1)]	// but I should issue proper error messages form transformation routines.
-			//				| '(' > expression(_r1)[_val = _1] > ')';
+				// Rules
+				/** A Syntax object should not outlive the std::ostream and 
+				 *	Grammar ones given as arguments to its constructor.
+				 */
+				template<typename Lexer>
+				Syntax(const Grammar<Lexer> &g, std::ostream &errorStream)
+					:Syntax::base_type(start)
+				{
+					start = expression(_r1)[_val = _1] | eps[_val = val(nullptr)];
+					expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
+					term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
+					factor = (prefixOperator > factor(_r1))[_val = bind(indirectCall,_1,_2)] | prefix(_r1)[_val = _1];
+					prefix = (primary(_r1) >> exponentiationOperator >> prefix(_r1))[_val = bind(indirectCall,_2,_1,_3)] | primary(_r1)[_val = _1];	// parses more expressions
+					primary = g.rationalLiteral[_val = bind(stringToRational,_1)] // than I can currently bring to canonical form
+							| g.identifier[_val = bind(createVariable,_1,_r1)]	// but I should issue proper error messages from transformation routines.
+							| '(' > expression(_r1)[_val = _1] > ')';
 
-			//		expression.name("expression");
-			//		term.name("term");
-			//		factor.name("factor");
-			//		prefix.name("prefix-expression");
-			//		primary.name("primary-expression");
+					start.name("expression-start-non-terminal");
+					expression.name("expression");
+					term.name("term");
+					factor.name("factor");
+					prefix.name("prefix-expression");
+					primary.name("primary-expression");
 
-			//		qi::on_error<qi::fail>
-			//		(
-			//			expression, errorStream << val("Parse error: \"") << construct<std::string>(_1, _2) << "\"!\n"
-			//									<< val("Here:         ") << construct<std::string>(bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
-			//									<< "Exprected a " << _4 << ".\n"
-			//		);
-			//	} // end Syntax constructor
+					qi::on_error<qi::fail>
+					(
+						expression, errorStream << val("Parse error: \"") << construct<std::string>(_1, _2) << "\"!\n"
+												<< val("Here:         ") << construct<std::string>(bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
+												<< "Exprected a " << _4 << ".\n"
+					);
+				} // end Syntax constructor
 
-			//private:
-			//	// Boost::Spirit and Boost::Phoenix work-arrounds:
-			//	template<template<class> class Operator>
-			//	static AbstractNode *unaryCombine(AbstractNode *subExpression)
-			//	{
-			//		return new UnaryNode<Operator>(std::unique_ptr<AbstractNode>(subExpression));
-			//	} // end function unaryCombine
+			private:
+				// Boost::Spirit and Boost::Phoenix work-arrounds:
+				template<template<class> class Operator>
+				static AbstractNode *unaryCombine(AbstractNode *subExpression)
+				{
+					return new UnaryNode<Operator>(std::unique_ptr<AbstractNode>(subExpression));
+				} // end function unaryCombine
 
-			//	template<template<class> class Operator>
-			//	static AbstractNode *binaryCombine(AbstractNode *leftSubExpression, AbstractNode *rightSubExpression)
-			//	{
-			//		return new BinaryNode<Operator>(std::unique_ptr<AbstractNode>(leftSubExpression),std::unique_ptr<AbstractNode>(rightSubExpression));
-			//	} // end function binaryCombine
+				template<template<class> class Operator>
+				static AbstractNode *binaryCombine(AbstractNode *leftSubExpression, AbstractNode *rightSubExpression)
+				{
+					return new BinaryNode<Operator>(std::unique_ptr<AbstractNode>(leftSubExpression),std::unique_ptr<AbstractNode>(rightSubExpression));
+				} // end function binaryCombine
 
-			//	static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *),AbstractNode *arg)
-			//	{
-			//		return f(arg);
-			//	} // end function inderectCall
+				static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *),AbstractNode *arg)
+				{
+					return f(arg);
+				} // end function inderectCall
 
-			//	static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *,AbstractNode *),AbstractNode *arg1, AbstractNode *arg2)
-			//	{
-			//		return f(arg1,arg2);
-			//	} // end function indirectCall
+				static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *,AbstractNode *),AbstractNode *arg1, AbstractNode *arg2)
+				{
+					return f(arg1,arg2);
+				} // end function indirectCall
 
-			//	static AbstractNode *createVariable(const NameType &name, symbol_table_type *symbolTable)
-			//	{
-			//		return new VariableNode(symbolTable->declare(name));
-			//	} // end function createVariable
+				static AbstractNode *createVariable(const NameType &name, symbol_table_type *symbolTable)
+				{
+					return new VariableNode(symbolTable->declare(name));
+				} // end function createVariable
 
-			//	/**	s must be a string of digits [0-9] containing zero or one '.'.
-			//	 */
-			//	static UIntType stringToRational(const NameType &s)
-			//	{
-			//		UIntType::int_type numerator = 0, denominator = 1;
-			//		auto inBegin = s.begin();
-			//		auto inEnd = s.end();
+				/**	s must be a string of digits [0-9] containing zero or one '.'.
+				 */
+				static AbstractNode *stringToRational(const NameType &s)
+				{
+					UIntType numerator = 0, denominator = 1;
+					auto inBegin = s.begin();
+					auto inEnd = s.end();
 
-			//		while(inBegin != inEnd && *inBegin != '.')
-			//		{
-			//			numerator *= 10;
-			//			numerator += *inBegin - '0';
-			//			++inBegin;
-			//		} // end while
-			//		if(inBegin != inEnd)
-			//			++inBegin;
-			//		while(inBegin != inEnd)
-			//		{
-			//			numerator *= 10;
-			//			numerator += *inBegin - '0';
-			//			denominator *= 10;
-			//			++inBegin;
-			//		} // end while
+					while(inBegin != inEnd && *inBegin != '.')
+					{
+						numerator *= 10;
+						numerator += *inBegin - '0';
+						++inBegin;
+					} // end while
+					if(inBegin != inEnd)
+						++inBegin;
+					while(inBegin != inEnd)
+					{
+						numerator *= 10;
+						numerator += *inBegin - '0';
+						denominator *= 10;
+						++inBegin;
+					} // end while
 
-			//		return UIntType(numerator,denominator);
-			//	} // end function sequenceToRational
+					if(denominator != 1)
+						return binaryCombine<OpTags::divides>(new LiteralNode(numerator),new LiteralNode(denominator));
+					else
+						return new LiteralNode(numerator);
+				} // end function sequenceToRational
 
-			//}; // end struct Syntax
+			}; // end struct Syntax
 
 		}; // end class Expression
 

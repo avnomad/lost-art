@@ -1500,6 +1500,7 @@ namespace Symbolic
 		// run tests
 		for(size_t i = 0 ; i < nTests ; ++i)
 		{
+			// tests prints
 			ostringstream strout;
 			tests[i].dsel.print1D(strout,true);
 			assert(strout.str() == tests[i].fullParen1D);
@@ -1511,6 +1512,35 @@ namespace Symbolic
 			assert(strout.str() == tests[i].fullParen2D);
 			strout.str("");
 			tests[i].dsel.print2D(strout,false);
+			assert(strout.str() == tests[i].minParen2D);
+
+			// test parser
+			Expression<> parsedExpr(tests[i].fullParen1D.begin(),tests[i].fullParen1D.end());
+			strout.str("");
+			parsedExpr.print1D(strout,true);
+			assert(strout.str() == tests[i].fullParen1D);
+			strout.str("");
+			parsedExpr.print1D(strout,false);
+			assert(strout.str() == tests[i].minParen1D);
+			strout.str("");
+			parsedExpr.print2D(strout,true);
+			assert(strout.str() == tests[i].fullParen2D);
+			strout.str("");
+			parsedExpr.print2D(strout,false);
+			assert(strout.str() == tests[i].minParen2D);
+
+			parsedExpr = Expression<>(tests[i].minParen1D.begin(),tests[i].minParen1D.end());
+			strout.str("");
+			parsedExpr.print1D(strout,true);
+			assert(strout.str() == tests[i].fullParen1D);
+			strout.str("");
+			parsedExpr.print1D(strout,false);
+			assert(strout.str() == tests[i].minParen1D);
+			strout.str("");
+			parsedExpr.print2D(strout,true);
+			assert(strout.str() == tests[i].fullParen2D);
+			strout.str("");
+			parsedExpr.print2D(strout,false);
 			assert(strout.str() == tests[i].minParen2D);
 		} // end for
 	} // end function testExpression
