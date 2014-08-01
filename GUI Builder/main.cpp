@@ -28,20 +28,24 @@ int main()
 	//Symbolic::runTestSuite();
 	gui::runTestSuite();
 
-	gui::Model<int> model;
+	gui::Model<int> model1;
 
-	model.controls.emplace_back(0,0,100,100);
-	model.controls.emplace_back(20,20,80,80);
+	model1.controls.emplace_back(0,0,100,100);
+	model1.controls.emplace_back(20,20,80,80);
 
-	model.constraints.emplace_back("a",0,gui::RectangleSide::LEFT,1,gui::RectangleSide::LEFT);
-	model.constraints.emplace_back("a",0,gui::RectangleSide::RIGHT,1,gui::RectangleSide::RIGHT);
-	model.constraints.emplace_back("2a",1,gui::RectangleSide::LEFT,1,gui::RectangleSide::RIGHT);
+	model1.constraints.emplace_back("a",0,gui::RectangleSide::LEFT,1,gui::RectangleSide::LEFT);
+	model1.constraints.emplace_back("a",0,gui::RectangleSide::RIGHT,1,gui::RectangleSide::RIGHT);
+	model1.constraints.emplace_back("2a",1,gui::RectangleSide::LEFT,1,gui::RectangleSide::RIGHT);
 
-	model.constraints.emplace_back("1/2b",0,gui::RectangleSide::BOTTOM,1,gui::RectangleSide::BOTTOM);
-	model.constraints.emplace_back("1/2b",0,gui::RectangleSide::TOP,1,gui::RectangleSide::TOP);
-	model.constraints.emplace_back("b",1,gui::RectangleSide::BOTTOM,1,gui::RectangleSide::TOP);
+	model1.constraints.emplace_back("1/2b",0,gui::RectangleSide::BOTTOM,1,gui::RectangleSide::BOTTOM);
+	model1.constraints.emplace_back("1/2b",0,gui::RectangleSide::TOP,1,gui::RectangleSide::TOP);
+	model1.constraints.emplace_back("b",1,gui::RectangleSide::BOTTOM,1,gui::RectangleSide::TOP);
 
-	model.save("test.las");
+	model1.save("test1.las");
+
+	gui::Model<int> model2;
+
+	model2.load("test2.las");
 
 	system("pause");
 	return 0;

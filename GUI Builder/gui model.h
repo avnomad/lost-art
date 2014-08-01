@@ -150,11 +150,18 @@ namespace gui
 			// empty body
 		} // end Control constructor
 
+		Control(const property_tree_type &tree)
+			:Rectangle(tree.get<CoordinateType>("sides.left"),tree.get<CoordinateType>("sides.bottom"),
+						tree.get<CoordinateType>("sides.right"),tree.get<CoordinateType>("sides.top"))
+		{
+			// empty body
+		} // end Control conversion constructor
+
 		/****************
 		*    Methods    *
 		****************/
 
-		property_tree_type pTree() const
+		operator property_tree_type() const
 		{
 			property_tree_type tree;
 
@@ -164,7 +171,7 @@ namespace gui
 			tree.put("sides.top",top());
 
 			return tree;
-		} // end method pTree
+		} // end method operator property_tree_type
 
 	}; // end class Control
 
@@ -196,11 +203,17 @@ namespace gui
 			// empty body
 		} // end ConstraintEndPoint constructor
 
+		ConstraintEndPoint(const property_tree_type &tree)
+			:control(tree.get<size_t>("control")),side(stringToRectangleSide(tree.get<std::string>("side")))
+		{
+			// empty body
+		} // end ConstraintEndPoint conversion constructor
+
 		/****************
 		*    Methods    *
 		****************/
 
-		property_tree_type pTree() const
+		operator property_tree_type() const
 		{
 			property_tree_type tree;
 
@@ -208,7 +221,7 @@ namespace gui
 			tree.put("side",rectangleSideToString(side));
 
 			return tree;
-		} // end method pTree
+		} // end method operator property_tree_type
 
 	}; // end struct ConstraintEndPoint
 
@@ -260,6 +273,14 @@ namespace gui
 			iEndPoints[1].side = side2;
 		} // end Control constructor
 
+		Constraint(const property_tree_type &tree)
+			:iText(tree.get<TextType>("text"))
+		{
+			iEndPoints[0] = EndPoint(tree.get_child("first-end-point"));
+			iEndPoints[1] = EndPoint(tree.get_child("second-end-point"));
+		} // end Constraint conversion constructor
+
+
 		/*************************
 		*    Accessor Methods    *
 		*************************/
@@ -288,16 +309,16 @@ namespace gui
 		*    Methods    *
 		****************/
 
-		property_tree_type pTree() const
+		operator property_tree_type() const
 		{
 			property_tree_type tree;
 
 			tree.put("text",iText);
-			tree.put_child("first-end-point",iEndPoints[0].pTree());
-			tree.put_child("second-end-point",iEndPoints[1].pTree());
+			tree.put_child("first-end-point",iEndPoints[0]);
+			tree.put_child("second-end-point",iEndPoints[1]);
 
 			return tree;
-		} // end method pTree
+		} // end method operator property_tree_type
 
 	}; // end class Constraint
 
@@ -310,6 +331,7 @@ namespace gui
 		*    Member Types    *
 		*********************/
 
+		typedef boost::property_tree::ptree property_tree_type;
 		typedef CoordinateType coordinate_type;
 		typedef TextType text_type;
 
@@ -334,26 +356,37 @@ namespace gui
 		*    Methods    *
 		****************/
 
+		void clear()
+		{
+			controls.clear();
+			constraints.clear();
+		} // end method clear
+
 		void load(const std::string &fileName)
 		{
+			clear();
+			property_tree_type tree;
+			
+			boost::property_tree::read_xml(fileName,tree);
 
+			for(const auto &control : tree.get_child("gui-model.controls"))
+				controls.emplace_back(control.second);
+
+			for(const auto &constraint : tree.get_child("gui-model.constraints"))
+				constraints.emplace_back(constraint.second);
 		} // end method load
 
 		void save(const std::string &fileName)
 		{
-			boost::property_tree::ptree modelTree;
+			property_tree_type tree;
 
-			std::for_each(controls.begin(),controls.end(),[&modelTree](const Control<CoordinateType> &control)
-			{
-				modelTree.add_child("gui-model.controls.control",control.pTree());
-			});
+			for(const auto &control : controls)
+				tree.add_child("gui-model.controls.control",control);
 
-			std::for_each(constraints.begin(),constraints.end(),[&modelTree](const Constraint<TextType> &constraint)
-			{
-				modelTree.add_child("gui-model.constraints.constraint",constraint.pTree());
-			});
+			for(const auto &constraint : constraints)
+				tree.add_child("gui-model.constraints.constraint",constraint);
 
-			boost::property_tree::write_xml(fileName,modelTree);
+			boost::property_tree::write_xml(fileName,tree);
 		} // end method save
 
 	}; // end class Model
