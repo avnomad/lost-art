@@ -11,15 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="geometry.cpp" />
     <ClCompile Include="gui model.cpp" />
     <ClCompile Include="linear system solving.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="symbol table.cpp" />
     <ClCompile Include="symbolic computation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="eigen-rational interface code.h" />
+    <ClInclude Include="geometry.h" />
     <ClInclude Include="gui model.h" />
     <ClInclude Include="linear system solving.h" />
+    <ClInclude Include="symbol table.h" />
     <ClInclude Include="symbolic computation.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

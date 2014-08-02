@@ -10,115 +10,11 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "geometry.h"
+
 namespace gui
 {
 	void runTestSuite();
-
-	enum class RectangleSide:unsigned {LEFT = 0, BOTTOM = 1, RIGHT = 2, TOP = 3};
-
-	inline std::string rectangleSideToString(RectangleSide side)
-	{
-		static const std::string sideNames[4] = {"left","bottom","right","top"};
-		return sideNames[size_t(side)];
-	} // end function rectangleSideToString
-
-	inline RectangleSide stringToRectangleSide(const std::string &side)
-	{
-		if(side == "left")
-			return RectangleSide::LEFT;
-		if(side == "bottom")
-			return RectangleSide::BOTTOM;
-		if(side == "right")
-			return RectangleSide::RIGHT;
-		if(side == "top")
-			return RectangleSide::TOP;
-		throw std::runtime_error(side + "is not a valid rectangle side!");
-	} // end function stringToRectangleSide
-
-	namespace geometry
-	{
-
-		template<typename CoordinateType>
-		struct Rectangle
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-
-			typedef RectangleSide Side;
-			typedef CoordinateType coordinate_type;
-
-		private:
-			/***************
-			*    Fields    *
-			***************/
-
-			CoordinateType iSides[4];
-
-		public:
-			/*********************
-			*    Constructors    *
-			*********************/
-
-			/** Construct an uninitialized Rectangle.
-			 */
-			Rectangle(){/* emtpy body */}
-
-			/** Construct a rectangle with the specified sides.
-			 */
-			Rectangle(CoordinateType left, CoordinateType bottom, CoordinateType right, CoordinateType top)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-			} // end Rectangle constructor
-
-			/*************************
-			*    Accessor Methods    *
-			*************************/
-
-#define accessor(name,enumerator) \
-			CoordinateType &name()\
-			{\
-				return iSides[size_t(Side::enumerator)];\
-			} /* end method name */\
-			\
-			const CoordinateType &name() const\
-			{\
-				return iSides[size_t(Side::enumerator)];\
-			} /* end method name */
-
-			accessor(left,LEFT)
-			accessor(bottom,BOTTOM)
-			accessor(right,RIGHT)
-			accessor(top,TOP)
-#undef accessor
-
-			CoordinateType (&sides())[4]
-			{
-				return iSides;
-			} // end method sides
-
-			const CoordinateType (&sides() const)[4]
-			{
-				return iSides;
-			} // end method sides
-
-			CoordinateType &side(Side sideName)
-			{
-				return iSides[size_t(sideName)];
-			} // end method side
-
-			const CoordinateType &side(Side sideName) const
-			{
-				return iSides[size_t(sideName)];
-			} // end method side
-
-		}; // end stuct Rectangle
-
-	} // end namespace geometry
-
 
 	template<typename CoordinateType>
 	class Control : public geometry::Rectangle<CoordinateType>
@@ -183,13 +79,14 @@ namespace gui
 		*********************/
 
 		typedef boost::property_tree::ptree property_tree_type;
+		typedef geometry::RectangleSide side_type;
 
 		/***************
 		*    Fields    *
 		***************/
 
 		size_t control; // ordinal number of the referred control
-		RectangleSide side; // enumerator of the referred side
+		side_type side; // enumerator of the referred side
 
 		/*********************
 		*    Constructors    *
@@ -197,14 +94,14 @@ namespace gui
 
 		ConstraintEndPoint(){/* empty body */}
 
-		ConstraintEndPoint(size_t control, RectangleSide side)
+		ConstraintEndPoint(size_t control, side_type side)
 			:control(control),side(side)
 		{
 			// empty body
 		} // end ConstraintEndPoint constructor
 
 		ConstraintEndPoint(const property_tree_type &tree)
-			:control(tree.get<size_t>("control")),side(stringToRectangleSide(tree.get<std::string>("side")))
+			:control(tree.get<size_t>("control")),side(to<side_type>(tree.get<std::string>("side")))
 		{
 			// empty body
 		} // end ConstraintEndPoint conversion constructor
@@ -218,7 +115,7 @@ namespace gui
 			property_tree_type tree;
 
 			tree.put("control",control);
-			tree.put("side",rectangleSideToString(side));
+			tree.put("side",to<std::string>(side));
 
 			return tree;
 		} // end method operator property_tree_type
@@ -237,6 +134,7 @@ namespace gui
 		typedef TextType text_type;
 		typedef boost::property_tree::ptree property_tree_type;
 		typedef ConstraintEndPoint EndPoint;
+		typedef EndPoint::side_type side_type;
 
 	private:
 		/***************
@@ -264,7 +162,7 @@ namespace gui
 			iEndPoints[1] = endPoint2;
 		} // end Control constructor
 
-		Constraint(TextType text, size_t control1, RectangleSide side1, size_t control2, RectangleSide side2)
+		Constraint(TextType text, size_t control1, side_type side1, size_t control2, side_type side2)
 			:iText(std::move(text))
 		{
 			iEndPoints[0].control = control1;
