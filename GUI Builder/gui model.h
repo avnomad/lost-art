@@ -1,8 +1,11 @@
 #ifndef GUI_MODEL_H
 #define GUI_MODEL_H
 
+#include <map>
+#include <cmath>
 #include <vector>
 #include <string>
+#include <memory>
 #include <utility>
 #include <algorithm>
 #include <stdexcept>
@@ -10,7 +13,11 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+
 #include "geometry.h"
+#include "symbol table.h"
 
 namespace gui
 {
@@ -131,6 +138,15 @@ namespace gui
 		*    Member Types    *
 		*********************/
 
+		template<typename IDType, typename RationalType>
+		struct ParseResult
+		{
+			// Fields
+			std::map<IDType,RationalType> varCoeff;
+			RationalType pxDensityCoeff;
+			RationalType rhsConstant;
+		}; // end struct ParseResult
+
 		typedef TextType text_type;
 		typedef boost::property_tree::ptree property_tree_type;
 		typedef ConstraintEndPoint EndPoint;
@@ -218,6 +234,55 @@ namespace gui
 			return tree;
 		} // end method operator property_tree_type
 
+		template<typename RationalType, typename IDType, typename NameType>
+		ParseResult<IDType,RationalType> parse(std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
+		{
+			namespace qi = boost::spirit::qi;
+			namespace px = boost::phoenix;
+			using qi::rule;
+			using qi::_val;	using qi::_1; using qi::_2;
+			using qi::alpha; using qi::alnum; using qi::char_; using qi::eps; using qi::ulong_long;
+			using boost::spirit::ascii::space;
+			using boost::spirit::ascii::space_type;
+			using boost::phoenix::bind;
+			using boost::phoenix::ref;
+
+			ParseResult<IDType,RationalType> result;
+
+			rule<TextType::iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
+			rule<TextType::iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
+					-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > 
+						ulong_long[_val = (_val*px::bind(shift,_1) + _1) / px::bind(shift,_1)]));
+			rule<TextType::iterator,space_type> constraint = (coefficient > identifier)[px::bind(populate<RationalType,IDType,NameType>,_1,_2,px::ref(result),px::ref(symbols))] % '+';
+
+			auto begin = iText.begin();
+			auto end = iText.end();
+
+			bool success = phrase_parse(begin,end,constraint,space);
+			if(!success || begin != end)
+				throw std::runtime_error("Error parsing constraint!");
+
+			return result;
+		} // end method parse
+
+	private:
+		// Spirit work arrounds:
+		static unsigned long long shift(unsigned long long x)
+		{
+			return (unsigned long long)std::ceil(std::log10((double)x));
+		} // end function shift
+
+		template<typename RationalType, typename IDType, typename NameType>
+		static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
+			std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
+		{
+			if(symbol == "cm")
+				result.rhsConstant += coeff;
+			else if(symbol == "px")
+				result.pxDensityCoeff += coeff;
+			else
+				result.varCoeff[symbols->declare(symbol)] += coeff;
+		} // end function populate
 	}; // end class Constraint
 
 

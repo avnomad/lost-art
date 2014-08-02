@@ -12,6 +12,7 @@ using std::log;
 #include <tuple>
 using std::get;
 
+#include <boost/rational.hpp>
 
 #include "eigen-rational interface code.h"
 using boost::rational;
@@ -48,6 +49,10 @@ int main()
 	model1.constraints.emplace_back("b",1,RectangleSide::BOTTOM,1,RectangleSide::TOP);
 
 	model1.save("test1.las");
+
+	auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
+	for(auto constraint : model1.constraints)
+		auto result = constraint.parse<boost::rational<long long>>(symbols);
 
 	gui::Model<int> model2;
 
