@@ -249,11 +249,30 @@ namespace gui
 
 			ParseResult<IDType,RationalType> result;
 
+			struct Workaround
+			{
+				static unsigned long long shift(unsigned long long x)
+				{
+					return (unsigned long long)std::ceil(std::log10((double)x));
+				} // end function shift
+
+				static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
+					std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
+				{
+					if(symbol == "cm")
+						result.rhsConstant += coeff;
+					else if(symbol == "px")
+						result.pxDensityCoeff += coeff;
+					else
+						result.varCoeff[symbols->declare(symbol)] += coeff;
+				} // end function populate
+			}; // end local struct Workaround
+
 			rule<TextType::iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
 			rule<TextType::iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
 					-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > 
-						ulong_long[_val = (_val*px::bind(shift,_1) + _1) / px::bind(shift,_1)]));
-			rule<TextType::iterator,space_type> constraint = (coefficient > identifier)[px::bind(populate<RationalType,IDType,NameType>,_1,_2,px::ref(result),px::ref(symbols))] % '+';
+					ulong_long[_val = (_val*px::bind(Workaround::shift,_1) + _1) / px::bind(Workaround::shift,_1)]));
+			rule<TextType::iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
 
 			auto begin = iText.begin();
 			auto end = iText.end();
@@ -265,24 +284,6 @@ namespace gui
 			return result;
 		} // end method parse
 
-	private:
-		// Spirit work arrounds:
-		static unsigned long long shift(unsigned long long x)
-		{
-			return (unsigned long long)std::ceil(std::log10((double)x));
-		} // end function shift
-
-		template<typename RationalType, typename IDType, typename NameType>
-		static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
-			std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
-		{
-			if(symbol == "cm")
-				result.rhsConstant += coeff;
-			else if(symbol == "px")
-				result.pxDensityCoeff += coeff;
-			else
-				result.varCoeff[symbols->declare(symbol)] += coeff;
-		} // end function populate
 	}; // end class Constraint
 
 
