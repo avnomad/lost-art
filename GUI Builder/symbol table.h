@@ -75,7 +75,7 @@ namespace Symbolic
 			// Methods
 			bool declared(const NameType &name) const
 			{
-				return names.count(name);
+				return names.count(name) != 0;
 			} // end method declared
 
 			bool declared(IDType id) const

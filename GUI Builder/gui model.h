@@ -2,7 +2,6 @@
 #define GUI_MODEL_H
 
 #include <map>
-#include <cmath>
 #include <vector>
 #include <string>
 #include <memory>
@@ -241,20 +240,30 @@ namespace gui
 			namespace px = boost::phoenix;
 			using qi::rule;
 			using qi::_val;	using qi::_1; using qi::_2;
-			using qi::alpha; using qi::alnum; using qi::char_; using qi::eps; using qi::ulong_long;
+			using qi::alpha; using qi::alnum; using qi::digit; using qi::char_; using qi::eps; using qi::ulong_long;
 			using boost::spirit::ascii::space;
 			using boost::spirit::ascii::space_type;
-			using boost::phoenix::bind;
-			using boost::phoenix::ref;
 
 			ParseResult<IDType,RationalType> result;
 
 			struct Workaround
 			{
-				static unsigned long long shift(unsigned long long x)
-				{
-					return (unsigned long long)std::ceil(std::log10((double)x));
-				} // end function shift
+				/**	s must be a string of digits [0-9].
+				 */
+				static RationalType decimalPoint(RationalType r, const std::vector<char> &s)
+				{ // TODO: make overflow safe
+					unsigned long long n = 0;
+					unsigned long long d = 1;
+
+					for(auto c : s)
+					{
+						n *= 10;
+						n += c - '0';
+						d *= 10;
+					} // end foreach
+					
+					return r + RationalType(n,d);
+				} // end function decimalPoint
 
 				static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
 					std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
@@ -270,8 +279,7 @@ namespace gui
 
 			rule<TextType::iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
 			rule<TextType::iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
-					-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > 
-					ulong_long[_val = (_val*px::bind(Workaround::shift,_1) + _1) / px::bind(Workaround::shift,_1)]));
+					-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
 			rule<TextType::iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
 
 			auto begin = iText.begin();
