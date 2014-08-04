@@ -54,6 +54,8 @@ int main()
 	for(auto constraint : model1.constraints)
 		auto result = constraint.parse<boost::rational<long long>>(symbols);
 
+	model1.compile<boost::rational<long long>,int,std::string>();
+
 	gui::Model<int> model2;
 
 	model2.load("test2.las");

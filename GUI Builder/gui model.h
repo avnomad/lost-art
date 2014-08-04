@@ -15,8 +15,11 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
+#include <Eigen/Dense>
+
 #include "geometry.h"
 #include "symbol table.h"
+#include "linear system solving.h"
 
 namespace gui
 {
@@ -234,7 +237,7 @@ namespace gui
 		} // end method operator property_tree_type
 
 		template<typename RationalType, typename IDType, typename NameType>
-		ParseResult<IDType,RationalType> parse(std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
+		ParseResult<IDType,RationalType> parse(std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols) const
 		{
 			namespace qi = boost::spirit::qi;
 			namespace px = boost::phoenix;
@@ -277,10 +280,10 @@ namespace gui
 				} // end function populate
 			}; // end local struct Workaround
 
-			rule<TextType::iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
-			rule<TextType::iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
+			rule<TextType::const_iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
+			rule<TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
 					-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
-			rule<TextType::iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
+			rule<TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
 
 			auto begin = iText.begin();
 			auto end = iText.end();
@@ -334,6 +337,8 @@ namespace gui
 			constraints.clear();
 		} // end method clear
 
+		// TODO: check that there is at least one control (the screen) and that all contraints refer to 
+		// existent controls! Also that endpoints are consistent.
 		void load(const std::string &fileName)
 		{
 			clear();
@@ -360,6 +365,53 @@ namespace gui
 
 			boost::property_tree::write_xml(fileName,tree);
 		} // end method save
+
+		template<typename RationalType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
+		void compile()
+		{
+			auto symbols = std::make_shared<Symbolic::Common::SymbolTable<NameType,IDType>>();
+			std::vector<Constraint<TextType>::template ParseResult<IDType,RationalType>> parseResults;
+
+			for(const auto &constraint : constraints)
+				parseResults.push_back(constraint.parse<RationalType,IDType,NameType>(symbols));
+			// TODO: optimize to not include unknown constants that are not present.
+
+			Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> systemMatrix; 
+			systemMatrix.setZero(constraints.size(),4*controls.size() + symbols->size() + 1); // 4*(nControls-1) + nSymbols + 4 + 1
+			// the layout is control sides, then named variables, then unknown constants then known constant.
+
+			// Fill in the augmented system matrix
+			size_t i = 0;
+			for(const auto &constraint : constraints)
+			{
+				int coeffs[2] = {1,-1};
+				if(controls[constraint.endPoints()[0].control].side(constraint.endPoints()[0].side) > controls[constraint.endPoints()[1].control].side(constraint.endPoints()[1].side))
+					std::swap(coeffs[0],coeffs[1]);
+
+				for(size_t ep = 0 ; ep < 2 ; ++ep)
+				{
+					if(constraint.endPoints()[ep].control != 0)
+						systemMatrix(i,4*(constraint.endPoints()[ep].control-1) + size_t(constraint.endPoints()[ep].side)) += coeffs[ep];
+					else if(constraint.endPoints()[ep].side == geometry::RectangleSide::RIGHT || constraint.endPoints()[ep].side == geometry::RectangleSide::TOP)
+						systemMatrix(i,4*(controls.size()-1) + symbols->size() + size_t(constraint.endPoints()[ep].side) - 2) += coeffs[ep];
+				} // end for
+
+				for(const auto &var : parseResults[i].varCoeff)
+					systemMatrix(i,4*(controls.size()-1) + var.first) = var.second;
+
+				size_t offset = constraint.endPoints()[0].side == geometry::RectangleSide::LEFT || constraint.endPoints()[0].side == geometry::RectangleSide::RIGHT ? 0 : 1;
+				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxDensityCoeff;
+
+				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 4) = -parseResults[i].rhsConstant; // move to rhs
+
+				++i;
+			} // end foreach
+
+			numericReducedRowEchelonFormNoPivot(systemMatrix);
+			auto solution = semiSymbolicSolveLinearSystem(systemMatrix,4);
+
+			// assume unique solution for now...
+		} // end method compile
 
 	}; // end class Model
 
