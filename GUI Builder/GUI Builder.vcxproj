@@ -11,6 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="application template.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="geometry.cpp" />
     <ClCompile Include="gui model.cpp" />
     <ClCompile Include="linear system solving.cpp" />
@@ -19,6 +22,7 @@
     <ClCompile Include="symbolic computation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application customization.h" />
     <ClInclude Include="eigen-rational interface code.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="gui model.h" />
