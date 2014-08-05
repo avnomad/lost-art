@@ -36,9 +36,6 @@
     <ClCompile Include="geometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="application template.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="eigen-rational interface code.h">
@@ -58,9 +55,6 @@
     </ClInclude>
     <ClInclude Include="geometry.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="application customization.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

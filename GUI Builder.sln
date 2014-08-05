@@ -1,7 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUI Builder", "GUI Builder\GUI Builder.vcxproj", "{26777C5F-3B14-49DF-B16D-26B073EB1F1F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Generated Application", "Generated Application\Generated Application.vcxproj", "{ACBEC448-7BD7-4B80-8F4B-66A78FF2C499}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,10 @@ Global
 		{26777C5F-3B14-49DF-B16D-26B073EB1F1F}.Debug|Win32.Build.0 = Debug|Win32
 		{26777C5F-3B14-49DF-B16D-26B073EB1F1F}.Release|Win32.ActiveCfg = Release|Win32
 		{26777C5F-3B14-49DF-B16D-26B073EB1F1F}.Release|Win32.Build.0 = Release|Win32
+		{ACBEC448-7BD7-4B80-8F4B-66A78FF2C499}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ACBEC448-7BD7-4B80-8F4B-66A78FF2C499}.Debug|Win32.Build.0 = Debug|Win32
+		{ACBEC448-7BD7-4B80-8F4B-66A78FF2C499}.Release|Win32.ActiveCfg = Release|Win32
+		{ACBEC448-7BD7-4B80-8F4B-66A78FF2C499}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
