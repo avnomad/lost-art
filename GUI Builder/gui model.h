@@ -145,7 +145,7 @@ namespace gui
 		{
 			// Fields
 			std::map<IDType,RationalType> varCoeff;
-			RationalType pxDensityCoeff;
+			RationalType pxSizeCoeff;
 			RationalType rhsConstant;
 		}; // end struct ParseResult
 
@@ -272,9 +272,9 @@ namespace gui
 					std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
 				{
 					if(symbol == "cm")
-						result.rhsConstant += coeff;
+						result.rhsConstant -= coeff;
 					else if(symbol == "px")
-						result.pxDensityCoeff += coeff;
+						result.pxSizeCoeff += coeff;
 					else
 						result.varCoeff[symbols->declare(symbol)] += coeff;
 				} // end function populate
@@ -400,9 +400,9 @@ namespace gui
 					systemMatrix(i,4*(controls.size()-1) + var.first) = var.second;
 
 				size_t offset = constraint.endPoints()[0].side == geometry::RectangleSide::LEFT || constraint.endPoints()[0].side == geometry::RectangleSide::RIGHT ? 0 : 1;
-				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxDensityCoeff;
+				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxSizeCoeff;
 
-				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 4) = -parseResults[i].rhsConstant; // move to rhs
+				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 4) = parseResults[i].rhsConstant; // already moved to rhs during parsing
 
 				++i;
 			} // end foreach
