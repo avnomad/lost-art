@@ -6,6 +6,8 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <fstream>
+#include <cstdlib>
 #include <algorithm>
 #include <stdexcept>
 
@@ -408,9 +410,59 @@ namespace gui
 			} // end foreach
 
 			numericReducedRowEchelonFormNoPivot(systemMatrix);
+			auto investigation = semiSymbolicInvestigateLinearSystem(systemMatrix,4);
 			auto solution = semiSymbolicSolveLinearSystem(systemMatrix,4);
+			auto base = std::get<0>(solution);
+			auto offset = std::get<1>(solution);
 
 			// assume unique solution for now...
+			std::ofstream cppOutput("application customization.h");
+			cppOutput << "// NO INCLUDE GUARD!!!\n\n";
+			cppOutput << "std::vector<geometry::Rectangle<float>> controls(" << controls.size()-1 << ");\n\n";
+			cppOutput << "void updateCoordinates(float screenWidth, float screenHeight, float pixelWidth, float pixelHeight)\n";
+			cppOutput << "{\n";
+
+			std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
+			for(i = 0 ; i < controls.size()-1 ; ++i)
+			{
+				for(size_t j = 0 ; j < 4 ; ++j)
+				{ // TODO: optimize for constant functions
+					cppOutput << "\tcontrols[" << i << "].sides()[" << j << "] = ";
+					bool nonZeroBefore = false;
+					for(size_t uc = 0 ; uc < 4 ; ++uc)
+						if(base(4*i+j,uc) != 0)
+						{
+							if(nonZeroBefore)
+								cppOutput << " + ";
+							nonZeroBefore = true;
+
+							if(base(4*i+j,uc).numerator() != 1)
+								cppOutput << base(4*i+j,uc).numerator() << '*';
+							cppOutput << unknownConstants[uc];
+							if(base(4*i+j,uc).denominator() != 1)
+								cppOutput << '/' << base(4*i+j,uc).denominator();
+						} // end if
+					if(offset(4*i+j) != 0 || !nonZeroBefore)
+					{
+						if(nonZeroBefore)
+							cppOutput << " + ";
+						nonZeroBefore = true;
+
+						cppOutput << offset(4*i+j).numerator();
+						if(offset(4*i+j).denominator() != 1)
+							cppOutput << "/(float)" << offset(4*i+j).denominator();
+					} // end if
+					cppOutput << ";\n";
+				} // end for
+				if(i != controls.size()-2) cppOutput << "\n";
+			} // end for
+
+			cppOutput << "} // end function updateCoordinates\n";
+			cppOutput.close();
+
+			std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
+			std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
+			std::system("\"..\\Debug\\Win32\\Generated Application.exe\"");
 		} // end method compile
 
 	}; // end class Model
