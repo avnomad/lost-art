@@ -27,7 +27,7 @@ using Eigen::Matrix;
 int main()
 {
 	// run test suites
-	runLinearSystemSolvingTestSuite();
+	LinearSystem::runTestSuite();
 	//Symbolic::runTestSuite();
 	Symbolic::Common::testSymbolTable();
 	geometry::runTestSuite();
@@ -54,7 +54,8 @@ int main()
 	for(auto constraint : model1.constraints)
 		auto result = constraint.parse<boost::rational<long long>>(symbols);
 
-	model1.compile<boost::rational<long long>,int,std::string>();
+	model1.compile<boost::rational<long long>,float,int,std::string>("application customization.h");
+	model1.run("\"..\\Debug\\Win32\\Generated Application.exe\"");
 
 	gui::Model<int> model2;
 

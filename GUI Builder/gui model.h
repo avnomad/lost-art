@@ -355,7 +355,8 @@ namespace gui
 				constraints.emplace_back(constraint.second);
 		} // end method load
 
-		void save(const std::string &fileName)
+
+		void save(const std::string &fileName) const
 		{
 			property_tree_type tree;
 
@@ -368,8 +369,9 @@ namespace gui
 			boost::property_tree::write_xml(fileName,tree);
 		} // end method save
 
+
 		template<typename RationalType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
-		void compile()
+		Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> generateSystemMatrix() const
 		{
 			auto symbols = std::make_shared<Symbolic::Common::SymbolTable<NameType,IDType>>();
 			std::vector<Constraint<TextType>::template ParseResult<IDType,RationalType>> parseResults;
@@ -378,8 +380,8 @@ namespace gui
 				parseResults.push_back(constraint.parse<RationalType,IDType,NameType>(symbols));
 			// TODO: optimize to not include unknown constants that are not present.
 
-			Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> systemMatrix; 
-			systemMatrix.setZero(constraints.size(),4*controls.size() + symbols->size() + 1); // 4*(nControls-1) + nSymbols + 4 + 1
+			Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> result; 
+			result.setZero(constraints.size(),4*controls.size() + symbols->size() + 1); // 4*(nControls-1) + nSymbols + 4 + 1
 			// the layout is control sides, then named variables, then unknown constants then known constant.
 
 			// Fill in the augmented system matrix
@@ -393,77 +395,102 @@ namespace gui
 				for(size_t ep = 0 ; ep < 2 ; ++ep)
 				{
 					if(constraint.endPoints()[ep].control != 0)
-						systemMatrix(i,4*(constraint.endPoints()[ep].control-1) + size_t(constraint.endPoints()[ep].side)) += coeffs[ep];
+						result(i,4*(constraint.endPoints()[ep].control-1) + size_t(constraint.endPoints()[ep].side)) += coeffs[ep];
 					else if(constraint.endPoints()[ep].side == geometry::RectangleSide::RIGHT || constraint.endPoints()[ep].side == geometry::RectangleSide::TOP)
-						systemMatrix(i,4*(controls.size()-1) + symbols->size() + size_t(constraint.endPoints()[ep].side) - 2) += coeffs[ep];
+						result(i,4*(controls.size()-1) + symbols->size() + size_t(constraint.endPoints()[ep].side) - 2) += coeffs[ep];
 				} // end for
 
 				for(const auto &var : parseResults[i].varCoeff)
-					systemMatrix(i,4*(controls.size()-1) + var.first) = var.second;
+					result(i,4*(controls.size()-1) + var.first) = var.second;
 
 				size_t offset = constraint.endPoints()[0].side == geometry::RectangleSide::LEFT || constraint.endPoints()[0].side == geometry::RectangleSide::RIGHT ? 0 : 1;
-				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxSizeCoeff;
+				result(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxSizeCoeff;
 
-				systemMatrix(i,4*(controls.size()-1) + symbols->size() + 4) = parseResults[i].rhsConstant; // already moved to rhs during parsing
+				result(i,4*(controls.size()-1) + symbols->size() + 4) = parseResults[i].rhsConstant; // already moved to rhs during parsing
 
 				++i;
 			} // end foreach
 
-			numericReducedRowEchelonFormNoPivot(systemMatrix);
-			auto investigation = semiSymbolicInvestigateLinearSystem(systemMatrix,4);
-			auto solution = semiSymbolicSolveLinearSystem(systemMatrix,4);
-			auto base = std::get<0>(solution);
-			auto offset = std::get<1>(solution);
+			return result;
+		} // end method generateSystemMatrix
 
-			// assume unique solution for now...
-			std::ofstream cppOutput("application customization.h");
-			cppOutput << "// NO INCLUDE GUARD!!!\n\n";
-			cppOutput << "std::vector<geometry::Rectangle<float>> controls(" << controls.size()-1 << ");\n\n";
-			cppOutput << "void updateCoordinates(float screenWidth, float screenHeight, float pixelWidth, float pixelHeight)\n";
-			cppOutput << "{\n";
+
+		/** Takes the solution of a linear system (in the form of a vector space base and point space offset 
+		 *	generating the solutions) describing a GUI and generates C++ code for an application 
+		 *	that implements that GUI. The output code is intended to be saved in a file and #included be a 
+		 *	suitable application-template .cpp file. Generated code is not tied to a specific GUI toolkit.
+		 */
+		template<typename RationalType, typename AppCoordType>
+		void outputCppApp(const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &base, const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &offset, std::ostream &output) const
+		{
+			output << "// NO INCLUDE GUARD!!!\n\n";
+			output << "std::vector<geometry::Rectangle<" << typeid(AppCoordType).name() << ">> controls(" << controls.size()-1 << ");\n\n";
+			output << "void updateCoordinates(" << typeid(AppCoordType).name() << " screenWidth, " << typeid(AppCoordType).name() << " screenHeight, " 
+				   << typeid(AppCoordType).name() << " pixelWidth, " << typeid(AppCoordType).name() << " pixelHeight)\n";
+			output << "{\n";
 
 			std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
-			for(i = 0 ; i < controls.size()-1 ; ++i)
+			for(size_t i = 0 ; i < controls.size()-1 ; ++i)
 			{
 				for(size_t j = 0 ; j < 4 ; ++j)
 				{ // TODO: optimize for constant functions
-					cppOutput << "\tcontrols[" << i << "].sides()[" << j << "] = ";
+					output << "\tcontrols[" << i << "].sides()[" << j << "] = ";
 					bool nonZeroBefore = false;
 					for(size_t uc = 0 ; uc < 4 ; ++uc)
 						if(base(4*i+j,uc) != 0)
 						{
 							if(nonZeroBefore)
-								cppOutput << " + ";
+								output << " + ";
 							nonZeroBefore = true;
 
 							if(base(4*i+j,uc).numerator() != 1)
-								cppOutput << base(4*i+j,uc).numerator() << '*';
-							cppOutput << unknownConstants[uc];
+								output << base(4*i+j,uc).numerator() << '*';
+							output << unknownConstants[uc];
 							if(base(4*i+j,uc).denominator() != 1)
-								cppOutput << '/' << base(4*i+j,uc).denominator();
+								output << '/' << base(4*i+j,uc).denominator();
 						} // end if
 					if(offset(4*i+j) != 0 || !nonZeroBefore)
 					{
 						if(nonZeroBefore)
-							cppOutput << " + ";
+							output << " + ";
 						nonZeroBefore = true;
 
-						cppOutput << offset(4*i+j).numerator();
+						output << offset(4*i+j).numerator();
 						if(offset(4*i+j).denominator() != 1)
-							cppOutput << "/(float)" << offset(4*i+j).denominator();
+							output << "/(float)" << offset(4*i+j).denominator();
 					} // end if
-					cppOutput << ";\n";
+					output << ";\n";
 				} // end for
-				if(i != controls.size()-2) cppOutput << "\n";
+				if(i != controls.size()-2) output << "\n";
 			} // end for
 
-			cppOutput << "} // end function updateCoordinates\n";
-			cppOutput.close();
+			output << "} // end function updateCoordinates\n";
+		} // end method outputOpenGLCppApp
+
+		template<typename RationalType, typename AppCoordType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
+		void compile(const std::string &headerName) const
+		{
+			auto systemMatrix = generateSystemMatrix<RationalType,IDType,NameType>();
+
+			LinearSystem::numericReducedRowEchelonFormNoPivot(systemMatrix);
+			auto investigation = LinearSystem::semiSymbolicInvestigate(systemMatrix,4);
+			auto solution = LinearSystem::semiSymbolicSolve(systemMatrix,4);
+			auto base = std::get<0>(solution);
+			auto offset = std::get<1>(solution);
+
+			// assume unique solution for now...
+			std::ofstream output(headerName);
+			outputCppApp<RationalType,AppCoordType>(base,offset,output);
+			output.close();
 
 			std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
 			std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
-			std::system("\"..\\Debug\\Win32\\Generated Application.exe\"");
 		} // end method compile
+
+		void run(const std::string &executableName) const
+		{
+			std::system(executableName.c_str());
+		} // end method run
 
 	}; // end class Model
 
