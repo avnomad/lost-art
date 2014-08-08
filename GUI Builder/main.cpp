@@ -33,33 +33,33 @@ int main()
 	geometry::runTestSuite();
 	gui::runTestSuite();
 
-	using geometry::RectangleSide;
+	//using geometry::RectangleSide;
 
-	gui::Model<int> model1;
+	//gui::Model<int> model1;
 
-	model1.controls.emplace_back(0,0,100,100);
-	model1.controls.emplace_back(20,20,80,80);
+	//model1.controls.emplace_back(0,0,100,100);
+	//model1.controls.emplace_back(20,20,80,80);
 
-	model1.constraints.emplace_back("a",0,RectangleSide::LEFT,1,RectangleSide::LEFT);
-	model1.constraints.emplace_back("a",0,RectangleSide::RIGHT,1,RectangleSide::RIGHT);
-	model1.constraints.emplace_back("2a",1,RectangleSide::LEFT,1,RectangleSide::RIGHT);
+	//model1.constraints.emplace_back("a",0,RectangleSide::LEFT,1,RectangleSide::LEFT);
+	//model1.constraints.emplace_back("a",0,RectangleSide::RIGHT,1,RectangleSide::RIGHT);
+	//model1.constraints.emplace_back("2a",1,RectangleSide::LEFT,1,RectangleSide::RIGHT);
 
-	model1.constraints.emplace_back("1/2b",0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM);
-	model1.constraints.emplace_back("1/2b",0,RectangleSide::TOP,1,RectangleSide::TOP);
-	model1.constraints.emplace_back("b",1,RectangleSide::BOTTOM,1,RectangleSide::TOP);
+	//model1.constraints.emplace_back("1/2b",0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM);
+	//model1.constraints.emplace_back("1/2b",0,RectangleSide::TOP,1,RectangleSide::TOP);
+	//model1.constraints.emplace_back("b",1,RectangleSide::BOTTOM,1,RectangleSide::TOP);
 
-	model1.save("test1.las");
+	//model1.save("test1.las");
 
-	auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
-	for(auto constraint : model1.constraints)
-		auto result = constraint.parse<boost::rational<long long>>(symbols);
+	//auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
+	//for(auto constraint : model1.constraints)
+	//	auto result = constraint.parse<boost::rational<long long>>(symbols);
 
-	model1.compile<boost::rational<long long>,float,int,std::string>("application customization.h");
-	model1.run("\"..\\Debug\\Win32\\Generated Application.exe\"");
+	//model1.compile<boost::rational<long long>,float,int,std::string>("application customization.h");
+	//model1.run("\"..\\Debug\\Win32\\Generated Application.exe\"");
 
-	gui::Model<int> model2;
+	//gui::Model<int> model2;
 
-	model2.load("test2.las");
+	//model2.load("test2.las");
 
 	system("pause");
 	return 0;
