@@ -2,6 +2,7 @@
 #define GEOMETRY_H
 
 #include <string>
+#include <algorithm>
 
 namespace geometry
 {
@@ -38,6 +39,8 @@ inline geometry::RectangleSide to<geometry::RectangleSide,std::string>(const std
 
 namespace geometry
 {
+	// TODO: consider changing the interface in order to enforce left <= right && bottom <= top.
+	// Use properties?
 	template<typename CoordinateType>
 	struct Rectangle
 	{
@@ -61,11 +64,11 @@ namespace geometry
 		*********************/
 
 		/** Construct an uninitialized Rectangle.
-			*/
+		 */
 		Rectangle(){/* emtpy body */}
 
 		/** Construct a rectangle with the specified sides.
-			*/
+		 */
 		Rectangle(CoordinateType left, CoordinateType bottom, CoordinateType right, CoordinateType top)
 		{
 			this->left() = left;
@@ -114,6 +117,20 @@ namespace geometry
 		{
 			return iSides[size_t(sideName)];
 		} // end method side
+
+		/****************
+		*    Methods    *
+		****************/
+
+		/** Returns whether the point (x,y) is inside the rectangle with 
+		 *	points on the border considered to be inside.
+		 */
+		bool contains(CoordinateType x, CoordinateType y) const
+		{
+			return std::min(left(),right()) <= x && x <= std::max(left(),right())
+				&& std::min(bottom(),top()) <= y && y <= std::max(bottom(),top());
+		} // end method contains
+
 	}; // end stuct Rectangle
 
 } // end namespace geometry

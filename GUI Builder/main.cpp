@@ -22,6 +22,7 @@ using Eigen::Matrix;
 //#include "symbolic computation.h"
 #include "symbol table.h"
 #include "geometry.h"
+#include "graphene.h"
 #include "gui model.h"
 
 int main()
@@ -31,6 +32,7 @@ int main()
 	//Symbolic::runTestSuite();
 	Symbolic::Common::testSymbolTable();
 	geometry::runTestSuite();
+	graphene::runTestSuite();
 	gui::runTestSuite();
 
 	//using geometry::RectangleSide;
