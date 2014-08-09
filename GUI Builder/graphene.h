@@ -88,6 +88,22 @@ namespace graphene
 			virtual const bool &pressed() const = 0;
 		}; // end class Pressable
 
+		template<typename FrameStackType, typename BaseType>
+		class Highlightable : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef FrameStackType frame_stack_type;
+
+			// Methods
+		public:
+			virtual FrameStackType &highlight() = 0;
+			virtual FrameStackType &dehighlight() = 0;
+			virtual bool &highlighted() = 0;
+			virtual const bool &highlighted() const = 0;
+		}; // end class Highlightable
+
 		template<typename BorderSizeType, typename BaseType>
 		class UniformlyBordered : public BaseType
 		{
@@ -217,6 +233,53 @@ namespace graphene
 				return iPressed;
 			} // end method pressed
 		}; // end class Pressable
+
+		template<typename FrameStackType, typename BaseType>
+		class Hightlightable : public BaseType
+		{
+			// must test that FrameStackType is indeed a subclass of Hightlightable and that
+			// the this pointer indeed points to a FrameStackType...
+			// Is there something wrong with VS2012 std::is_base_of?
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			bool iHighlighted;
+
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef FrameStackType frame_stack_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			FrameStackType &highlight()
+			{
+				iHighlighted = true;
+				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+			} // end method highlight
+
+			FrameStackType &dehighlight()
+			{
+				iHighlighted = false;
+				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+			} // end method dehighlight
+
+			bool &highlighted()
+			{
+				return iHighlighted;
+			} // end method highlighted
+
+			const bool &highlighted() const
+			{
+				return iHighlighted;
+			} // end method highlighted
+		}; // end class Hightlightable
 
 		template<typename BorderSizeType, typename BaseType>
 		class UniformlyBordered : public BaseType
@@ -387,6 +450,15 @@ namespace graphene
 				return selectable.selected();
 			} // end method operator()
 		}; // end struct Selected
+
+		struct Highlighted
+		{
+			template<typename HighlightableType>
+			bool operator()(const HighlightableType &highlightable)
+			{
+				return highlightable.highlighted();
+			} // end method operator()
+		}; // end struct Highlighted
 
 	} // end namespace FuntionObjects
 
