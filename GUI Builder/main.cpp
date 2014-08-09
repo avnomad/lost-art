@@ -29,13 +29,21 @@ using Eigen::Matrix;
 #include "gui model.h"
 
 float pixelWidth, pixelHeight; // in milimetres
-graphene::Controls::Button<geometry::Rectangle<float>> button(10,10,50,50,5);
+graphene::Controls::Button<geometry::Rectangle<float>> button1(10,10,90,50,2);
+graphene::Controls::Button<geometry::Rectangle<float>> button2(10,60,90,100,3);
+
+void idle()
+{
+	glutPostRedisplay();
+} // end function idle
+
 
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	button.render();
+	button1.render();
+	button2.render();
 
 	glutSwapBuffers();
 } // end function display
@@ -49,6 +57,29 @@ void keyboard(unsigned char key, int x, int y)
 			std::exit(0);
 	} // end switch
 } // end function keyboard
+
+
+void mouse(int button, int state, int x, int y)
+{
+	float fx = x*pixelWidth;
+	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
+
+	if(button == GLUT_LEFT_BUTTON)
+	{
+		button1.pressed() = state == GLUT_DOWN && button1.contains(fx,fy);
+		button2.pressed() = state == GLUT_DOWN && button2.contains(fx,fy);
+	} // end if
+} // end function mouse
+
+
+void motion(int x, int y)
+{
+	float fx = x*pixelWidth;
+	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
+
+	button1.pressed() = button1.contains(fx,fy);
+	button2.pressed() = button2.contains(fx,fy);
+} // end function motion
 
 
 void reshape(int windowWidth, int windowHeight)
@@ -120,8 +151,11 @@ int main(int argc, char **argv)
 	pixelHeight = (float)glutGet(GLUT_SCREEN_HEIGHT_MM) / glutGet(GLUT_SCREEN_HEIGHT);
 
 	// event handling initialization
+	glutIdleFunc(idle);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
+	glutMouseFunc(mouse);
+	glutMotionFunc(motion);
 	glutReshapeFunc(reshape);
 	glutMainLoop();
 

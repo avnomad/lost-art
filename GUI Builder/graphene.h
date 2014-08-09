@@ -398,7 +398,7 @@ namespace graphene
 	namespace Controls
 	{
 		template<typename RectangleType>
-		class Button : public Frames::Renderable::Conditional<Frames::Renderable::BorderedRectangle,Frames::Renderable::FilledRectangle,FunctionObjects::Pressed,
+		class Button : public Frames::Renderable::Conditional<Frames::Renderable::FilledRectangle,Frames::Renderable::BorderedRectangle,FunctionObjects::Pressed,
 								Frames::Pressable<Button<RectangleType>,Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>>
 		{
 			/*********************
