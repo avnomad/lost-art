@@ -29,8 +29,8 @@ using Eigen::Matrix;
 #include "gui model.h"
 
 float pixelWidth, pixelHeight; // in milimetres
-graphene::Controls::Button<geometry::Rectangle<float>> button1(10,10,90,50,2);
-graphene::Controls::Button<geometry::Rectangle<float>> button2(10,60,90,100,3);
+graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<10>> button1(10,10,90,50,2);
+graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<10>> button2(10,60,90,100,5);
 
 void idle()
 {
@@ -79,6 +79,16 @@ void motion(int x, int y)
 
 	button1.pressed() = button1.contains(fx,fy);
 	button2.pressed() = button2.contains(fx,fy);
+} // end function motion
+
+
+void passiveMotion(int x, int y)
+{
+	float fx = x*pixelWidth;
+	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
+
+	button1.highlighted() = button1.contains(fx,fy);
+	button2.highlighted() = button2.contains(fx,fy);
 } // end function motion
 
 
@@ -156,6 +166,7 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
+	glutPassiveMotionFunc(passiveMotion);
 	glutReshapeFunc(reshape);
 	glutMainLoop();
 

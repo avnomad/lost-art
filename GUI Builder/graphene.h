@@ -414,6 +414,81 @@ namespace graphene
 
 			} // end namespace Colored
 
+			template<typename BaseType>
+			class Stippled : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Stippled(){/* empty body */}
+
+				Stippled(const BaseType &other) // this class does not add extra members
+					:BaseType(other)
+				{
+					// empty body
+				} // end Stippled copy/conversion constructor
+
+				Stippled(BaseType &&other) // this class does not add extra members
+					:BaseType(std::move(other))
+				{
+					// empty body
+				} // end Stippled move/conversion constructor
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void render() const
+				{
+					const GLubyte pattern[128] = {
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+						0x88,0x88,0x88,0x88,
+						0x55,0x55,0x55,0x55,
+						0x22,0x22,0x22,0x22,
+						0x55,0x55,0x55,0x55,
+					}; // end pattern initializer
+					glPushAttrib(GL_POLYGON_BIT|GL_POLYGON_STIPPLE_BIT);
+						glEnable(GL_POLYGON_STIPPLE);
+						glPolygonStipple(pattern);
+						BaseType::render();
+					glPopAttrib();
+				} // end method render
+			}; // end class Stippled
+
 			template<typename TrueWrapper, typename FalseWrapper, typename UnaryPredicate, typename BaseType>
 			class Conditional : public BaseType
 			{
@@ -425,6 +500,24 @@ namespace graphene
 				typedef UnaryPredicate unary_predicate_type;
 				typedef TrueWrapper true_wrapper_type;
 				typedef FalseWrapper false_wrapper_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Conditional(){/* empty body */}
+
+				Conditional(const BaseType &other) // this class does not add extra members
+					:BaseType(other)
+				{
+					// empty body
+				} // end Conditional copy/conversion constructor
+
+				Conditional(BaseType &&other) // this class does not add extra members
+					:BaseType(std::move(other))
+				{
+					// empty body
+				} // end Conditional move/conversion constructor
 
 				/****************
 				*    Methods    *
@@ -495,19 +588,25 @@ namespace graphene
 	 */
 	namespace Controls
 	{
-		template<typename RectangleType> class Button;
-		template<typename RectangleType> class Base : public Frames::Pressable<Button<RectangleType>,Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>{}; // poor man's template alias
+		template<typename RectangleType, typename CTRational> class Button;
+		template<typename RectangleType, typename CTRational> class Base : public Frames::Hightlightable<Button<RectangleType,CTRational>,
+																				Frames::Pressable<Button<RectangleType,CTRational>,
+																				Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>>{}; // poor man's template alias
 
-		template<typename RectangleType>
-		class Button : public Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType>>,
-							Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType>>,FunctionObjects::Pressed,Base<RectangleType>>
+		template<typename RectangleType, typename CTRational>
+		class Button : public Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
+							Frames::Renderable::Conditional<Frames::Renderable::Colorblind::BorderedRectangle<CTRational,Base<RectangleType,CTRational>>,
+															Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType,CTRational>>,
+								FunctionObjects::Highlighted,Base<RectangleType,CTRational>>,FunctionObjects::Pressed,Base<RectangleType,CTRational>>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType>>,
-							Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType>>,FunctionObjects::Pressed,Base<RectangleType>> base_type;
+			typedef Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
+							Frames::Renderable::Conditional<Frames::Renderable::Colorblind::BorderedRectangle<CTRational,Base<RectangleType,CTRational>>,
+															Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType,CTRational>>,
+								FunctionObjects::Highlighted,Base<RectangleType,CTRational>>,FunctionObjects::Pressed,Base<RectangleType,CTRational>> base_type;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -517,7 +616,7 @@ namespace graphene
 		public:
 			Button(){/* empty body */}
 
-			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, bool pressed = false)
+			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, bool pressed = false, bool highlighted = false)
 			{
 				this->left() = left;
 				this->bottom() = bottom;
@@ -525,6 +624,7 @@ namespace graphene
 				this->top() = top;
 				this->borderSize() = borderSize;
 				this->pressed() = pressed;
+				this->highlighted() = highlighted;
 			} // end Button constructor
 		}; // end class Button
 
