@@ -1,6 +1,7 @@
 #ifndef GRAPHENE_H
 #define GRAPHENE_H
 
+#include <ratio>
 #include <utility>
 #include <algorithm>
 
@@ -315,94 +316,105 @@ namespace graphene
 
 		namespace Renderable
 		{
-			template<typename BaseType>
-			class FilledRectangle : public BaseType
+			namespace Colorblind
 			{
-				/*********************
-				*    Member Types    *
-				*********************/
-			public:
-				typedef BaseType base_type;
-
-				/*********************
-				*    Constructors    *
-				*********************/
-			public:
-				FilledRectangle(){/* empty body */}
-
-				FilledRectangle(const BaseType &other) // this class does not add extra members
-					:BaseType(other)
+				template<typename BaseType>
+				class FilledRectangle : public BaseType
 				{
-					// empty body
-				} // end FilledRectangle copy/conversion constructor
+					/*********************
+					*    Member Types    *
+					*********************/
+				public:
+					typedef BaseType base_type;
 
-				FilledRectangle(BaseType &&other) // this class does not add extra members
-					:BaseType(std::move(other))
+					/*********************
+					*    Constructors    *
+					*********************/
+				public:
+					FilledRectangle(){/* empty body */}
+
+					FilledRectangle(const BaseType &other) // this class does not add extra members
+						:BaseType(other)
+					{
+						// empty body
+					} // end FilledRectangle copy/conversion constructor
+
+					FilledRectangle(BaseType &&other) // this class does not add extra members
+						:BaseType(std::move(other))
+					{
+						// empty body
+					} // end FilledRectangle move/conversion constructor
+
+					/****************
+					*    Methods    *
+					****************/
+				public:
+					void render() const
+					{
+						glPushAttrib(GL_POLYGON_BIT);
+							glPolygonMode(GL_FRONT,GL_FILL);
+							glRect(std::min(left(),right()),std::min(bottom(),top()),std::max(left(),right()),std::max(bottom(),top()));
+						glPopAttrib();
+					} // end method render
+				}; // end class FilledRectangle
+
+				template<typename CTRational, typename BaseType>
+				class BorderedRectangle : public BaseType
 				{
-					// empty body
-				} // end FilledRectangle move/conversion constructor
+					/*********************
+					*    Member Types    *
+					*********************/
+				public:
+					typedef BaseType base_type;
+					typedef CTRational compile_time_rational_type;
 
-				/****************
-				*    Methods    *
-				****************/
-			public:
-				void render() const
-				{
-					glPushAttrib(GL_POLYGON_BIT);
-						glPolygonMode(GL_FRONT,GL_FILL);
-						glRect(std::min(left(),right()),std::min(bottom(),top()),std::max(left(),right()),std::max(bottom(),top()));
-					glPopAttrib();
-				} // end method render
-			}; // end class FilledRectangle
+					/*********************
+					*    Constructors    *
+					*********************/
+				public:
+					BorderedRectangle(){/* empty body */}
 
-			template<typename BaseType>
-			class BorderedRectangle : public BaseType
+					BorderedRectangle(const BaseType &other) // this class does not add extra members
+						:BaseType(other)
+					{
+						// empty body
+					} // end BorderedRectangle copy/conversion constructor
+
+					BorderedRectangle(BaseType &&other) // this class does not add extra members
+						:BaseType(std::move(other))
+					{
+						// empty body
+					} // end BorderedRectangle move/conversion constructor
+
+					/****************
+					*    Methods    *
+					****************/
+				public:
+					void render() const
+					{
+						glPushAttrib(GL_POLYGON_BIT);
+							glPolygonMode(GL_FRONT,GL_FILL);
+							auto bSize = (CTRational::den * borderSize() + CTRational::num) / CTRational::den;
+							auto minX = std::min(left(),right());
+							auto maxX = std::max(left(),right());
+							auto minY = std::min(bottom(),top());
+							auto maxY = std::max(bottom(),top());
+							glRect(minX,minY,minX+bSize,maxY-bSize);
+							glRect(minX,maxY-bSize,maxX-bSize,maxY);
+							glRect(maxX-bSize,minY+bSize,maxX,maxY);
+							glRect(minX+bSize,minY,maxX,minY+bSize);
+						glPopAttrib();
+					} // end method render
+				}; // end class BorderedRectangle
+
+			} // end namespace Colorblind
+
+			namespace Colored
 			{
-				/*********************
-				*    Member Types    *
-				*********************/
-			public:
-				typedef BaseType base_type;
 
-				/*********************
-				*    Constructors    *
-				*********************/
-			public:
-				BorderedRectangle(){/* empty body */}
+			} // end namespace Colored
 
-				BorderedRectangle(const BaseType &other) // this class does not add extra members
-					:BaseType(other)
-				{
-					// empty body
-				} // end BorderedRectangle copy/conversion constructor
-
-				BorderedRectangle(BaseType &&other) // this class does not add extra members
-					:BaseType(std::move(other))
-				{
-					// empty body
-				} // end BorderedRectangle move/conversion constructor
-
-				/****************
-				*    Methods    *
-				****************/
-			public:
-				void render() const
-				{
-					glPushAttrib(GL_POLYGON_BIT);
-						glPolygonMode(GL_FRONT,GL_FILL);
-						auto minX = std::min(left(),right());
-						auto maxX = std::max(left(),right());
-						auto minY = std::min(bottom(),top());
-						auto maxY = std::max(bottom(),top());
-						glRect(minX,minY,minX+borderSize(),maxY-borderSize());
-						glRect(minX,maxY-borderSize(),maxX-borderSize(),maxY);
-						glRect(maxX-borderSize(),minY+borderSize(),maxX,maxY);
-						glRect(minX+borderSize(),minY,maxX,minY+borderSize());
-					glPopAttrib();
-				} // end method render
-			}; // end class BorderedRectangle
-
-			template<template<typename BaseType> class TrueWrapper, template<typename BaseType> class FalseWrapper, typename UnaryPredicate, typename BaseType>
+			template<typename TrueWrapper, typename FalseWrapper, typename UnaryPredicate, typename BaseType>
 			class Conditional : public BaseType
 			{
 				/*********************
@@ -411,8 +423,8 @@ namespace graphene
 			public:
 				typedef BaseType base_type;
 				typedef UnaryPredicate unary_predicate_type;
-				template<typename BaseType> class true_wrapper_template : public TrueWrapper<BaseType>{};
-				template<typename BaseType> class false_wrapper_template : public FalseWrapper<BaseType>{};
+				typedef TrueWrapper true_wrapper_type;
+				typedef FalseWrapper false_wrapper_type;
 
 				/****************
 				*    Methods    *
@@ -421,13 +433,27 @@ namespace graphene
 				void render() const
 				{
 					if(UnaryPredicate()(*this))
-						TrueWrapper<BaseType>(*static_cast<const BaseType *const>(this)).render();
+						TrueWrapper(*this).render();
 					else
-						FalseWrapper<BaseType>(*static_cast<const BaseType *const>(this)).render();
+						FalseWrapper(*this).render();
 				} // end method render
 			}; // end class Conditional
 
 		} // end namespace Renderable
+
+		namespace GLUT
+		{
+			namespace Classic
+			{
+
+			} // end namespace Classic
+
+			namespace Touch
+			{
+
+			} // end namespace Touch
+
+		} // end namespace GLUT
 
 	} // end namespace Frames
 
@@ -469,16 +495,19 @@ namespace graphene
 	 */
 	namespace Controls
 	{
+		template<typename RectangleType> class Button;
+		template<typename RectangleType> class Base : public Frames::Pressable<Button<RectangleType>,Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>{}; // poor man's template alias
+
 		template<typename RectangleType>
-		class Button : public Frames::Renderable::Conditional<Frames::Renderable::FilledRectangle,Frames::Renderable::BorderedRectangle,FunctionObjects::Pressed,
-								Frames::Pressable<Button<RectangleType>,Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>>
+		class Button : public Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType>>,
+							Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType>>,FunctionObjects::Pressed,Base<RectangleType>>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<Frames::Renderable::BorderedRectangle,Frames::Renderable::FilledRectangle,FunctionObjects::Pressed,
-					Frames::Pressable<Button<RectangleType>,Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>> base_type;
+			typedef Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType>>,
+							Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType>>,FunctionObjects::Pressed,Base<RectangleType>> base_type;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
