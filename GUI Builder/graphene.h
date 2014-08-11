@@ -31,7 +31,7 @@ namespace graphene
 			virtual void render() const = 0;
 		}; // end class Renderable
 
-		template<typename CoordinateType, typename BaseType>
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 		class Movable : public BaseType
 		{
 			// Member Types
@@ -44,7 +44,7 @@ namespace graphene
 			virtual void move(CoordinateType xOffset, CoordinateType yOffset) = 0;
 		}; // end class Movable
 
-		template<typename CoordinateType, typename BaseType>
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 		class Containing : public BaseType
 		{
 			// Member Types
@@ -57,7 +57,7 @@ namespace graphene
 			virtual bool contains(CoordinateType x, CoordinateType y) const = 0;
 		}; // end class Movable
 
-		template<typename FrameStackType, typename BaseType>
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Selectable : public BaseType
 		{
 			// Member Types
@@ -73,7 +73,7 @@ namespace graphene
 			virtual const bool &selected() const = 0;
 		}; // end class Selectable
 
-		template<typename FrameStackType, typename BaseType>
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Pressable : public BaseType
 		{
 			// Member Types
@@ -89,7 +89,7 @@ namespace graphene
 			virtual const bool &pressed() const = 0;
 		}; // end class Pressable
 
-		template<typename FrameStackType, typename BaseType>
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Highlightable : public BaseType
 		{
 			// Member Types
@@ -105,7 +105,7 @@ namespace graphene
 			virtual const bool &highlighted() const = 0;
 		}; // end class Highlightable
 
-		template<typename BorderSizeType, typename BaseType>
+		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
 		class UniformlyBordered : public BaseType
 		{
 			// Member Types
@@ -119,7 +119,7 @@ namespace graphene
 			virtual const BorderSizeType &borderSize() const = 0;
 		}; // end class UniformlyBordered
 
-		template<typename CoordinateType, typename PartType, typename ConstPartType, typename BaseType>
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type>
 		class MultiPart : public BaseType
 		{
 			// Member Types
@@ -140,7 +140,7 @@ namespace graphene
 
 	namespace Frames
 	{
-		template<typename FrameStackType, typename BaseType>
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Selectable : public BaseType
 		{
 			// must test that FrameStackType is indeed a subclass of Selectable and that
@@ -188,7 +188,7 @@ namespace graphene
 		}; // end class Selectable
 
 
-		template<typename FrameStackType, typename BaseType>
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Pressable : public BaseType
 		{
 			// must test that FrameStackType is indeed a subclass of Pressable and that
@@ -235,7 +235,7 @@ namespace graphene
 			} // end method pressed
 		}; // end class Pressable
 
-		template<typename FrameStackType, typename BaseType>
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Hightlightable : public BaseType
 		{
 			// must test that FrameStackType is indeed a subclass of Hightlightable and that
@@ -282,7 +282,7 @@ namespace graphene
 			} // end method highlighted
 		}; // end class Hightlightable
 
-		template<typename BorderSizeType, typename BaseType>
+		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
 		class UniformlyBordered : public BaseType
 		{
 			/***************
@@ -358,7 +358,7 @@ namespace graphene
 					} // end method render
 				}; // end class FilledRectangle
 
-				template<typename CTRational, typename BaseType>
+				template<typename BaseType, typename CTRational = typename BaseType::compile_time_rational_type>
 				class BorderedRectangle : public BaseType
 				{
 					/*********************
@@ -489,7 +489,7 @@ namespace graphene
 				} // end method render
 			}; // end class Stippled
 
-			template<typename TrueWrapper, typename FalseWrapper, typename UnaryPredicate, typename BaseType>
+			template<typename BaseType, typename TrueWrapper, typename FalseWrapper, typename UnaryPredicate>
 			class Conditional : public BaseType
 			{
 				/*********************
@@ -534,20 +534,6 @@ namespace graphene
 
 		} // end namespace Renderable
 
-		namespace GLUT
-		{
-			namespace Classic
-			{
-
-			} // end namespace Classic
-
-			namespace Touch
-			{
-
-			} // end namespace Touch
-
-		} // end namespace GLUT
-
 	} // end namespace Frames
 
 	namespace FunctionObjects
@@ -589,24 +575,27 @@ namespace graphene
 	namespace Controls
 	{
 		template<typename RectangleType, typename CTRational> class Button;
-		template<typename RectangleType, typename CTRational> class Base : public Frames::Hightlightable<Button<RectangleType,CTRational>,
-																				Frames::Pressable<Button<RectangleType,CTRational>,
-																				Frames::UniformlyBordered<typename RectangleType::coordinate_type,RectangleType>>>{}; // poor man's template alias
+		template<typename RectangleType, typename CTRational> class Base : public Frames::Hightlightable<
+																					Frames::Pressable<
+																						Frames::UniformlyBordered<RectangleType, typename RectangleType::coordinate_type>,
+																					Button<RectangleType,CTRational>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename CTRational>
-		class Button : public Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
-							Frames::Renderable::Conditional<Frames::Renderable::Colorblind::BorderedRectangle<CTRational,Base<RectangleType,CTRational>>,
-															Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType,CTRational>>,
-								FunctionObjects::Highlighted,Base<RectangleType,CTRational>>,FunctionObjects::Pressed,Base<RectangleType,CTRational>>
+		class Button : public Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
+							Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,CTRational>,
+																							Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,std::ratio<0>>,
+																							FunctionObjects::Highlighted>,
+							FunctionObjects::Pressed>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
-							Frames::Renderable::Conditional<Frames::Renderable::Colorblind::BorderedRectangle<CTRational,Base<RectangleType,CTRational>>,
-															Frames::Renderable::Colorblind::BorderedRectangle<std::ratio<0>,Base<RectangleType,CTRational>>,
-								FunctionObjects::Highlighted,Base<RectangleType,CTRational>>,FunctionObjects::Pressed,Base<RectangleType,CTRational>> base_type;
+			typedef Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
+							Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,CTRational>,
+																							Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,std::ratio<0>>,
+																							FunctionObjects::Highlighted>,
+							FunctionObjects::Pressed> base_type;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
