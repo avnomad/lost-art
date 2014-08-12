@@ -5,6 +5,9 @@
 #include <utility>
 #include <algorithm>
 
+#include <GL/glew.h>
+#include <GL/glut.h>
+
 #include "opengl overloads.h"
 
 #include "geometry.h"
@@ -134,6 +137,31 @@ namespace graphene
 			virtual PartType partUnderPoint(CoordinateType x, CoordinateType y) = 0;
 			virtual ConstPartType partUnderPoint(CoordinateType x, CoordinateType y) const = 0;
 		}; // end class MultiPart
+
+		namespace EventHandling
+		{
+			/** Controls implementing this interface should document whether they expect to recieve all
+			 *	mouse events or only the ones that happen above them.
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class KeyboardAndMouse : public BaseType
+			{
+				// Member Types
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+
+				// Methods
+			public:
+				virtual void keyboardAscii(unsigned char charCode, bool down, CoordinateType x, CoordinateType y) = 0;
+				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y) = 0;
+				virtual void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y) = 0;
+				virtual void mouseEnter(CoordinateType x, CoordinateType y) = 0;
+				virtual void mouseMove(CoordinateType x, CoordinateType y) = 0;
+				virtual void mouseExit(CoordinateType x, CoordinateType y) = 0;
+			}; // end class KeyboardAndMouse
+
+		} // end namespace EventHandling
 
 	} // end namespace Bases
 
@@ -534,6 +562,112 @@ namespace graphene
 
 		} // end namespace Renderable
 
+		namespace EventHandling
+		{
+			/** Frame providing stub (empty) implementations for the methods of the KeyboardAndMouse interface.
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class KeyboardAndMouseStub : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				virtual void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y){}
+				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y){}
+				virtual void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y){}
+				virtual void mouseEnter(CoordinateType x, CoordinateType y){}
+				virtual void mouseMove(CoordinateType x, CoordinateType y){}
+				virtual void mouseExit(CoordinateType x, CoordinateType y){}
+			}; // end class KeyboardAndMouseStub
+
+			// TODO: should use atomic operations for thread safety...
+			template<typename FrameType>
+			struct Focus
+			{
+				static Focus *target;
+			}; // end class Focus
+
+			template<typename FrameType>
+			Focus<FrameType> *Focus<FrameType>::target = nullptr;
+
+			/** This frame is intended for the implementation of buttons. It requires the BaseType to be
+			 *	pressable and highlightable and expects to receive only mouse events than happen over it,
+			 *	except when it is has the focus in which case it expects all.
+			 *	It ignores keyboard and wheel events for now.
+			 */
+			// TODO: formally define behaviour using a state machine.
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class TwoStagePressable : public BaseType, public Focus<TwoStagePressable<Bases::Empty,void>>
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+				typedef Focus<TwoStagePressable<Bases::Empty,void>> focus_type;
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				virtual void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
+				{
+					// ignore keyboard events
+				} // end method keyboardAscii
+
+				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
+				{
+					if(button == 0)
+					{
+						pressed() = down;
+						if(down)
+							target = this;
+						else
+						{
+							target = nullptr;
+							highlighted() = contains(x,y);
+						} // end else
+					} // end if
+				} // end method mouseButton
+
+				virtual void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y)
+				{
+					// ignore mouse wheel events
+				} // end method mouseWheel
+
+				virtual void mouseEnter(CoordinateType x, CoordinateType y)
+				{
+					if(target == nullptr)
+						highlight();
+					else if(target == this)
+						press();
+				} // end method mouseEnter
+
+				virtual void mouseMove(CoordinateType x, CoordinateType y)
+				{
+					// nothing to do
+				} // end method mouseMove
+
+				virtual void mouseExit(CoordinateType x, CoordinateType y)
+				{
+					if(target == nullptr)
+						dehighlight();
+					else if(target == this)
+						depress();
+				} // end method mouseExit
+			}; // end class TwoStagePressable
+
+		} // end namespace EventHandling
+
 	} // end namespace Frames
 
 	namespace FunctionObjects
@@ -575,10 +709,11 @@ namespace graphene
 	namespace Controls
 	{
 		template<typename RectangleType, typename CTRational> class Button;
-		template<typename RectangleType, typename CTRational> class Base : public Frames::Hightlightable<
+		template<typename RectangleType, typename CTRational> class Base : public Frames::EventHandling::TwoStagePressable<
+																					Frames::Hightlightable<
 																					Frames::Pressable<
 																						Frames::UniformlyBordered<RectangleType, typename RectangleType::coordinate_type>,
-																					Button<RectangleType,CTRational>>>{}; // poor man's template alias
+																					Button<RectangleType,CTRational>>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename CTRational>
 		class Button : public Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
@@ -618,6 +753,32 @@ namespace graphene
 		}; // end class Button
 
 	} // end namespace Controls
+
+	namespace EventAdaptors
+	{
+		template<typename RootControlType>
+		class GLUT
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef RootControlType root_control_type;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			static RootControlType rootControl;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			// TODO: add static methods implementing GLUT event handling functions
+		}; // end class GLUT
+
+	} // end namespace EventAdaptors
 
 } // end namespace graphene
 

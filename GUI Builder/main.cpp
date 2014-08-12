@@ -56,6 +56,12 @@ void keyboard(unsigned char key, int x, int y)
 		case 27:	// escape key
 			std::exit(0);
 	} // end switch
+
+	float fx = x*pixelWidth;
+	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
+
+	button1.keyboardAscii(key,true,fx,fy);
+	button2.keyboardAscii(key,true,fx,fy);
 } // end function keyboard
 
 
@@ -65,10 +71,16 @@ void mouse(int button, int state, int x, int y)
 	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
 
 	if(button == GLUT_LEFT_BUTTON)
-	{
-		button1.pressed() = state == GLUT_DOWN && button1.contains(fx,fy);
-		button2.pressed() = state == GLUT_DOWN && button2.contains(fx,fy);
-	} // end if
+		if(button1.target != nullptr)
+			static_cast<decltype(button1)*>(button1.target)->mouseButton(0,state==GLUT_DOWN,fx,fy);
+		else
+		{
+			if(button1.contains(fx,fy))
+				button1.mouseButton(0,state==GLUT_DOWN,fx,fy);
+			if(button1.target == nullptr)
+				if(button2.contains(fx,fy))
+					button2.mouseButton(0,state==GLUT_DOWN,fx,fy);
+		} // end else
 } // end function mouse
 
 
@@ -77,19 +89,67 @@ void motion(int x, int y)
 	float fx = x*pixelWidth;
 	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
 
-	button1.pressed() = button1.contains(fx,fy);
-	button2.pressed() = button2.contains(fx,fy);
+	static decltype(button1) *lastContaining = nullptr;
+
+	if(button1.target != nullptr)
+	{
+		if(static_cast<decltype(button1)*>(button1.target)->contains(fx,fy))
+		{
+			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
+				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
+			else
+				(lastContaining = static_cast<decltype(button1)*>(button1.target))->mouseEnter(fx,fy);
+		}
+		else
+		{
+			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
+			{
+				lastContaining = nullptr;
+				static_cast<decltype(button1)*>(button1.target)->mouseExit(fx,fy);
+			}
+			else
+				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
+		} // end else
+	}
+	else
+	{
+		if(button1.contains(fx,fy))
+		{
+			if(&button1 == lastContaining)
+				button1.mouseMove(fx,fy);
+			else
+				(lastContaining = &button1)->mouseEnter(fx,fy);
+		}
+		else if(&button1 == lastContaining)
+		{
+			lastContaining = nullptr;
+			button1.mouseExit(fx,fy);
+		} // end else
+
+		if(button2.contains(fx,fy))
+		{
+			if(&button2 == lastContaining)
+				button2.mouseMove(fx,fy);
+			else
+				(lastContaining = &button2)->mouseEnter(fx,fy);
+		}
+		else if(&button2 == lastContaining)
+		{
+			lastContaining = nullptr;
+			button2.mouseExit(fx,fy);
+		} // end else
+	} // end else
 } // end function motion
 
 
-void passiveMotion(int x, int y)
-{
-	float fx = x*pixelWidth;
-	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-
-	button1.highlighted() = button1.contains(fx,fy);
-	button2.highlighted() = button2.contains(fx,fy);
-} // end function motion
+//void passiveMotion(int x, int y)
+//{
+//	float fx = x*pixelWidth;
+//	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
+//
+//	button1.highlighted() = button1.contains(fx,fy);
+//	button2.highlighted() = button2.contains(fx,fy);
+//} // end function motion
 
 
 void reshape(int windowWidth, int windowHeight)
@@ -166,7 +226,7 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
-	glutPassiveMotionFunc(passiveMotion);
+	glutPassiveMotionFunc(motion);
 	glutReshapeFunc(reshape);
 	glutMainLoop();
 
