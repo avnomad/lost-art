@@ -29,8 +29,8 @@ using Eigen::Matrix;
 #include "gui model.h"
 
 float pixelWidth, pixelHeight; // in milimetres
-graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<10>> button1(10,10,90,50,2);
-graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<10>> button2(10,60,90,100,5);
+graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button1(10,10,90,50,1);
+graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button2(10,60,90,100,1);
 
 void idle()
 {

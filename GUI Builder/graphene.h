@@ -2,6 +2,7 @@
 #define GRAPHENE_H
 
 #include <ratio>
+#include <memory>
 #include <utility>
 #include <algorithm>
 
@@ -46,6 +47,32 @@ namespace graphene
 		public:
 			virtual void move(CoordinateType xOffset, CoordinateType yOffset) = 0;
 		}; // end class Movable
+
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class Rectangular : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual CoordinateType &left() = 0;
+			virtual const CoordinateType &left() const = 0;
+			virtual CoordinateType &bottom() = 0;
+			virtual const CoordinateType &bottom() const = 0;
+			virtual CoordinateType &right() = 0;
+			virtual const CoordinateType &right() const = 0;
+			virtual CoordinateType &top() = 0;
+			virtual const CoordinateType &top() const = 0;
+
+			virtual CoordinateType (&sides())[4] = 0;
+			virtual const CoordinateType (&sides() const)[4] = 0;
+
+			virtual CoordinateType &side(geometry::RectangleSide sideName) = 0;
+			virtual const CoordinateType &side(geometry::RectangleSide sideName) const = 0;
+		}; // end class Rectangular
 
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 		class Containing : public BaseType
@@ -168,6 +195,31 @@ namespace graphene
 
 	namespace Frames
 	{
+		namespace Movable
+		{
+			/** The base type should be Rectangular
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class Rectangular : public BaseType
+			{
+				// Member Types
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+
+				// Methods
+			public:
+				void move(CoordinateType xOffset, CoordinateType yOffset)
+				{
+					left() += xOffset;
+					bottom() += yOffset;
+					right() += xOffset;
+					top() += yOffset;
+				} // end method move
+			}; // end class Rectangular
+
+		} // end namespace Movable
+
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Selectable : public BaseType
 		{
@@ -341,6 +393,84 @@ namespace graphene
 			} // end method borderSize
 		}; // end class UniformlyBordered
 
+		/**	BaseType should be Rectangular and Containing, and PartType should be constructible from rectangle sides and one or two references?!?
+		 */
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type>
+		class MultiPartBorderedRectangle : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef PartType part_type;
+			typedef ConstPartType const_part_type;
+			typedef CoordinateType coordinate_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			// TODO: modify to work even if left() > right() || bottom() > top()
+			std::unique_ptr<PartType> partUnderPoint(CoordinateType x, CoordinateType y)
+			{
+				if(left() <= x && x <= right() && bottom() <= y && y <= top())
+				{
+					if(x <= left()+borderSize())
+					{
+						if(y <= bottom()+borderSize())
+						{
+							return std::unique_ptr<PartType>(new MoverType(left(),bottom(),left()+borderSize(),bottom()+borderSize(),left(),bottom()));
+						}
+						else if(y < top()-borderSize())
+						{
+
+						}
+						else // top()-borderSize() <= y
+						{
+
+						} // end else
+					}
+					else if(x < right()-borderSize())
+					{
+						if(y <= bottom()+borderSize())
+						{
+
+						}
+						else if(y < top()-borderSize())
+						{
+							return std::unique_ptr<PartType>(this);
+						}
+						else // top()-borderSize() <= y
+						{
+
+						} // end else
+					}
+					else // right()-borderSize <= x
+					{
+						if(y <= bottom()+borderSize())
+						{
+
+						}
+						else if(y < top()-borderSize())
+						{
+
+						}
+						else // top()-borderSize() <= y
+						{
+
+						} // end else
+					} // end else
+				}
+				else
+					return nullptr;
+			} // end method partUnderPoint
+
+			std::unique_ptr<ConstPartType> partUnderPoint(CoordinateType x, CoordinateType y)
+			{
+
+			} // end method partUnderPoint
+		}; // end class MultiPartBorderedRectangle
 
 		namespace Renderable
 		{
