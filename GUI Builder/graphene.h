@@ -199,12 +199,16 @@ namespace graphene
 			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 			class Rectangular : public BaseType
 			{
-				// Member Types
+				/*********************
+				*    Member Types    *
+				*********************/
 			public:
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
 
-				// Methods
+				/****************
+				*    Methods    *
+				****************/
 			public:
 				void move(CoordinateType xOffset, CoordinateType yOffset)
 				{
@@ -217,39 +221,25 @@ namespace graphene
 
 			/** The base type should be Movable
 			 */
-			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-			class Horizontally : public BaseType
+			template<typename BaseType, bool allowHorizontal = true, bool allowVertical = true, typename CoordinateType = typename BaseType::coordinate_type>
+			class HVMovable : public BaseType
 			{
-				// Member Types
+				/*********************
+				*    Member Types    *
+				*********************/
 			public:
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
 
-				// Methods
+				/****************
+				*    Methods    *
+				****************/
 			public:
 				void move(CoordinateType xOffset, CoordinateType yOffset)
 				{
-					BaseType::move(xOffset,0);
+					BaseType::move(allowHorizontal?xOffset:0 , allowVertical?yOffset:0);
 				} // end method move
-			}; // end class Horizontally
-
-			/** The base type should be Movable
-			 */
-			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-			class Vertically : public BaseType
-			{
-				// Member Types
-			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
-
-				// Methods
-			public:
-				void move(CoordinateType xOffset, CoordinateType yOffset)
-				{
-					BaseType::move(0,yOffset);
-				} // end method move
-			}; // end class Vertically
+			}; // end class HVMovable
 
 		} // end namespace Movable
 
@@ -429,7 +419,7 @@ namespace graphene
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be constructible from rectangle sides and capable
 		 *	of capturing designated sides by reference like geometry::RefRectangle.
 		 */
-		template<typename BaseType, template<bool,bool,bool,bool> class HMovableTemplate, template<bool,bool,bool,bool> class VMovableTemplate, template<bool,bool,bool,bool> class MovableTemplate, 
+		template<typename BaseType, template<bool horizontal, bool vertical, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
 			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
@@ -441,120 +431,72 @@ namespace graphene
 			typedef PartType part_type;
 			typedef ConstPartType const_part_type;
 			typedef CoordinateType coordinate_type;
-			// TODO: add template alias for RefRectangularType when implemented
+			// TODO: add template alias for ConcretePartTemplate when implemented
 
 			/****************
 			*    Methods    *
 			****************/
 		public:
 			// TODO: modify to work even if left() > right() || bottom() > top()
-			PartType partUnderPoint(CoordinateType x, CoordinateType y)
-			{
-				if(left() <= x && x <= right() && bottom() <= y && y <= top())
-				{
-					if(x <= left()+borderSize())
-					{
-						if(y <= bottom()+borderSize())
-						{
-							return PartType(new MovableTemplate<true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));
-						}
-						else if(y < top()-borderSize())
-						{
-							return PartType(new HMovableTemplate<true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));
-						}
-						else // top()-borderSize() <= y
-						{
-							return PartType(new MovableTemplate<true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));
-						} // end else
-					}
-					else if(x < right()-borderSize())
-					{
-						if(y <= bottom()+borderSize())
-						{
-							return PartType(new VMovableTemplate<false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));
-						}
-						else if(y < top()-borderSize())
-						{
-							return PartType(new MovableTemplate<true,true,true,true>(left(),bottom(),right(),top()));
-						}
-						else // top()-borderSize() <= y
-						{
-							return PartType(new VMovableTemplate<false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));
-						} // end else
-					}
-					else // right()-borderSize() <= x
-					{
-						if(y <= bottom()+borderSize())
-						{
-							return PartType(new MovableTemplate<false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));
-						}
-						else if(y < top()-borderSize())
-						{
-							return PartType(new HMovableTemplate<false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));
-						}
-						else // top()-borderSize() <= y
-						{
-							return PartType(new MovableTemplate<false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));
-						} // end else
-					} // end else
-				}
-				else
-					return nullptr;
+#define partUnderPointMacro(PartType,Const) \
+			PartType partUnderPoint(CoordinateType x, CoordinateType y) Const\
+			{\
+				if(left() <= x && x <= right() && bottom() <= y && y <= top())\
+				{\
+					if(x <= left()+borderSize())\
+					{\
+						if(y <= bottom()+borderSize())\
+						{\
+							return PartType(new ConcretePartTemplate<true,true,true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));\
+						}\
+						else if(y < top()-borderSize())\
+						{\
+							return PartType(new ConcretePartTemplate<true,false,true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));\
+						}\
+						else /* top()-borderSize() <= y */\
+						{\
+							return PartType(new ConcretePartTemplate<true,true,true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));\
+						} /* end else */\
+					}\
+					else if(x < right()-borderSize())\
+					{\
+						if(y <= bottom()+borderSize())\
+						{\
+							return PartType(new ConcretePartTemplate<false,true,false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));\
+						}\
+						else if(y < top()-borderSize())\
+						{\
+							return PartType(new ConcretePartTemplate<true,true,true,true,true,true>(left(),bottom(),right(),top()));\
+						}\
+						else /* top()-borderSize() <= y */\
+						{\
+							return PartType(new ConcretePartTemplate<false,true,false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));\
+						} /* end else */\
+					}\
+					else /* right()-borderSize() <= x */\
+					{\
+						if(y <= bottom()+borderSize())\
+						{\
+							return PartType(new ConcretePartTemplate<true,true,false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));\
+						}\
+						else if(y < top()-borderSize())\
+						{\
+							return PartType(new ConcretePartTemplate<true,false,false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));\
+						}\
+						else /* top()-borderSize() <= y */\
+						{\
+							return PartType(new ConcretePartTemplate<true,true,false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));\
+						} /* end else */\
+					} /* end else */\
+				}\
+				else\
+					return nullptr;\
 			} // end method partUnderPoint
 
-			ConstPartType partUnderPoint(CoordinateType x, CoordinateType y)
-			{
-				if(left() <= x && x <= right() && bottom() <= y && y <= top())
-				{
-					if(x <= left()+borderSize())
-					{
-						if(y <= bottom()+borderSize())
-						{
-							return ConstPartType(new MovableTemplate<true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));
-						}
-						else if(y < top()-borderSize())
-						{
-							return ConstPartType(new HMovableTemplate<true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));
-						}
-						else // top()-borderSize() <= y
-						{
-							return ConstPartType(new MovableTemplate<true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));
-						} // end else
-					}
-					else if(x < right()-borderSize())
-					{
-						if(y <= bottom()+borderSize())
-						{
-							return ConstPartType(new VMovableTemplate<false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));
-						}
-						else if(y < top()-borderSize())
-						{
-							return ConstPartType(new MovableTemplate<true,true,true,true>(left(),bottom(),right(),top()));
-						}
-						else // top()-borderSize() <= y
-						{
-							return ConstPartType(new VMovableTemplate<false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));
-						} // end else
-					}
-					else // right()-borderSize() <= x
-					{
-						if(y <= bottom()+borderSize())
-						{
-							return ConstPartType(new MovableTemplate<false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));
-						}
-						else if(y < top()-borderSize())
-						{
-							return ConstPartType(new HMovableTemplate<false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));
-						}
-						else // top()-borderSize() <= y
-						{
-							return ConstPartType(new MovableTemplate<false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));
-						} // end else
-					} // end else
-				}
-				else
-					return nullptr;
-			} // end method partUnderPoint
+			partUnderPointMacro(PartType,/* omit */)
+			partUnderPointMacro(ConstPartType,const)
+#undef partUnderPointMacro
+
 		}; // end class MultiPartBorderedRectangle
 
 		namespace Renderable
