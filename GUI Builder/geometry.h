@@ -3,6 +3,7 @@
 
 #include <string>
 #include <algorithm>
+#include <type_traits>
 
 namespace geometry
 {
@@ -132,6 +133,120 @@ namespace geometry
 		} // end method contains
 
 	}; // end stuct Rectangle
+
+	// TODO: consider changing the interface in order to enforce left <= right && bottom <= top.
+	// Use properties?
+	/** This rectangled type can capture a designated subset of its coordinate by reference.
+	 *	In which case, it should not outlive the objects it refers to.
+	 */
+	template<typename CoordinateType, bool leftRef = false, bool bottomRef = false, bool rightRef = false, bool topRef = false>
+	struct RefRectangle
+	{
+		/*********************
+		*    Member Types    *
+		*********************/
+
+		typedef RectangleSide Side;
+		typedef CoordinateType coordinate_type;
+		typedef typename std::add_reference<CoordinateType>::type coordinate_reference_type;
+		typedef typename std::conditional<leftRef,coordinate_reference_type,CoordinateType>::type left_type;
+		typedef typename std::conditional<bottomRef,coordinate_reference_type,CoordinateType>::type bottom_type;
+		typedef typename std::conditional<rightRef,coordinate_reference_type,CoordinateType>::type right_type;
+		typedef typename std::conditional<topRef,coordinate_reference_type,CoordinateType>::type top_type;
+
+	private:
+		/***************
+		*    Fields    *
+		***************/
+
+		left_type iLeft;
+		bottom_type iBottom;
+		right_type iRight;
+		top_type iTop;
+
+	public:
+		/*********************
+		*    Constructors    *
+		*********************/
+
+		/** Construct an uninitialized RefRectangle.
+		 */
+		RefRectangle(){/* emtpy body */}
+
+		/** Construct a rectangle with the specified sides.
+		 *	Depending on the template parameters some arguments may be captured by reference! 
+		 */
+		RefRectangle(left_type left, bottom_type bottom, right_type right, top_type top)
+			:iLeft(left),iBottom(bottom),iRight(right),iTop(top)
+		{
+			// empty body
+		} // end RefRectangle constructor
+
+		/*************************
+		*    Accessor Methods    *
+		*************************/
+
+#define accessor(name,iName) \
+		CoordinateType &name()\
+		{\
+			return iName;\
+		} /* end method name */\
+		\
+		const CoordinateType &name() const\
+		{\
+			return iName;\
+		} /* end method name */
+
+		accessor(left,iLeft)
+		accessor(bottom,iBottom)
+		accessor(right,iRight)
+		accessor(top,iTop)
+#undef accessor
+
+		CoordinateType &side(Side sideName)
+		{
+			switch(sideName)
+			{
+			case Side::LEFT:
+				return iLeft;
+			case Side::BOTTOM:
+				return iBottom;
+			case Side::RIGHT:
+				return iRight;
+			case Side::TOP:
+				return iTop;
+			} // end switch
+		} // end method side
+
+		const CoordinateType &side(Side sideName) const
+		{
+			switch(sideName)
+			{
+			case Side::LEFT:
+				return iLeft;
+			case Side::BOTTOM:
+				return iBottom;
+			case Side::RIGHT:
+				return iRight;
+			case Side::TOP:
+				return iTop;
+			} // end switch
+		} // end method side
+
+		/****************
+		*    Methods    *
+		****************/
+
+		/** Returns whether the point (x,y) is inside the rectangle with 
+		 *	points on the border considered to be inside.
+		 */
+		bool contains(CoordinateType x, CoordinateType y) const
+		{
+			return std::min(left(),right()) <= x && x <= std::max(left(),right())
+				&& std::min(bottom(),top()) <= y && y <= std::max(bottom(),top());
+		} // end method contains
+
+	}; // end stuct RefRectangle
 
 } // end namespace geometry
 

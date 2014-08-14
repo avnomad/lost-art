@@ -67,9 +67,6 @@ namespace graphene
 			virtual CoordinateType &top() = 0;
 			virtual const CoordinateType &top() const = 0;
 
-			virtual CoordinateType (&sides())[4] = 0;
-			virtual const CoordinateType (&sides() const)[4] = 0;
-
 			virtual CoordinateType &side(geometry::RectangleSide sideName) = 0;
 			virtual const CoordinateType &side(geometry::RectangleSide sideName) const = 0;
 		}; // end class Rectangular
@@ -149,7 +146,7 @@ namespace graphene
 			virtual const BorderSizeType &borderSize() const = 0;
 		}; // end class UniformlyBordered
 
-		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type>
+		template<typename BaseType, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPart : public BaseType
 		{
 			// Member Types
@@ -217,6 +214,42 @@ namespace graphene
 					top() += yOffset;
 				} // end method move
 			}; // end class Rectangular
+
+			/** The base type should be Movable
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class Horizontally : public BaseType
+			{
+				// Member Types
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+
+				// Methods
+			public:
+				void move(CoordinateType xOffset, CoordinateType yOffset)
+				{
+					BaseType::move(xOffset,0);
+				} // end method move
+			}; // end class Horizontally
+
+			/** The base type should be Movable
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class Vertically : public BaseType
+			{
+				// Member Types
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+
+				// Methods
+			public:
+				void move(CoordinateType xOffset, CoordinateType yOffset)
+				{
+					BaseType::move(0,yOffset);
+				} // end method move
+			}; // end class Vertically
 
 		} // end namespace Movable
 
@@ -393,9 +426,11 @@ namespace graphene
 			} // end method borderSize
 		}; // end class UniformlyBordered
 
-		/**	BaseType should be Rectangular and Containing, and PartType should be constructible from rectangle sides and one or two references?!?
+		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be constructible from rectangle sides and capable
+		 *	of capturing designated sides by reference like geometry::RefRectangle.
 		 */
-		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type>
+		template<typename BaseType, template<bool,bool,bool,bool> class HMovableTemplate, template<bool,bool,bool,bool> class VMovableTemplate, template<bool,bool,bool,bool> class MovableTemplate, 
+			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
 			/*********************
@@ -406,13 +441,14 @@ namespace graphene
 			typedef PartType part_type;
 			typedef ConstPartType const_part_type;
 			typedef CoordinateType coordinate_type;
+			// TODO: add template alias for RefRectangularType when implemented
 
 			/****************
 			*    Methods    *
 			****************/
 		public:
 			// TODO: modify to work even if left() > right() || bottom() > top()
-			std::unique_ptr<PartType> partUnderPoint(CoordinateType x, CoordinateType y)
+			PartType partUnderPoint(CoordinateType x, CoordinateType y)
 			{
 				if(left() <= x && x <= right() && bottom() <= y && y <= top())
 				{
@@ -420,45 +456,45 @@ namespace graphene
 					{
 						if(y <= bottom()+borderSize())
 						{
-							return std::unique_ptr<PartType>(new MoverType(left(),bottom(),left()+borderSize(),bottom()+borderSize(),left(),bottom()));
+							return PartType(new MovableTemplate<true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));
 						}
 						else if(y < top()-borderSize())
 						{
-
+							return PartType(new HMovableTemplate<true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));
 						}
 						else // top()-borderSize() <= y
 						{
-
+							return PartType(new MovableTemplate<true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));
 						} // end else
 					}
 					else if(x < right()-borderSize())
 					{
 						if(y <= bottom()+borderSize())
 						{
-
+							return PartType(new VMovableTemplate<false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));
 						}
 						else if(y < top()-borderSize())
 						{
-							return std::unique_ptr<PartType>(this);
+							return PartType(new MovableTemplate<true,true,true,true>(left(),bottom(),right(),top()));
 						}
 						else // top()-borderSize() <= y
 						{
-
+							return PartType(new VMovableTemplate<false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));
 						} // end else
 					}
-					else // right()-borderSize <= x
+					else // right()-borderSize() <= x
 					{
 						if(y <= bottom()+borderSize())
 						{
-
+							return PartType(new MovableTemplate<false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));
 						}
 						else if(y < top()-borderSize())
 						{
-
+							return PartType(new HMovableTemplate<false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));
 						}
 						else // top()-borderSize() <= y
 						{
-
+							return PartType(new MovableTemplate<false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));
 						} // end else
 					} // end else
 				}
@@ -466,9 +502,58 @@ namespace graphene
 					return nullptr;
 			} // end method partUnderPoint
 
-			std::unique_ptr<ConstPartType> partUnderPoint(CoordinateType x, CoordinateType y)
+			ConstPartType partUnderPoint(CoordinateType x, CoordinateType y)
 			{
-
+				if(left() <= x && x <= right() && bottom() <= y && y <= top())
+				{
+					if(x <= left()+borderSize())
+					{
+						if(y <= bottom()+borderSize())
+						{
+							return ConstPartType(new MovableTemplate<true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));
+						}
+						else if(y < top()-borderSize())
+						{
+							return ConstPartType(new HMovableTemplate<true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));
+						}
+						else // top()-borderSize() <= y
+						{
+							return ConstPartType(new MovableTemplate<true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));
+						} // end else
+					}
+					else if(x < right()-borderSize())
+					{
+						if(y <= bottom()+borderSize())
+						{
+							return ConstPartType(new VMovableTemplate<false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));
+						}
+						else if(y < top()-borderSize())
+						{
+							return ConstPartType(new MovableTemplate<true,true,true,true>(left(),bottom(),right(),top()));
+						}
+						else // top()-borderSize() <= y
+						{
+							return ConstPartType(new VMovableTemplate<false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));
+						} // end else
+					}
+					else // right()-borderSize() <= x
+					{
+						if(y <= bottom()+borderSize())
+						{
+							return ConstPartType(new MovableTemplate<false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));
+						}
+						else if(y < top()-borderSize())
+						{
+							return ConstPartType(new HMovableTemplate<false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));
+						}
+						else // top()-borderSize() <= y
+						{
+							return ConstPartType(new MovableTemplate<false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));
+						} // end else
+					} // end else
+				}
+				else
+					return nullptr;
 			} // end method partUnderPoint
 		}; // end class MultiPartBorderedRectangle
 
