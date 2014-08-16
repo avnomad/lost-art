@@ -3,6 +3,7 @@
 
 #include <string>
 #include <algorithm>
+#include <stdexcept>
 #include <type_traits>
 
 namespace geometry
@@ -215,6 +216,8 @@ namespace geometry
 				return iRight;
 			case Side::TOP:
 				return iTop;
+			default:
+				throw std::invalid_argument("Invalid enum value!");
 			} // end switch
 		} // end method side
 
@@ -230,6 +233,8 @@ namespace geometry
 				return iRight;
 			case Side::TOP:
 				return iTop;
+			default:
+				throw std::invalid_argument("Invalid enum value!");
 			} // end switch
 		} // end method side
 
