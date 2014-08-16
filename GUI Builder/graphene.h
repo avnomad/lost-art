@@ -592,6 +592,48 @@ namespace graphene
 					} // end method render
 				}; // end class BorderedRectangle
 
+				/** Renders what its BaseType would render, but with the foreground and background
+				 *	colors swapped. Transparencies aren't swapped!
+				 */
+				template<typename BaseType>
+				class InversedColor : public BaseType
+				{
+					/*********************
+					*    Member Types    *
+					*********************/
+				public:
+					typedef BaseType base_type;
+
+					/*********************
+					*    Constructors    *
+					*********************/
+				public:
+					InversedColor(){/* empty body */}
+
+					template<typename OtherType>
+					InversedColor(OtherType &&other) // this class does not add extra members
+						:BaseType(std::forward<OtherType>(other))
+					{
+						// empty body
+					} // end InversedColor forwarding constructor (may move/copy/convert)
+
+					/****************
+					*    Methods    *
+					****************/
+				public:
+					void render() const
+					{
+						float fgColor[4], bgColor[4];
+						glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+							glGetFloatv(GL_CURRENT_COLOR,fgColor);
+							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
+							glClearColor(fgColor[0],fgColor[1],fgColor[2],bgColor[3]);
+							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
+							BaseType::render();
+						glPopAttrib();
+					} // end method render
+				}; // end class InversedColor
+
 			} // end namespace Colorblind
 
 			namespace Colored
@@ -873,7 +915,7 @@ namespace graphene
 																					Button<RectangleType,CTRational>>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename CTRational>
-		class Button : public Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
+		class Button : public Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Stippled<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>>>,
 							Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,CTRational>,
 																							Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,std::ratio<0>>,
 																							FunctionObjects::Highlighted>,

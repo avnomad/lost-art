@@ -42,6 +42,10 @@ void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	glColor3f(1,1,1);
+	glRecti(0,0,110,110);
+	glColor3f(1,0.75,0);
+
 	button1.render();
 	button2.render();
 
