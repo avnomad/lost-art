@@ -518,17 +518,12 @@ namespace graphene
 				public:
 					FilledRectangle(){/* empty body */}
 
-					FilledRectangle(const BaseType &other) // this class does not add extra members
-						:BaseType(other)
+					template<typename OtherType>
+					FilledRectangle(OtherType &&other) // this class does not add extra members
+						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
-					} // end FilledRectangle copy/conversion constructor
-
-					FilledRectangle(BaseType &&other) // this class does not add extra members
-						:BaseType(std::move(other))
-					{
-						// empty body
-					} // end FilledRectangle move/conversion constructor
+					} // end FilledRectangle forwarding constructor (may move/copy/convert)
 
 					/****************
 					*    Methods    *
@@ -559,17 +554,12 @@ namespace graphene
 				public:
 					BorderedRectangle(){/* empty body */}
 
-					BorderedRectangle(const BaseType &other) // this class does not add extra members
-						:BaseType(other)
+					template<typename OtherType>
+					BorderedRectangle(OtherType &&other) // this class does not add extra members
+						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
-					} // end BorderedRectangle copy/conversion constructor
-
-					BorderedRectangle(BaseType &&other) // this class does not add extra members
-						:BaseType(std::move(other))
-					{
-						// empty body
-					} // end BorderedRectangle move/conversion constructor
+					} // end BorderedRectangle forwarding constructor (may move/copy/convert)
 
 					/****************
 					*    Methods    *
@@ -656,17 +646,12 @@ namespace graphene
 			public:
 				Stippled(){/* empty body */}
 
-				Stippled(const BaseType &other) // this class does not add extra members
-					:BaseType(other)
+				template<typename OtherType>
+				Stippled(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
-				} // end Stippled copy/conversion constructor
-
-				Stippled(BaseType &&other) // this class does not add extra members
-					:BaseType(std::move(other))
-				{
-					// empty body
-				} // end Stippled move/conversion constructor
+				} // end Stippled forwarding constructor (may move/copy/convert)
 
 				/****************
 				*    Methods    *
@@ -734,17 +719,12 @@ namespace graphene
 			public:
 				Conditional(){/* empty body */}
 
-				Conditional(const BaseType &other) // this class does not add extra members
-					:BaseType(other)
+				template<typename OtherType>
+				Conditional(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
-				} // end Conditional copy/conversion constructor
-
-				Conditional(BaseType &&other) // this class does not add extra members
-					:BaseType(std::move(other))
-				{
-					// empty body
-				} // end Conditional move/conversion constructor
+				} // end Conditional forwarding constructor (may move/copy/convert)
 
 				/****************
 				*    Methods    *
