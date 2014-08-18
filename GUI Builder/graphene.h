@@ -416,10 +416,10 @@ namespace graphene
 			} // end method borderSize
 		}; // end class UniformlyBordered
 
-		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be constructible from rectangle sides and capable
-		 *	of capturing designated sides by reference like geometry::RefRectangle.
+		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
+		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
 		 */
-		template<typename BaseType, template<bool horizontal, bool vertical, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
+		template<typename BaseType, template<typename CoordinateType, bool horizontal, bool vertical, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
 			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
@@ -447,45 +447,45 @@ namespace graphene
 					{\
 						if(y <= bottom()+borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<true,true,true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,true,true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));\
 						}\
 						else if(y < top()-borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<true,false,true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,false,true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));\
 						}\
 						else /* top()-borderSize() <= y */\
 						{\
-							return PartType(new ConcretePartTemplate<true,true,true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,true,true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));\
 						} /* end else */\
 					}\
 					else if(x < right()-borderSize())\
 					{\
 						if(y <= bottom()+borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<false,true,false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,false,true,false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));\
 						}\
 						else if(y < top()-borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<true,true,true,true,true,true>(left(),bottom(),right(),top()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,true,true,true,true,true>(left(),bottom(),right(),top()));\
 						}\
 						else /* top()-borderSize() <= y */\
 						{\
-							return PartType(new ConcretePartTemplate<false,true,false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,false,true,false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));\
 						} /* end else */\
 					}\
 					else /* right()-borderSize() <= x */\
 					{\
 						if(y <= bottom()+borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<true,true,false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,true,false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));\
 						}\
 						else if(y < top()-borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<true,false,false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,false,false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));\
 						}\
 						else /* top()-borderSize() <= y */\
 						{\
-							return PartType(new ConcretePartTemplate<true,true,false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));\
+							return PartType(new ConcretePartTemplate<CoordinateType,true,true,false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));\
 						} /* end else */\
 					} /* end else */\
 				}\
@@ -880,7 +880,7 @@ namespace graphene
 
 	} // end namespace FuntionObjects
 
-	/** The intention is to let the client to easily combine frames to create controls as needed.
+	/** The intention is to let the client easily combine frames to create controls as needed.
 	 *	But my compiler does not support inheriting constructors, so the created controls would only
 	 *	be default constructible. To workaround that in the common case, I specialize common control 
 	 *	types and add constructors to them.
@@ -888,28 +888,32 @@ namespace graphene
 	namespace Controls
 	{
 		template<typename RectangleType, typename CTRational> class Button;
-		template<typename RectangleType, typename CTRational> class Base : public Frames::EventHandling::TwoStagePressable<
+		template<typename RectangleType, typename CTRational> class ButtonBase : public Frames::EventHandling::TwoStagePressable<
 																					Frames::Hightlightable<
 																					Frames::Pressable<
 																						Frames::UniformlyBordered<RectangleType, typename RectangleType::coordinate_type>,
 																					Button<RectangleType,CTRational>>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename CTRational>
-		class Button : public Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Stippled<Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>>>,
-							Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,CTRational>,
-																							Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,std::ratio<0>>,
-																							FunctionObjects::Highlighted>,
-							FunctionObjects::Pressed>
+		class Button : public Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
+								Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,CTRational>>,
+								Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
+									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,CTRational>,
+									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,std::ratio<0>>,
+									FunctionObjects::Highlighted>,
+								FunctionObjects::Pressed>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::FilledRectangle<Base<RectangleType,CTRational>>,
-							Frames::Renderable::Conditional<Base<RectangleType,CTRational>,Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,CTRational>,
-																							Frames::Renderable::Colorblind::BorderedRectangle<Base<RectangleType,CTRational>,std::ratio<0>>,
-																							FunctionObjects::Highlighted>,
-							FunctionObjects::Pressed> base_type;
+			typedef Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
+								Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,CTRational>>,
+								Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
+									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,CTRational>,
+									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,std::ratio<0>>,
+									FunctionObjects::Highlighted>,
+								FunctionObjects::Pressed> base_type;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -930,6 +934,136 @@ namespace graphene
 				this->highlighted() = highlighted;
 			} // end Button constructor
 		}; // end class Button
+
+
+		template<typename CoordinateType>
+		class IShapePart : public Bases::Renderable<Bases::Containing<Bases::Movable<Bases::Empty,CoordinateType>>>{}; // poor man's template alias
+
+		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		class ControlPart : public Frames::Renderable::Colorblind::InversedColor<
+									Frames::Renderable::Stippled<
+									Frames::Renderable::Colorblind::FilledRectangle<
+									Frames::Movable::HVMovable<
+										Frames::Movable::Rectangular<
+										Bases::Rectangular<
+										IShapePart<CoordinateType>
+									>>,horizontallyMovable,verticallyMovable>>>>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef typename ControlPart::coordinate_type coordinate_type;
+			typedef geometry::RefRectangle<CoordinateType,leftRef,bottomRef,rightRef,topRef> rectangle_type;
+			typedef typename rectangle_type::Side Side;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			rectangle_type iRectangle; // TODO: find a way to use frame inheritance instaead
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			ControlPart(){/* empty body */}
+
+			ControlPart(typename rectangle_type::left_type left, typename rectangle_type::bottom_type bottom, typename rectangle_type::right_type right, typename rectangle_type::top_type top)
+				:iRectangle(left,bottom,right,top)
+			{
+				// empty body
+			} // end ControlPart constructor
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+
+#define accessor(name) \
+			CoordinateType &name()\
+			{\
+				return iRectangle.name();\
+			} /* end method name */\
+			\
+			const CoordinateType &name() const\
+			{\
+				return iRectangle.name();\
+			} /* end method name */
+
+			accessor(left)
+			accessor(bottom)
+			accessor(right)
+			accessor(top)
+#undef accessor
+
+			CoordinateType &side(Side sideName)
+			{
+				return iRectangle.side(sideName);
+			} // end method side
+
+			const CoordinateType &side(Side sideName) const
+			{
+				return iRectangle.side(sideName);
+			} // end method side
+
+			bool contains(CoordinateType x, CoordinateType y) const
+			{
+				return iRectangle.contains(x,y);
+			} // end method contains
+		}; // end class ControlPart
+
+
+		template<typename RectangleType, typename CTRational> class Control;
+		template<typename RectangleType, typename CTRational> class ControlBase : public Frames::MultiPartBorderedRectangle<
+																							Frames::Movable::Rectangular<
+																							Frames::Hightlightable<
+																							Frames::Selectable<
+																								Frames::UniformlyBordered<RectangleType,typename RectangleType::coordinate_type>																	
+																							,Control<RectangleType,CTRational>>>>
+																						,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,
+																									std::unique_ptr<IShapePart<const typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+
+		template<typename RectangleType, typename CTRational>
+		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
+									Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,CTRational>>,
+									Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
+										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,CTRational>,
+										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,std::ratio<0>>,
+										FunctionObjects::Highlighted>,
+									FunctionObjects::Selected>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
+									Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,CTRational>>,
+									Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
+										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,CTRational>,
+										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,std::ratio<0>>,
+										FunctionObjects::Highlighted>,
+									FunctionObjects::Selected> base_type;
+			typedef typename Control::coordinate_type coordinate_type;
+			typedef RectangleType rectangle_type;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Control(){/* empty body */}
+
+			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, bool selected = false, bool highlighted = false)
+			{
+				this->left() = left;
+				this->bottom() = bottom;
+				this->right() = right;
+				this->top() = top;
+				this->borderSize() = borderSize;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+			} // end Control constructor
+		}; // end class Control
 
 	} // end namespace Controls
 

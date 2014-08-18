@@ -12,6 +12,12 @@ using std::log;
 #include <tuple>
 using std::get;
 
+#include <list>
+using std::list;
+
+#include <memory>
+using std::unique_ptr;
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 
@@ -28,9 +34,17 @@ using Eigen::Matrix;
 #include "graphene.h"
 #include "gui model.h"
 
+float lastX, lastY;
 float pixelWidth, pixelHeight; // in milimetres
+
 graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button1(10,10,90,50,1);
 graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button2(10,60,90,100,1);
+decltype(button1) *lastContaining = nullptr;
+
+list<graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>>> controls;
+unique_ptr<graphene::Controls::IShapePart<float>> selectedPart;
+graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>> *selectedControl = nullptr;
+graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>> *highlightedControl = nullptr;
 
 void idle()
 {
@@ -42,12 +56,14 @@ void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glColor3f(1,1,1);
-	glRecti(0,0,110,110);
-	glColor3f(1,0.75,0);
-
 	button1.render();
 	button2.render();
+
+	for(auto &control : controls)
+		control.render();
+
+	if(selectedPart)
+		selectedPart->render();
 
 	glutSwapBuffers();
 } // end function display
@@ -85,6 +101,25 @@ void mouse(int button, int state, int x, int y)
 				if(button2.contains(fx,fy))
 					button2.mouseButton(0,state==GLUT_DOWN,fx,fy);
 		} // end else
+
+	if(button == GLUT_LEFT_BUTTON)	// TODO: add bring-to-front
+		if(state == GLUT_DOWN)
+		{
+			lastX = fx;
+			lastY = fy;
+			if(selectedControl)
+				selectedControl->deselect();
+			for(auto &control : controls)
+				if(selectedPart = control.partUnderPoint(fx,fy))
+				{
+					selectedControl = &control.select();
+					break;
+				} // end if
+		}
+		else
+		{
+			selectedPart = nullptr;
+		} // end else
 } // end function mouse
 
 
@@ -92,8 +127,6 @@ void motion(int x, int y)
 {
 	float fx = x*pixelWidth;
 	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-
-	static decltype(button1) *lastContaining = nullptr;
 
 	if(button1.target != nullptr)
 	{
@@ -143,17 +176,77 @@ void motion(int x, int y)
 			button2.mouseExit(fx,fy);
 		} // end else
 	} // end else
+
+	if(selectedPart)
+		selectedPart->move(fx-lastX,fy-lastY);
+	lastX = fx;
+	lastY = fy;
 } // end function motion
 
 
-//void passiveMotion(int x, int y)
-//{
-//	float fx = x*pixelWidth;
-//	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-//
-//	button1.highlighted() = button1.contains(fx,fy);
-//	button2.highlighted() = button2.contains(fx,fy);
-//} // end function motion
+void passiveMotion(int x, int y)
+{
+	float fx = x*pixelWidth;
+	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
+
+	if(button1.target != nullptr)
+	{
+		if(static_cast<decltype(button1)*>(button1.target)->contains(fx,fy))
+		{
+			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
+				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
+			else
+				(lastContaining = static_cast<decltype(button1)*>(button1.target))->mouseEnter(fx,fy);
+		}
+		else
+		{
+			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
+			{
+				lastContaining = nullptr;
+				static_cast<decltype(button1)*>(button1.target)->mouseExit(fx,fy);
+			}
+			else
+				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
+		} // end else
+	}
+	else
+	{
+		if(button1.contains(fx,fy))
+		{
+			if(&button1 == lastContaining)
+				button1.mouseMove(fx,fy);
+			else
+				(lastContaining = &button1)->mouseEnter(fx,fy);
+		}
+		else if(&button1 == lastContaining)
+		{
+			lastContaining = nullptr;
+			button1.mouseExit(fx,fy);
+		} // end else
+
+		if(button2.contains(fx,fy))
+		{
+			if(&button2 == lastContaining)
+				button2.mouseMove(fx,fy);
+			else
+				(lastContaining = &button2)->mouseEnter(fx,fy);
+		}
+		else if(&button2 == lastContaining)
+		{
+			lastContaining = nullptr;
+			button2.mouseExit(fx,fy);
+		} // end else
+	} // end else
+
+	if(highlightedControl)
+		highlightedControl->dehighlight();
+	for(auto &control : controls)
+		if(control.contains(fx,fy))
+		{
+			highlightedControl = &control.highlight();
+			break;
+		} // end if
+} // end function motion
 
 
 void reshape(int windowWidth, int windowHeight)
@@ -206,7 +299,7 @@ int main(int argc, char **argv)
 	// glut initialization
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	glutInitWindowSize(500,500);
+	glutInitWindowSize(500,600);
 	glutInitWindowPosition(700,160);
 	glutCreateWindow("LostArt");
 
@@ -223,6 +316,10 @@ int main(int argc, char **argv)
 	// application initialization
 	pixelWidth = (float)glutGet(GLUT_SCREEN_WIDTH_MM) / glutGet(GLUT_SCREEN_WIDTH);
 	pixelHeight = (float)glutGet(GLUT_SCREEN_HEIGHT_MM) / glutGet(GLUT_SCREEN_HEIGHT);
+	controls.emplace_back(100.0f, 10.0f,150.0f, 40.0f,1.0f);
+	controls.emplace_back(100.0f, 50.0f,150.0f, 80.0f,1.0f);
+	controls.emplace_back(100.0f, 90.0f,140.0f,130.0f,1.0f);
+	controls.emplace_back(100.0f,140.0f,140.0f,180.0f,1.0f);
 
 	// event handling initialization
 	glutIdleFunc(idle);
@@ -230,7 +327,7 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
-	glutPassiveMotionFunc(motion);
+	glutPassiveMotionFunc(passiveMotion);
 	glutReshapeFunc(reshape);
 	glutMainLoop();
 
