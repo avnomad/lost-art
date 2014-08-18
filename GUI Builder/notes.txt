@@ -1,0 +1,13 @@
+	Copyright (C) 2014 Vaptistis Anogeianakis <nomad@cornercase.gr>
+	
+Notes:
+
+1.  Had a problem the mouse coordinates and window size reported by freeglut, 
+    but it was fixed when I updated to version 2.8.1 (from 2.8.0).
+
+Issues:
+
+1.  Need to redesign the frame architecture. Perhaps pass down FrameStackType to 
+    all the frames? Or allow certain frames to store function object callbacks
+    internally and call them on certain occasions. The later is one way to allow 
+    Pressable frames to thicken the rectangle border used for part calculation.
