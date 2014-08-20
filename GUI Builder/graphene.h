@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
 #include "opengl overloads.h"
 
@@ -145,6 +145,42 @@ namespace graphene
 			virtual BorderSizeType &borderSize() = 0;
 			virtual const BorderSizeType &borderSize() const = 0;
 		}; // end class UniformlyBordered
+
+		template<typename BaseType, typename TextType = typename BaseType::text_type>
+		class Textual : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef TextType text_type;
+
+			// Methods
+		public:
+			virtual TextType &text() = 0;
+			virtual const TextType &text() const = 0;
+		}; // end class Textual
+
+		/** SizedText instances have a fixed 'natural' aspect ration, so changing the height,
+		 *	actually changes the width as well. Some frame stacks, may interpret  text sizes, as
+		 *	preferred instead of mandatory.
+		 */
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class SizedText : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual CoordinateType &textHeight() = 0;
+			virtual const CoordinateType &textHeight() const = 0;
+			// TODO: add support for setting the text width using properties, and perhaps the ability
+			// to set/get the aspect ratio.
+			virtual CoordinateType textWidth() const = 0;
+			virtual void setTextWidth(const CoordinateType &value) = 0; // deprecated
+		}; // end class SizedText
 
 		template<typename BaseType, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPart : public BaseType
@@ -416,6 +452,86 @@ namespace graphene
 			} // end method borderSize
 		}; // end class UniformlyBordered
 
+		template<typename BaseType, typename TextType = typename BaseType::text_type>
+		class Textual : public BaseType
+		{
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			TextType iText;
+
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef TextType text_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			TextType &text()
+			{
+				return iText;
+			} // end method text
+
+			const TextType &text() const
+			{
+				return iText;
+			} // end method text
+
+		}; // end class Textual
+
+		/** BaseType should be Textual, TextEndineType should be default constructible
+		 */
+		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
+		class SizedText : public BaseType
+		{
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			CoordinateType iTextHeight;
+
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+			typedef FontEngineType font_engine_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			CoordinateType &textHeight()
+			{
+				return iTextHeight;
+			} // end method textHeight
+
+			const CoordinateType &textHeight() const
+			{
+				return iTextHeight;
+			} // end method textHeight
+
+			// TODO: add support for setting the text width using properties, and perhaps the ability
+			// to set/get the aspect ratio.
+			CoordinateType textWidth() const
+			{
+				FontEngineType fontEngine;
+				return fontEngine.stringLength(text().c_str()) * textHeight() / fontEngine.fontHeight();
+			} // end method textWidth
+
+			void setTextWidth(const CoordinateType &value) // deprecated
+			{
+				FontEngineType fontEngine;
+				return textHeight() = fontEngine.fontHeight() * value / fontEngine.stringLength(text().c_str());
+			} // end method setTextWidth
+		}; // end class SizedText
+
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
 		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
 		 */
@@ -581,6 +697,44 @@ namespace graphene
 						glPopAttrib();
 					} // end method render
 				}; // end class BorderedRectangle
+
+				/** BaseType should be Rectangular, Textual, SizedText. Margin should be a compile-time rational type
+				 *	representing the margin reserved between the rectangle sides and the text.
+				 */
+				//template<typename BaseType, typename Margin = typename BaseType::margin>
+				//class BoxedText : public BaseType
+				//{
+				//	/*********************
+				//	*    Member Types    *
+				//	*********************/
+				//public:
+				//	typedef BaseType base_type;
+				//	typedef Margin margin;
+
+				//	/*********************
+				//	*    Constructors    *
+				//	*********************/
+				//public:
+				//	BoxedText(){/* empty body */}
+
+				//	template<typename OtherType>
+				//	BoxedText(OtherType &&other) // this class does not add extra members
+				//		:BaseType(std::forward<OtherType>(other))
+				//	{
+				//		// empty body
+				//	} // end BorderedRectangle forwarding constructor (may move/copy/convert)
+
+				//	/****************
+				//	*    Methods    *
+				//	****************/
+				//public:
+				//	void render() const
+				//	{
+				//		typename BaseType::font_engine_type fontEngine;
+				//		auto textHeight = std::max(textHeight(),height() - 2*Margin::num / Margin::den);
+				//		auto textWidth = std::max(textWidth(),height() - 2*Margin::num / Margin::den);
+				//	} // end method render
+				//}; // end class BoxedText
 
 				/** Renders what its BaseType would render, but with the foreground and background
 				 *	colors swapped. Transparencies aren't swapped!
@@ -877,6 +1031,60 @@ namespace graphene
 				return highlightable.highlighted();
 			} // end method operator()
 		}; // end struct Highlighted
+
+		/** Font engines encapsulate low level font metric and rendering functions, to present 
+		 *	them in a uniform manner. They should be constructible from a font and default 
+		 *	constructible (that should give font a default value).
+		 *	The actual method signatures depend on what the underlying toolkit supports.
+		 */
+		// TODO: rethink the font engine and font concepts.
+		struct GlutStrokeFontEngine
+		{
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			void *iFont;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			GlutStrokeFontEngine(void *font = GLUT_STROKE_ROMAN)
+				:iFont(font)
+			{
+				// empty body
+			} // end GlutStrokeFontEngine constructor
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			void *&font()
+			{
+				return iFont;
+			} // end method font
+
+			void *const &font() const
+			{
+				return iFont;
+			} // end method font
+
+			GLfloat fontHeight() const
+			{
+				return glutStrokeHeight(iFont);
+			} // end method fontHeight
+
+			int charWidth(int character) const
+			{
+				return glutStrokeWidth(iFont,character);
+			} // end method charWidth
+
+			int stringWidth(const unsigned char *string) const
+			{
+				return glutStrokeLength(iFont,string);
+			} // end method stringWidth
+		}; // end struct GlutStrokeFontEngine
 
 	} // end namespace FuntionObjects
 
