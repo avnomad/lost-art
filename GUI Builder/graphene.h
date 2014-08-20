@@ -740,9 +740,11 @@ namespace graphene
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
-								glTranslated((((width() - textWidth())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + std::min(left(),right()),
-											 (((height() - textHeight())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + std::min(bottom(),top()),0); // center text in rectangle
+								glTranslated((((width() - textWidth())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
+											 (((height() - textHeight())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
+											 0); // center text in inner rectangle
 								glScaled(textWidth() / fontEngine.stringWidth(text()) , textHeight() / fontEngine.fontHeight() , 1);
+								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
 								fontEngine.render(text());
 							glPopMatrix();
 						glPopAttrib();
@@ -1122,6 +1124,16 @@ namespace graphene
 			{
 				return glutStrokeHeight(iFont);
 			} // end method fontHeight
+
+			GLfloat fontAboveBaseLine() const
+			{
+				return 119.05f; // magic value from GLUT documentation
+			} // end method fontAboveBaseLine
+
+			GLfloat fontBelowBaseLine() const
+			{
+				return 33.33f; // magic value from GLUT documentation
+			} // end method fontBelowBaseLine
 
 			int charWidth(int character) const
 			{

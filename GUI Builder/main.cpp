@@ -41,7 +41,7 @@ graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button1(10,
 graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button2(10,60,90,100,1);
 decltype(button1) *lastContaining = nullptr;
 
-graphene::Controls::Label<geometry::Rectangle<float>,std::string,std::ratio<1>> label1(15,110,85,130,"This is a label!",10);
+graphene::Controls::Label<geometry::Rectangle<float>,std::string,std::ratio<1>> label1(5,110,95,130,"Feel the groove!",10);
 graphene::Controls::Label<geometry::Rectangle<float>,std::string,std::ratio<1>> label2(25,140,75,160,"Hello World!",10);
 
 list<graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>>> controls;
