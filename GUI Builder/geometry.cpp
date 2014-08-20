@@ -12,10 +12,16 @@ namespace geometry
 		assert(recti.right() == 3);
 		assert(recti.bottom() == 5);
 		assert(recti.top() == 8);
+		assert(recti.width() == 5);
+		assert(recti.height() == 3);
 		recti.sides()[size_t(RectangleSide::RIGHT)] = 0;
 		assert(recti.right() == 0);
+		assert(recti.width() == 2);
+		assert(recti.height() == 3);
 		recti.side(geometry::Rectangle<int>::Side::BOTTOM) = 4;
 		assert(recti.bottom() == 4);
+		assert(recti.width() == 2);
+		assert(recti.height() == 4);
 
 		Rectangle<float> rectf(-2.0,5.0,3.0,8.0);
 		assert(rectf.sides()[size_t(Rectangle<float>::Side::TOP)] == 8.0);
@@ -27,14 +33,20 @@ namespace geometry
 		assert(refrecti.right() == 3);
 		assert(refrecti.bottom() == 5);
 		assert(refrecti.top() == 7);
+		assert(refrecti.width() == 4);
+		assert(refrecti.height() == 2);
 		refrecti.side(RectangleSide::RIGHT) = 0;
 		assert(refrecti.right() == 0);
 		assert(x == -1);
 		assert(y == 7);
+		assert(refrecti.width() == 1);
+		assert(refrecti.height() == 2);
 		refrecti.side(geometry::RefRectangle<int,true,false,false,true>::Side::BOTTOM) = 4;
 		assert(refrecti.bottom() == 4);
 		assert(x == -1);
 		assert(y == 7);
+		assert(refrecti.width() == 1);
+		assert(refrecti.height() == 3);
 		refrecti.left() = 0;
 		assert(refrecti.left() == 0);
 		assert(x == 0);

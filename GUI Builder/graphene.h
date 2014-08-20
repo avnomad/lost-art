@@ -69,6 +69,9 @@ namespace graphene
 
 			virtual CoordinateType &side(geometry::RectangleSide sideName) = 0;
 			virtual const CoordinateType &side(geometry::RectangleSide sideName) const = 0;
+
+			virtual CoordinateType width() const = 0;
+			virtual CoordinateType height() const = 0;
 		}; // end class Rectangular
 
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
@@ -732,7 +735,7 @@ namespace graphene
 				//	{
 				//		typename BaseType::font_engine_type fontEngine;
 				//		auto textHeight = std::max(textHeight(),height() - 2*Margin::num / Margin::den);
-				//		auto textWidth = std::max(textWidth(),height() - 2*Margin::num / Margin::den);
+				//		auto textWidth = std::max(textWidth(),width() - 2*Margin::num / Margin::den);
 				//	} // end method render
 				//}; // end class BoxedText
 
@@ -1214,6 +1217,16 @@ namespace graphene
 			{
 				return iRectangle.side(sideName);
 			} // end method side
+
+			CoordinateType width() const
+			{
+				return iRectangle.width();
+			} // end method width
+
+			CoordinateType height() const
+			{
+				return iRectangle.height();
+			} // end method height
 
 			bool contains(CoordinateType x, CoordinateType y) const
 			{

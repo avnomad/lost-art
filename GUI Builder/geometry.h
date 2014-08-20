@@ -124,6 +124,16 @@ namespace geometry
 		*    Methods    *
 		****************/
 
+		CoordinateType height() const
+		{
+			return std::max(bottom(),top()) - std::min(bottom(),top());
+		} // end method height
+
+		CoordinateType width() const
+		{
+			return std::max(left(),right()) - std::min(left(),right());
+		} // end method height
+
 		/** Returns whether the point (x,y) is inside the rectangle with 
 		 *	points on the border considered to be inside.
 		 */
@@ -241,6 +251,16 @@ namespace geometry
 		/****************
 		*    Methods    *
 		****************/
+
+		CoordinateType height() const
+		{
+			return std::max(bottom(),top()) - std::min(bottom(),top());
+		} // end method height
+
+		CoordinateType width() const
+		{
+			return std::max(left(),right()) - std::min(left(),right());
+		} // end method height
 
 		/** Returns whether the point (x,y) is inside the rectangle with 
 		 *	points on the border considered to be inside.
