@@ -704,7 +704,10 @@ namespace graphene
 
 				/** BaseType should be Rectangular, Textual, SizedText. Margin should be a compile-time rational type
 				 *	representing the margin reserved between the rectangle sides and the text.
+				 *	If the text cannot fit in the rectangle, it is silently scaled down for rendering. This does not affect
+				 *	the size returned by the object methods.
 				 */
+				// TODO: Is silent scaling the best option?
 				template<typename BaseType, typename Margin = typename BaseType::margin>
 				class BoxedText : public BaseType
 				{
@@ -734,16 +737,19 @@ namespace graphene
 				public:
 					void render() const
 					{
-						// TODO: consider scaling text down to fit in box.
 						typename BaseType::font_engine_type fontEngine;
+						// scale text down to fit:
+						auto actualTextHeight = std::min(textHeight(),(height()*Margin::den - 2*Margin::num) / Margin::den);
+						auto actualTextWidth = std::min(actualTextHeight * fontEngine.stringWidth(text()) / fontEngine.fontHeight(),(width()*Margin::den - 2*Margin::num) / Margin::den);
+						actualTextHeight = std::min(actualTextHeight, actualTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(text()));
 
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
-								glTranslated((((width() - textWidth())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
-											 (((height() - textHeight())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
+								glTranslated((((width() - actualTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
+											 (((height() - actualTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
 											 0); // center text in inner rectangle
-								glScaled(textWidth() / fontEngine.stringWidth(text()) , textHeight() / fontEngine.fontHeight() , 1);
+								glScaled(actualTextWidth / fontEngine.stringWidth(text()) , actualTextHeight / fontEngine.fontHeight() , 1);
 								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
 								fontEngine.render(text());
 							glPopMatrix();
