@@ -3,6 +3,7 @@
 
 #include <ratio>
 #include <memory>
+#include <string>
 #include <utility>
 #include <algorithm>
 
@@ -525,13 +526,13 @@ namespace graphene
 			CoordinateType textWidth() const
 			{
 				FontEngineType fontEngine;
-				return fontEngine.stringLength(text().c_str()) * textHeight() / fontEngine.fontHeight();
+				return fontEngine.stringWidth(text()) * textHeight() / fontEngine.fontHeight();
 			} // end method textWidth
 
 			void setTextWidth(const CoordinateType &value) // deprecated
 			{
 				FontEngineType fontEngine;
-				return textHeight() = fontEngine.fontHeight() * value / fontEngine.stringLength(text().c_str());
+				return textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(text());
 			} // end method setTextWidth
 		}; // end class SizedText
 
@@ -704,40 +705,49 @@ namespace graphene
 				/** BaseType should be Rectangular, Textual, SizedText. Margin should be a compile-time rational type
 				 *	representing the margin reserved between the rectangle sides and the text.
 				 */
-				//template<typename BaseType, typename Margin = typename BaseType::margin>
-				//class BoxedText : public BaseType
-				//{
-				//	/*********************
-				//	*    Member Types    *
-				//	*********************/
-				//public:
-				//	typedef BaseType base_type;
-				//	typedef Margin margin;
+				template<typename BaseType, typename Margin = typename BaseType::margin>
+				class BoxedText : public BaseType
+				{
+					/*********************
+					*    Member Types    *
+					*********************/
+				public:
+					typedef BaseType base_type;
+					typedef Margin margin;
 
-				//	/*********************
-				//	*    Constructors    *
-				//	*********************/
-				//public:
-				//	BoxedText(){/* empty body */}
+					/*********************
+					*    Constructors    *
+					*********************/
+				public:
+					BoxedText(){/* empty body */}
 
-				//	template<typename OtherType>
-				//	BoxedText(OtherType &&other) // this class does not add extra members
-				//		:BaseType(std::forward<OtherType>(other))
-				//	{
-				//		// empty body
-				//	} // end BorderedRectangle forwarding constructor (may move/copy/convert)
+					template<typename OtherType>
+					BoxedText(OtherType &&other) // this class does not add extra members
+						:BaseType(std::forward<OtherType>(other))
+					{
+						// empty body
+					} // end BoxedText forwarding constructor (may move/copy/convert)
 
-				//	/****************
-				//	*    Methods    *
-				//	****************/
-				//public:
-				//	void render() const
-				//	{
-				//		typename BaseType::font_engine_type fontEngine;
-				//		auto textHeight = std::max(textHeight(),height() - 2*Margin::num / Margin::den);
-				//		auto textWidth = std::max(textWidth(),width() - 2*Margin::num / Margin::den);
-				//	} // end method render
-				//}; // end class BoxedText
+					/****************
+					*    Methods    *
+					****************/
+				public:
+					void render() const
+					{
+						// TODO: consider scaling text down to fit in box.
+						typename BaseType::font_engine_type fontEngine;
+
+						glPushAttrib(GL_TRANSFORM_BIT);
+							glMatrixMode(GL_MODELVIEW);
+							glPushMatrix();
+								glTranslated((((width() - textWidth())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + std::min(left(),right()),
+											 (((height() - textHeight())*Margin::den - 2.0*Margin::num) / Margin::den) / 2 + std::min(bottom(),top()),0); // center text in rectangle
+								glScaled(textWidth() / fontEngine.stringWidth(text()) , textHeight() / fontEngine.fontHeight() , 1);
+								fontEngine.render(text());
+							glPopMatrix();
+						glPopAttrib();
+					} // end method render
+				}; // end class BoxedText
 
 				/** Renders what its BaseType would render, but with the foreground and background
 				 *	colors swapped. Transparencies aren't swapped!
@@ -895,6 +905,41 @@ namespace graphene
 						FalseWrapper(*this).render();
 				} // end method render
 			}; // end class Conditional
+
+			template<typename BaseType, typename FirstWrapper, typename SecondWrapper> // TODO: use variadic templates when available
+			class Sequential : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef FirstWrapper first_wrapper_type;
+				typedef SecondWrapper second_wrapper_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Sequential(){/* empty body */}
+
+				template<typename OtherType>
+				Sequential(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
+				{
+					// empty body
+				} // end Sequential forwarding constructor (may move/copy/convert)
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void render() const
+				{
+					FirstWrapper(*this).render();
+					SecondWrapper(*this).render();
+				} // end method render
+			}; // end class Sequential
 
 		} // end namespace Renderable
 
@@ -1083,10 +1128,19 @@ namespace graphene
 				return glutStrokeWidth(iFont,character);
 			} // end method charWidth
 
-			int stringWidth(const unsigned char *string) const
+			template<typename CharSequenceType>
+			int stringWidth(const CharSequenceType &string) const // for some reason glutStrokeLength takes unsigned char * instead of the char * documented!
 			{
-				return glutStrokeLength(iFont,string);
+				return glutStrokeLength(iFont,std::basic_string<unsigned char>(std::begin(string),std::end(string)).c_str());
 			} // end method stringWidth
+
+			/** The string will be rendered in some sort of 'current position' having some sort of 'current size'.
+			 */
+			template<typename CharSequenceType>
+			void render(const CharSequenceType &string) const // for some reason glutStrokeString takes unsigned char * instead of the char * documented!
+			{
+				glutStrokeString(iFont,std::basic_string<unsigned char>(std::begin(string),std::end(string)).c_str());
+			} // end method render
 		}; // end struct GlutStrokeFontEngine
 
 	} // end namespace FuntionObjects
@@ -1285,6 +1339,46 @@ namespace graphene
 				this->highlighted() = highlighted;
 			} // end Control constructor
 		}; // end class Control
+
+		template<typename RectangleType, typename TextType> class LabelBase : public Frames::SizedText<
+																						Frames::Textual<
+																							Frames::Movable::Rectangular<RectangleType>,
+																							TextType>,
+																						FunctionObjects::GlutStrokeFontEngine>{}; // poor man's template alias
+
+		template<typename RectangleType, typename TextType, typename Margin>
+		class Label : public Frames::Renderable::Sequential<
+								LabelBase<RectangleType,TextType>,
+								Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
+								Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,Margin>>>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef Frames::Renderable::Sequential<
+						LabelBase<RectangleType,TextType>,
+						Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
+						Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,Margin>>> base_type;
+			typedef typename Label::coordinate_type coordinate_type;
+			typedef RectangleType rectangle_type;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Label(){/* empty body */}
+
+			Label(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, TextType text, coordinate_type textHeight)
+			{
+				this->left() = left;
+				this->bottom() = bottom;
+				this->right() = right;
+				this->top() = top;
+				this->text() = text;
+				this->textHeight() = textHeight;
+			} // end Label constructor
+		}; // end class Label
 
 	} // end namespace Controls
 
