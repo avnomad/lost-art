@@ -34,18 +34,21 @@ using Eigen::Matrix;
 #include "graphene.h"
 #include "gui model.h"
 
+typedef graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Button;
+typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Control;
+typedef graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> Label;
+
 float lastX, lastY;
 float pixelWidth, pixelHeight; // in milimetres
 
-graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> button1(10,10,90,50,1,"button1",20);
-graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> button2(10,60,90,100,1,"button2",20);
-decltype(button1) *lastContaining = nullptr;
+Button button1(10,10,90,50,1,"button1",20);
+Button button2(10,60,90,100,1,"button2",20);
+Button *lastContaining = nullptr;
 
-graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> label1(5,110,95,130,"Feel the groove!",10);
-graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> label2(25,140,75,160,"Hello World!",10);
-graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> label3(25,170,75,185,"This is a very long text!",10);
+Label label1(5,110,95,130,"Feel the groove!",10);
+Label label2(25,140,75,160,"Hello World!",10);
+Label label3(25,170,75,185,"This is a very long text!",10);
 
-typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Control;
 list<Control> controls;
 unique_ptr<graphene::Controls::IShapePart<float>> selectedPart;
 Control *selectedControl = nullptr;

@@ -619,6 +619,96 @@ namespace graphene
 
 		}; // end class MultiPartBorderedRectangle
 
+		/** These are intended primarily to adapt geometric types that are unaware of frame architecture,
+		 *	in order to present them as frames.
+		 */
+		namespace Adapting
+		{
+			template<typename BaseType, typename RectangleType>
+			class Rectangular : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef RectangleType rectangle_type;
+				typedef typename rectangle_type::coordinate_type coordinate_type;
+				typedef typename rectangle_type::Side Side;
+
+				/***************
+				*    Fields    *
+				***************/
+			private:
+				RectangleType iRectangle;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				/** Default constructs the underlying RectangularType
+				 */
+				Rectangular(){/* emtpy body */}
+
+				/** Forwards arguments to the underlying RectangularType constructor
+				 */
+				template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
+				Rectangular(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
+					:iRectangle(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
+				{
+					// empty body
+				} // end Rectangular constructor
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+
+#define accessor(name) \
+				coordinate_type &name()\
+				{\
+					return iRectangle.name();\
+				} /* end method name */\
+				\
+				const coordinate_type &name() const\
+				{\
+					return iRectangle.name();\
+				} /* end method name */
+
+				accessor(left)
+				accessor(bottom)
+				accessor(right)
+				accessor(top)
+#undef accessor
+
+				coordinate_type &side(Side sideName)
+				{
+					return iRectangle.side(sideName);
+				} // end method side
+
+				const coordinate_type &side(Side sideName) const
+				{
+					return iRectangle.side(sideName);
+				} // end method side
+
+				coordinate_type width() const
+				{
+					return iRectangle.width();
+				} // end method width
+
+				coordinate_type height() const
+				{
+					return iRectangle.height();
+				} // end method height
+
+				bool contains(coordinate_type x, coordinate_type y) const
+				{
+					return iRectangle.contains(x,y);
+				} // end method contains
+			}; // end class Rectangular
+
+		} // end namespace Adapting
+
 		namespace Renderable
 		{
 			namespace Colorblind
@@ -1242,89 +1332,47 @@ namespace graphene
 		class IShapePart : public Bases::Renderable<Bases::Containing<Bases::Movable<Bases::Empty,CoordinateType>>>{}; // poor man's template alias
 
 		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		class ControlPart : public Frames::Renderable::Colorblind::InversedColor<
-									Frames::Renderable::Stippled<
-									Frames::Renderable::Colorblind::FilledRectangle<
-									Frames::Movable::HVMovable<
-										Frames::Movable::Rectangular<
-										Bases::Rectangular<
-										IShapePart<CoordinateType>
-									>>,horizontallyMovable,verticallyMovable>>>>
+		class ControlPart : public Frames::Adapting::Rectangular<
+										Frames::Renderable::Colorblind::InversedColor<										
+										Frames::Renderable::Stippled<
+										Frames::Renderable::Colorblind::FilledRectangle<
+										Frames::Movable::HVMovable<
+											Frames::Movable::Rectangular<
+											Bases::Rectangular<IShapePart<CoordinateType>>>,
+										horizontallyMovable,verticallyMovable>>>>,
+									geometry::RefRectangle<CoordinateType,leftRef,bottomRef,rightRef,topRef>>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef typename ControlPart::coordinate_type coordinate_type;
-			typedef geometry::RefRectangle<CoordinateType,leftRef,bottomRef,rightRef,topRef> rectangle_type;
-			typedef typename rectangle_type::Side Side;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			rectangle_type iRectangle; // TODO: find a way to use frame inheritance instaead
-
+			typedef Frames::Adapting::Rectangular<
+						Frames::Renderable::Colorblind::InversedColor<										
+						Frames::Renderable::Stippled<
+						Frames::Renderable::Colorblind::FilledRectangle<
+						Frames::Movable::HVMovable<
+							Frames::Movable::Rectangular<
+							Bases::Rectangular<IShapePart<CoordinateType>>>,
+						horizontallyMovable,verticallyMovable>>>>,
+					geometry::RefRectangle<CoordinateType,leftRef,bottomRef,rightRef,topRef>> base_type;
+			typedef typename ControlPart::rectangle_type rectangle_type;
+			
 			/*********************
 			*    Constructors    *
 			*********************/
 		public:
 			ControlPart(){/* empty body */}
 
-			ControlPart(typename rectangle_type::left_type left, typename rectangle_type::bottom_type bottom, typename rectangle_type::right_type right, typename rectangle_type::top_type top)
-				:iRectangle(left,bottom,right,top)
+			/** Forwards arguments to the underlying RectangularType constructor
+				*/
+			template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
+			ControlPart(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
+				:base_type(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
 			{
 				// empty body
 			} // end ControlPart constructor
 
-			/****************
-			*    Methods    *
-			****************/
-		public:
-
-#define accessor(name) \
-			CoordinateType &name()\
-			{\
-				return iRectangle.name();\
-			} /* end method name */\
-			\
-			const CoordinateType &name() const\
-			{\
-				return iRectangle.name();\
-			} /* end method name */
-
-			accessor(left)
-			accessor(bottom)
-			accessor(right)
-			accessor(top)
-#undef accessor
-
-			CoordinateType &side(Side sideName)
-			{
-				return iRectangle.side(sideName);
-			} // end method side
-
-			const CoordinateType &side(Side sideName) const
-			{
-				return iRectangle.side(sideName);
-			} // end method side
-
-			CoordinateType width() const
-			{
-				return iRectangle.width();
-			} // end method width
-
-			CoordinateType height() const
-			{
-				return iRectangle.height();
-			} // end method height
-
-			bool contains(CoordinateType x, CoordinateType y) const
-			{
-				return iRectangle.contains(x,y);
-			} // end method contains
 		}; // end class ControlPart
-
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Control;
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
