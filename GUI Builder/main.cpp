@@ -37,18 +37,19 @@ using Eigen::Matrix;
 float lastX, lastY;
 float pixelWidth, pixelHeight; // in milimetres
 
-graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button1(10,10,90,50,1);
-graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>> button2(10,60,90,100,1);
+graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> button1(10,10,90,50,1,"button1",20);
+graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> button2(10,60,90,100,1,"button2",20);
 decltype(button1) *lastContaining = nullptr;
 
-graphene::Controls::Label<geometry::Rectangle<float>,std::string,std::ratio<1>> label1(5,110,95,130,"Feel the groove!",10);
-graphene::Controls::Label<geometry::Rectangle<float>,std::string,std::ratio<1>> label2(25,140,75,160,"Hello World!",10);
-graphene::Controls::Label<geometry::Rectangle<float>,std::string,std::ratio<1>> label3(25,170,75,185,"This is a very long text!",10);
+graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> label1(5,110,95,130,"Feel the groove!",10);
+graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> label2(25,140,75,160,"Hello World!",10);
+graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> label3(25,170,75,185,"This is a very long text!",10);
 
-list<graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>>> controls;
+typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Control;
+list<Control> controls;
 unique_ptr<graphene::Controls::IShapePart<float>> selectedPart;
-graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>> *selectedControl = nullptr;
-graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>> *highlightedControl = nullptr;
+Control *selectedControl = nullptr;
+Control *highlightedControl = nullptr;
 
 void idle()
 {
@@ -324,10 +325,14 @@ int main(int argc, char **argv)
 	// application initialization
 	pixelWidth = (float)glutGet(GLUT_SCREEN_WIDTH_MM) / glutGet(GLUT_SCREEN_WIDTH);
 	pixelHeight = (float)glutGet(GLUT_SCREEN_HEIGHT_MM) / glutGet(GLUT_SCREEN_HEIGHT);
-	controls.emplace_back(100.0f, 10.0f,150.0f, 40.0f,1.0f);
-	controls.emplace_back(100.0f, 50.0f,150.0f, 80.0f,1.0f);
-	controls.emplace_back(100.0f, 90.0f,140.0f,130.0f,1.0f);
-	controls.emplace_back(100.0f,140.0f,140.0f,180.0f,1.0f);
+	//controls.emplace_back(100.0f, 10.0f,150.0f, 40.0f,1.0f,"control1",10.0f); // VS2012 standard library does not support 6+ arguments...
+	//controls.emplace_back(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f);
+	//controls.emplace_back(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f);
+	//controls.emplace_back(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f);
+	controls.push_back(Control(100.0f, 10.0f,150.0f, 40.0f,1.0f,"control1",10.0f));
+	controls.push_back(Control(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f));
+	controls.push_back(Control(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f));
+	controls.push_back(Control(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f));
 
 	// event handling initialization
 	glutIdleFunc(idle);

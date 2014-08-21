@@ -1170,19 +1170,29 @@ namespace graphene
 	 */
 	namespace Controls
 	{
-		template<typename RectangleType, typename CTRational> class Button;
-		template<typename RectangleType, typename CTRational> class ButtonBase : public Frames::EventHandling::TwoStagePressable<
-																					Frames::Hightlightable<
-																					Frames::Pressable<
-																						Frames::UniformlyBordered<RectangleType, typename RectangleType::coordinate_type>,
-																					Button<RectangleType,CTRational>>>>{}; // poor man's template alias
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> class ButtonBase : public Frames::EventHandling::TwoStagePressable<
+																															Frames::SizedText<
+																																Frames::Textual<
+																																	Frames::Hightlightable<
+																																	Frames::Pressable<
+																																		Frames::UniformlyBordered<RectangleType, typename RectangleType::coordinate_type>,
+																																	Button<RectangleType,BorderSize,Margin,TextType>>>,
+																																TextType>,
+																															FunctionObjects::GlutStrokeFontEngine>>{}; // poor man's template alias
 
-		template<typename RectangleType, typename CTRational>
-		class Button : public Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
-								Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,CTRational>>,
-								Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
-									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,CTRational>,
-									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,std::ratio<0>>,
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class Button : public Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+								Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+									Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
+									Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+								Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+									Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+										Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+									Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+										Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
 									FunctionObjects::Highlighted>,
 								FunctionObjects::Pressed>
 		{
@@ -1190,13 +1200,19 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
-								Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,CTRational>>,
-								Frames::Renderable::Conditional<ButtonBase<RectangleType,CTRational>,
-									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,CTRational>,
-									Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,CTRational>,std::ratio<0>>,
-									FunctionObjects::Highlighted>,
-								FunctionObjects::Pressed> base_type;
+			typedef Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+							Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
+							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+						Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+							Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+								Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+							Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+								Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+							FunctionObjects::Highlighted>,
+						FunctionObjects::Pressed> base_type;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -1206,13 +1222,16 @@ namespace graphene
 		public:
 			Button(){/* empty body */}
 
-			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, bool pressed = false, bool highlighted = false)
+			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
 			{
 				this->left() = left;
 				this->bottom() = bottom;
 				this->right() = right;
 				this->top() = top;
 				this->borderSize() = borderSize;
+				this->text() = text;
+				this->textHeight() = textHeight;
 				this->pressed() = pressed;
 				this->highlighted() = highlighted;
 			} // end Button constructor
@@ -1307,22 +1326,34 @@ namespace graphene
 		}; // end class ControlPart
 
 
-		template<typename RectangleType, typename CTRational> class Control;
-		template<typename RectangleType, typename CTRational> class ControlBase : public Frames::MultiPartBorderedRectangle<
-																							Frames::Movable::Rectangular<
-																							Frames::Hightlightable<
-																							Frames::Selectable<
-																								Frames::UniformlyBordered<RectangleType,typename RectangleType::coordinate_type>																	
-																							,Control<RectangleType,CTRational>>>>
-																						,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,
-																									std::unique_ptr<IShapePart<const typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Control;
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
+		class ControlBase : public Frames::MultiPartBorderedRectangle<
+									Frames::SizedText<
+										Frames::Textual<
+											Frames::Movable::Rectangular<
+											Frames::Hightlightable<
+											Frames::Selectable<
+												Frames::UniformlyBordered<RectangleType,typename RectangleType::coordinate_type>,
+											Control<RectangleType,BorderSize,Margin,TextType>>>>,
+										TextType>,
+									FunctionObjects::GlutStrokeFontEngine>,
+									ControlPart,
+									std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,
+									std::unique_ptr<IShapePart<const typename RectangleType::coordinate_type>>>{}; // poor man's template alias
 
-		template<typename RectangleType, typename CTRational>
-		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
-									Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,CTRational>>,
-									Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
-										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,CTRational>,
-										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,std::ratio<0>>,
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+									Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+										Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
+										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+									Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
 										FunctionObjects::Highlighted>,
 									FunctionObjects::Selected>
 		{
@@ -1330,13 +1361,19 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
-									Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,CTRational>>,
-									Frames::Renderable::Conditional<ControlBase<RectangleType,CTRational>,
-										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,CTRational>,
-										Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,CTRational>,std::ratio<0>>,
-										FunctionObjects::Highlighted>,
-									FunctionObjects::Selected> base_type;
+			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+							Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
+							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+						Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+							FunctionObjects::Highlighted>,
+						FunctionObjects::Selected> base_type;
 			typedef typename Control::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -1346,13 +1383,16 @@ namespace graphene
 		public:
 			Control(){/* empty body */}
 
-			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, bool selected = false, bool highlighted = false)
+			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
 			{
 				this->left() = left;
 				this->bottom() = bottom;
 				this->right() = right;
 				this->top() = top;
 				this->borderSize() = borderSize;
+				this->text() = text;
+				this->textHeight() = textHeight;
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 			} // end Control constructor
@@ -1364,7 +1404,7 @@ namespace graphene
 																							TextType>,
 																						FunctionObjects::GlutStrokeFontEngine>{}; // poor man's template alias
 
-		template<typename RectangleType, typename TextType, typename Margin>
+		template<typename RectangleType, typename Margin, typename TextType = std::string>
 		class Label : public Frames::Renderable::Sequential<
 								LabelBase<RectangleType,TextType>,
 								Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
