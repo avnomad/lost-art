@@ -532,7 +532,7 @@ namespace graphene
 			void setTextWidth(const CoordinateType &value) // deprecated
 			{
 				FontEngineType fontEngine;
-				return textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(text());
+				textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(text());
 			} // end method setTextWidth
 		}; // end class SizedText
 
@@ -1451,34 +1451,54 @@ namespace graphene
 
 		}; // end class ControlPart
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Control;
+		template<typename CoordinateType, typename TextType = std::string> 
+		class IControl : public Bases::Renderable<
+								Bases::MultiPart<
+									Bases::Highlightable<
+									Bases::Selectable<
+										Bases::SizedText<
+										Bases::Textual<
+											Bases::UniformlyBordered<
+												Bases::Movable<
+												Bases::Containing<
+												Bases::Rectangular<
+													Bases::Empty,
+												CoordinateType>>>,
+											CoordinateType>,
+										TextType>>,
+									IControl<CoordinateType,TextType>>>,
+								std::unique_ptr<IShapePart<CoordinateType>>,
+								std::unique_ptr<const IShapePart<CoordinateType>>>>{}; // poor man's template alias
+																	
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
 		class ControlBase : public Frames::MultiPartBorderedRectangle<
-									Frames::SizedText<
-										Frames::Textual<
+										Frames::SizedText<
+											Frames::Textual<
 											Frames::Movable::Rectangular<
 											Frames::Hightlightable<
 											Frames::Selectable<
-												Frames::UniformlyBordered<RectangleType,typename RectangleType::coordinate_type>,
-											Control<RectangleType,BorderSize,Margin,TextType>>>>,
-										TextType>,
-									FunctionObjects::GlutStrokeFontEngine>,
-									ControlPart,
-									std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,
-									std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+												Frames::UniformlyBordered<
+													Frames::Adapting::Rectangular<
+														IControl<typename RectangleType::coordinate_type,TextType>,
+													RectangleType>,
+												typename RectangleType::coordinate_type>/*,
+											Control<RectangleType,BorderSize,Margin,TextType>*/>>>>,
+										FunctionObjects::GlutStrokeFontEngine>,
+									ControlPart>{}; // poor man's template alias
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		template<typename RectangleType, typename BorderSize, typename Margin, template<typename BaseType, typename Margin> class TextRenderer 
+			= Frames::Renderable::Colorblind::BoxedText, typename TextType = std::string>
 		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 									Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+										Frames::Renderable::Colorblind::InversedColor<TextRenderer<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
 									Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+											TextRenderer<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
 										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+											TextRenderer<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
 										FunctionObjects::Highlighted>,
 									FunctionObjects::Selected>
 		{
@@ -1489,14 +1509,14 @@ namespace graphene
 			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 						Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+							Frames::Renderable::Colorblind::InversedColor<TextRenderer<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
 						Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+								TextRenderer<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
 							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+								TextRenderer<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
 							FunctionObjects::Highlighted>,
 						FunctionObjects::Selected> base_type;
 			typedef typename Control::coordinate_type coordinate_type;

@@ -34,8 +34,10 @@ using Eigen::Matrix;
 #include "graphene.h"
 #include "gui model.h"
 
+typedef graphene::Controls::IControl<float> IControl;
 typedef graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Button;
 typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Control;
+typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>,graphene::Frames::Renderable::Colorblind::BoxedParagraph> ParagraphControl;
 typedef graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> Label;
 
 float lastX, lastY;
@@ -49,10 +51,10 @@ Label label1(5,110,95,130,"Feel the groove!",10);
 Label label2(25,140,75,160,"Hello World!",10);
 Label label3(25,170,75,185,"This is a very long text!",10);
 
-list<Control> controls;
+list<unique_ptr<IControl>> controls;
 unique_ptr<graphene::Controls::IShapePart<float>> selectedPart;
-Control *selectedControl = nullptr;
-Control *highlightedControl = nullptr;
+IControl *selectedControl = nullptr;
+IControl *highlightedControl = nullptr;
 
 void idle()
 {
@@ -72,7 +74,7 @@ void display()
 	label3.render();
 
 	for(auto &control : controls)
-		control.render();
+		control->render();
 
 	if(selectedPart)
 		selectedPart->render();
@@ -122,9 +124,9 @@ void mouse(int button, int state, int x, int y)
 			if(selectedControl)
 				selectedControl->deselect();
 			for(auto &control : controls)
-				if(selectedPart = control.partUnderPoint(fx,fy))
+				if(selectedPart = control->partUnderPoint(fx,fy))
 				{
-					selectedControl = &control.select();
+					selectedControl = &control->select();
 					break;
 				} // end if
 		}
@@ -253,9 +255,9 @@ void passiveMotion(int x, int y)
 	if(highlightedControl)
 		highlightedControl->dehighlight();
 	for(auto &control : controls)
-		if(control.contains(fx,fy))
+		if(control->contains(fx,fy))
 		{
-			highlightedControl = &control.highlight();
+			highlightedControl = &control->highlight();
 			break;
 		} // end if
 } // end function motion
@@ -311,7 +313,7 @@ int main(int argc, char **argv)
 	// glut initialization
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	glutInitWindowSize(500,600);
+	glutInitWindowSize(800,800);
 	glutInitWindowPosition(700,160);
 	glutCreateWindow("LostArt");
 
@@ -332,11 +334,14 @@ int main(int argc, char **argv)
 	//controls.emplace_back(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f);
 	//controls.emplace_back(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f);
 	//controls.emplace_back(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f);
-	controls.push_back(Control(100.0f, 10.0f,150.0f, 40.0f,1.0f,"control1",10.0f));
-	controls.push_back(Control(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f));
-	controls.push_back(Control(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f));
-	controls.push_back(Control(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f));
-
+	controls.emplace_back(new Control(100.0f, 10.0f,150.0f, 40.0f,1.0f,"control1",10.0f));
+	controls.emplace_back(new Control(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f));
+	controls.emplace_back(new Control(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f));
+	controls.emplace_back(new Control(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f));
+	controls.emplace_back(new ParagraphControl(20.0f,240.0f,270.0f,270.0f,1.0f,
+		"This is a sample paragraph for paragraph_control1.\n\nThe text should appear with the two lines separated by a blank line.",8.0f));
+	controls.emplace_back(new ParagraphControl(20.0f,200.0f,270.0f,230.0f,1.0f,
+		"This is another paragraph. This time for paragraph_control2.\nThis line should be immediately below the previous one.\n",8.0f));
 	// event handling initialization
 	glutIdleFunc(idle);
 	glutDisplayFunc(display);
