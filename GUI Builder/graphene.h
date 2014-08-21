@@ -539,7 +539,7 @@ namespace graphene
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
 		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
 		 */
-		template<typename BaseType, template<typename CoordinateType, bool horizontal, bool vertical, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
+		template<typename BaseType, template<typename CoordinateType, bool horizontal, bool vertical, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
 			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
@@ -558,7 +558,7 @@ namespace graphene
 			****************/
 		public:
 			// TODO: modify to work even if left() > right() || bottom() > top()
-#define partUnderPointMacro(PartType,Const) \
+#define partUnderPointMacro(PartType,Const,Constant) \
 			PartType partUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
 				if(left() <= x && x <= right() && bottom() <= y && y <= top())\
@@ -567,45 +567,45 @@ namespace graphene
 					{\
 						if(y <= bottom()+borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,true,true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));\
 						}\
 						else if(y < top()-borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,false,true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));\
 						}\
 						else /* top()-borderSize() <= y */\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,true,true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));\
 						} /* end else */\
 					}\
 					else if(x < right()-borderSize())\
 					{\
 						if(y <= bottom()+borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,false,true,false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));\
 						}\
 						else if(y < top()-borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,true,true,true,true,true>(left(),bottom(),right(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,true,true>(left(),bottom(),right(),top()));\
 						}\
 						else /* top()-borderSize() <= y */\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,false,true,false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));\
 						} /* end else */\
 					}\
 					else /* right()-borderSize() <= x */\
 					{\
 						if(y <= bottom()+borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,true,false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));\
 						}\
 						else if(y < top()-borderSize())\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,false,false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));\
 						}\
 						else /* top()-borderSize() <= y */\
 						{\
-							return PartType(new ConcretePartTemplate<CoordinateType,true,true,false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));\
 						} /* end else */\
 					} /* end else */\
 				}\
@@ -613,8 +613,8 @@ namespace graphene
 					return nullptr;\
 			} // end method partUnderPoint
 
-			partUnderPointMacro(PartType,/* omit */)
-			partUnderPointMacro(ConstPartType,const)
+			partUnderPointMacro(PartType,/* omit */,false)
+			partUnderPointMacro(ConstPartType,const,true)
 #undef partUnderPointMacro
 
 		}; // end class MultiPartBorderedRectangle
@@ -1331,7 +1331,9 @@ namespace graphene
 		template<typename CoordinateType>
 		class IShapePart : public Bases::Renderable<Bases::Containing<Bases::Movable<Bases::Empty,CoordinateType>>>{}; // poor man's template alias
 
-		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		/** Const instances should be constant and non-const instances should be non constant
+		 */
+		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 		class ControlPart : public Frames::Adapting::Rectangular<
 										Frames::Renderable::Colorblind::InversedColor<										
 										Frames::Renderable::Stippled<
@@ -1340,7 +1342,7 @@ namespace graphene
 											Frames::Movable::Rectangular<
 											Bases::Rectangular<IShapePart<CoordinateType>>>,
 										horizontallyMovable,verticallyMovable>>>>,
-									geometry::RefRectangle<CoordinateType,leftRef,bottomRef,rightRef,topRef>>
+									geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
 		{
 			/*********************
 			*    Member Types    *
@@ -1354,7 +1356,7 @@ namespace graphene
 							Frames::Movable::Rectangular<
 							Bases::Rectangular<IShapePart<CoordinateType>>>,
 						horizontallyMovable,verticallyMovable>>>>,
-					geometry::RefRectangle<CoordinateType,leftRef,bottomRef,rightRef,topRef>> base_type;
+					geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>> base_type;
 			typedef typename ControlPart::rectangle_type rectangle_type;
 			
 			/*********************
@@ -1388,7 +1390,7 @@ namespace graphene
 									FunctionObjects::GlutStrokeFontEngine>,
 									ControlPart,
 									std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,
-									std::unique_ptr<IShapePart<const typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+									std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,

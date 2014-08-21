@@ -28,7 +28,7 @@ namespace geometry
 
 		// test RefRectangle
 		int x = -1, y = 7;
-		RefRectangle<int,true,false,false,true> refrecti(x,5,3,y);
+		RefRectangle<int,false,true,false,false,true> refrecti(x,5,3,y);
 		assert(refrecti.left() == -1);
 		assert(refrecti.right() == 3);
 		assert(refrecti.bottom() == 5);
@@ -41,7 +41,7 @@ namespace geometry
 		assert(y == 7);
 		assert(refrecti.width() == 1);
 		assert(refrecti.height() == 2);
-		refrecti.side(geometry::RefRectangle<int,true,false,false,true>::Side::BOTTOM) = 4;
+		refrecti.side(geometry::RefRectangle<int,false,true,false,false,true>::Side::BOTTOM) = 4;
 		assert(refrecti.bottom() == 4);
 		assert(x == -1);
 		assert(y == 7);

@@ -149,8 +149,10 @@ namespace geometry
 	// Use properties?
 	/** This rectangled type can capture a designated subset of its coordinate by reference.
 	 *	In which case, it should not outlive the objects it refers to.
+	 *	Note: there does not seem to be a way to implement transitive constness in C++ so const instances
+	 *	should have constant == true while non-const instances should have constant == false.
 	 */
-	template<typename CoordinateType, bool leftRef = false, bool bottomRef = false, bool rightRef = false, bool topRef = false>
+	template<typename CoordinateType, bool constant = false, bool leftRef = false, bool bottomRef = false, bool rightRef = false, bool topRef = false>
 	struct RefRectangle
 	{
 		/*********************
@@ -159,11 +161,12 @@ namespace geometry
 
 		typedef RectangleSide Side;
 		typedef CoordinateType coordinate_type;
-		typedef typename std::add_reference<CoordinateType>::type coordinate_reference_type;
-		typedef typename std::conditional<leftRef,coordinate_reference_type,CoordinateType>::type left_type;
-		typedef typename std::conditional<bottomRef,coordinate_reference_type,CoordinateType>::type bottom_type;
-		typedef typename std::conditional<rightRef,coordinate_reference_type,CoordinateType>::type right_type;
-		typedef typename std::conditional<topRef,coordinate_reference_type,CoordinateType>::type top_type;
+		typedef typename std::conditional<constant,typename std::add_const<coordinate_type>::type,coordinate_type>::type effective_coordinate_type;
+		typedef typename std::add_reference<effective_coordinate_type>::type effective_coordinate_reference_type;
+		typedef typename std::conditional<leftRef,effective_coordinate_reference_type,effective_coordinate_type>::type left_type;
+		typedef typename std::conditional<bottomRef,effective_coordinate_reference_type,effective_coordinate_type>::type bottom_type;
+		typedef typename std::conditional<rightRef,effective_coordinate_reference_type,effective_coordinate_type>::type right_type;
+		typedef typename std::conditional<topRef,effective_coordinate_reference_type,effective_coordinate_type>::type top_type;
 
 	private:
 		/***************
@@ -200,7 +203,9 @@ namespace geometry
 #define accessor(name,iName) \
 		CoordinateType &name()\
 		{\
-			return iName;\
+			if(constant)\
+				throw std::logic_error("Incorrect instantiation of RefRectangle template: constant==true should only be used with const objects!");\
+			return const_cast<CoordinateType &>(iName);\
 		} /* end method name */\
 		\
 		const CoordinateType &name() const\
@@ -216,16 +221,19 @@ namespace geometry
 
 		CoordinateType &side(Side sideName)
 		{
+			if(constant)
+				throw std::logic_error("Incorrect instantiation of RefRectangle template: constant==true should only be used with const objects!");
+
 			switch(sideName)
 			{
 			case Side::LEFT:
-				return iLeft;
+				return const_cast<CoordinateType &>(iLeft);
 			case Side::BOTTOM:
-				return iBottom;
+				return const_cast<CoordinateType &>(iBottom);
 			case Side::RIGHT:
-				return iRight;
+				return const_cast<CoordinateType &>(iRight);
 			case Side::TOP:
-				return iTop;
+				return const_cast<CoordinateType &>(iTop);
 			default:
 				throw std::invalid_argument("Invalid enum value!");
 			} // end switch
