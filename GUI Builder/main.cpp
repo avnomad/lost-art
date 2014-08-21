@@ -37,7 +37,7 @@ using Eigen::Matrix;
 typedef graphene::Controls::IControl<float> IControl;
 typedef graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Button;
 typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Control;
-typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>,graphene::Frames::Renderable::Colorblind::BoxedParagraph> ParagraphControl;
+typedef graphene::Controls::Paragraph<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>,std::ratio<1,2>> Paragraph;
 typedef graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> Label;
 
 float lastX, lastY;
@@ -338,9 +338,9 @@ int main(int argc, char **argv)
 	controls.emplace_back(new Control(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f));
 	controls.emplace_back(new Control(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f));
 	controls.emplace_back(new Control(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f));
-	controls.emplace_back(new ParagraphControl(20.0f,240.0f,270.0f,270.0f,1.0f,
+	controls.emplace_back(new Paragraph(20.0f,240.0f,270.0f,270.0f,1.0f,
 		"This is a sample paragraph for paragraph_control1.\n\nThe text should appear with the two lines separated by a blank line.",8.0f));
-	controls.emplace_back(new ParagraphControl(20.0f,200.0f,270.0f,230.0f,1.0f,
+	controls.emplace_back(new Paragraph(20.0f,200.0f,270.0f,230.0f,1.0f,
 		"This is another paragraph. This time for paragraph_control2.\nThis line should be immediately below the previous one.\n",8.0f));
 	// event handling initialization
 	glutIdleFunc(idle);
