@@ -847,6 +847,81 @@ namespace graphene
 					} // end method render
 				}; // end class BoxedText
 
+				/** BaseType should be Rectangular, Textual, SizedText. Margin should be a compile-time rational type
+				 *	representing the margin reserved between the rectangle sides and the paragraph text.
+				 *	Newline characters in the text are respected, but new ones may be added as text is wrapper to fit 
+				 *	in the rectangle.
+				 *	If the text cannot fit in the rectangle, it is silently scaled down for rendering. This does not affect
+				 *	the size returned by the object methods.
+				 */
+				// TODO: Is silent scaling the best option?
+				// TODO: add support for different line spacings. Static and Dynamic options
+				template<typename BaseType, typename Margin = typename BaseType::margin>
+				class BoxedParagraph : public BaseType
+				{
+					/*********************
+					*    Member Types    *
+					*********************/
+				public:
+					typedef BaseType base_type;
+					typedef Margin margin;
+
+					/*********************
+					*    Constructors    *
+					*********************/
+				public:
+					BoxedParagraph(){/* empty body */}
+
+					template<typename OtherType>
+					BoxedParagraph(OtherType &&other) // this class does not add extra members
+						:BaseType(std::forward<OtherType>(other))
+					{
+						// empty body
+					} // end BoxedParagraph forwarding constructor (may move/copy/convert)
+
+					/****************
+					*    Methods    *
+					****************/
+				public:
+					void render() const
+					{
+						// TODO: add scaling support. nlgn algorithm based on binary search?
+						typename BaseType::font_engine_type fontEngine;
+						auto innerLeft   = (std::min(left(),right())*Margin::den + Margin::num)/Margin::den;
+						auto innerBottom = (std::min(bottom(),top())*Margin::den + Margin::num)/Margin::den;
+						auto innerRight  = (std::max(left(),right())*Margin::den - Margin::num)/Margin::den;
+						auto innerTop    = (std::max(bottom(),top())*Margin::den - Margin::num)/Margin::den;
+						typename BaseType::text_type currentLine;
+						auto lineHeight = textHeight(); // change later...
+
+						// TODO: add line wrapping.
+						glPushAttrib(GL_TRANSFORM_BIT);
+							glMatrixMode(GL_MODELVIEW);
+							glPushMatrix();
+								glTranslated(innerLeft,innerTop - fontEngine.fontAboveBaseLine()*lineHeight/fontEngine.fontHeight(),0); // set caret to initial position
+								for(auto character : text())
+								{
+									if(character == '\n') // TODO: use character traits for comparison
+									{
+										glPushMatrix();
+											glScaled(lineHeight/fontEngine.fontHeight(),lineHeight/fontEngine.fontHeight(),1);
+											fontEngine.render(currentLine);
+										glPopMatrix();
+										currentLine.clear();
+										glTranslated(0,-lineHeight,0);
+									}
+									else
+									{
+										currentLine.push_back(character);
+									} // end else
+								} // end foreach
+								glScaled(lineHeight/fontEngine.fontHeight(),lineHeight/fontEngine.fontHeight(),1);
+								fontEngine.render(currentLine);
+							glPopMatrix();
+						glPopAttrib();
+					} // end method render
+				}; // end class BoxedParagraph
+
 				/** Renders what its BaseType would render, but with the foreground and background
 				 *	colors swapped. Transparencies aren't swapped!
 				 */
