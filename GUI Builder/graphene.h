@@ -1339,7 +1339,8 @@ namespace graphene
 		// Workaround for the fact that VS2012 compiler and GCC don't allow inheriting directly from a decltype expression.
 		// Actually unfortunately the workaround std::common_type<decltype(...)>::type does not work...
 
-		// TODO: change >> to , and perhaps avoid the trailing () in frame<...>()
+		// TODO: perhaps avoid the trailing () in frame<...>()?
+		// TODO: find a way to restore default template arguments.
 		// TODO: remove overloads when variadic templates are available.
 		template<template<typename Base> class Frame>
 		struct Frame0{};
@@ -1364,15 +1365,15 @@ namespace graphene
 		Frame4<Frame,T1,T2,T3,T4> frame();
 		
 		template<typename BaseType, template<typename BaseType> class Frame>
-		Frame<BaseType> operator>>(BaseType, Frame0<Frame>);
+		Frame<BaseType> operator,(BaseType, Frame0<Frame>);
 		template<typename BaseType, template<typename BaseType, typename T1> class Frame, typename T1>
-		Frame<BaseType,T1> operator>>(BaseType, Frame1<Frame,T1>);
+		Frame<BaseType,T1> operator,(BaseType, Frame1<Frame,T1>);
 		template<typename BaseType, template<typename BaseType, typename T1, typename T2> class Frame, typename T1, typename T2>
-		Frame<BaseType,T1,T2> operator>>(BaseType, Frame2<Frame,T1,T2>);
+		Frame<BaseType,T1,T2> operator,(BaseType, Frame2<Frame,T1,T2>);
 		template<typename BaseType, template<typename BaseType, typename T1, typename T2, typename T3> class Frame, typename T1, typename T2, typename T3>
-		Frame<BaseType,T1,T2,T3> operator>>(BaseType, Frame3<Frame,T1,T2,T3>);
+		Frame<BaseType,T1,T2,T3> operator,(BaseType, Frame3<Frame,T1,T2,T3>);
 		template<typename BaseType, template<typename BaseType, typename T1, typename T2, typename T3, typename T4> class Frame, typename T1, typename T2, typename T3, typename T4>
-		Frame<BaseType,T1,T2,T3,T4> operator>>(BaseType, Frame4<Frame,T1,T2,T3,T4>);
+		Frame<BaseType,T1,T2,T3,T4> operator,(BaseType, Frame4<Frame,T1,T2,T3,T4>);
 	} // end namespace DSEL
 
 	/** The intention is to let the client easily combine frames to create controls as needed.
@@ -1390,12 +1391,12 @@ namespace graphene
 		struct ButtonBaseHelper
 		{
 			typedef decltype(
-				RectangleType() >> 
-				frame<Frames::UniformlyBordered,typename RectangleType::coordinate_type>() >>
-				frame<Frames::Pressable,Button<RectangleType,BorderSize,Margin,TextType>>() >>
-				frame<Frames::Hightlightable,Button<RectangleType,BorderSize,Margin,TextType>>() >>
-				frame<Frames::Textual,TextType>() >>
-				frame<Frames::SizedText,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>() >>
+				std::declval<RectangleType>(),
+				frame<Frames::UniformlyBordered,typename RectangleType::coordinate_type>(),
+				frame<Frames::Pressable,Button<RectangleType,BorderSize,Margin,TextType>>(),
+				frame<Frames::Hightlightable,Button<RectangleType,BorderSize,Margin,TextType>>(),
+				frame<Frames::Textual,TextType>(),
+				frame<Frames::SizedText,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>(),
 				frame<Frames::EventHandling::TwoStagePressable,typename RectangleType::coordinate_type>()
 			) type;
 		}; // end class ButtonBaseHelper
@@ -1498,7 +1499,7 @@ namespace graphene
 			ControlPart(){/* empty body */}
 
 			/** Forwards arguments to the underlying RectangularType constructor
-				*/
+			 */
 			template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
 			ControlPart(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
 				:base_type(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
