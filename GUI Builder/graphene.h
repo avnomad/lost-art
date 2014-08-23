@@ -1336,35 +1336,8 @@ namespace graphene
 	 */
 	namespace DSEL
 	{
-		// Workaround for the fact that VS2012 compiler and GCC don't allow inheriting directly from a decltype expression.
-		// Actually unfortunately the workaround std::common_type<decltype(...)>::type does not work...
-
-		// TODO: perhaps avoid the trailing () in frame<...>()?
-		// TODO: find a way to restore default template arguments.
-		// TODO: remove overloads when variadic templates are available.
-
-		//template<template<typename Base> class Frame>
-		//struct Frame0{};
-		//template<template<typename Base, typename T1> class Frame, typename T1>
-		//struct Frame1{};
-		//template<template<typename Base, typename T1, typename T2> class Frame, typename T1, typename T2>
-		//struct Frame2{};
-		//template<template<typename Base, typename T1, typename T2, typename T3> class Frame, typename T1, typename T2, typename T3>
-		//struct Frame3{};
-		//template<template<typename Base, typename T1, typename T2, typename T3, typename T4> class Frame, typename T1, typename T2, typename T3, typename T4>
-		//struct Frame4{};
-
-		//template<template<typename BaseType> class Frame>
-		//Frame0<Frame> frame();
-		//template<template<typename BaseType, typename T1> class Frame, typename T1>
-		//Frame1<Frame,T1> frame();
-		//template<template<typename BaseType, typename T1, typename T2> class Frame, typename T1, typename T2>
-		//Frame2<Frame,T1,T2> frame();
-		//template<template<typename BaseType, typename T1, typename T2, typename T3> class Frame, typename T1, typename T2, typename T3>
-		//Frame3<Frame,T1,T2,T3> frame();
-		//template<template<typename BaseType, typename T1, typename T2, typename T3, typename T4> class Frame, typename T1, typename T2, typename T3, typename T4>
-		//Frame4<Frame,T1,T2,T3,T4> frame();
-		
+		// Had to workaround many VS2012 and gcc bugs related to decltype. The std::common_type<decltype(...)>::type workaround
+		// didn't work in the base list context. TODO: replace the explicit specializations with variadic templates when available.
 		struct Omit {};
 
 		template<class T1 = Omit, class T2 = Omit, class T3 = Omit, class T4 = Omit, class T5 = Omit,
@@ -1373,7 +1346,6 @@ namespace graphene
 				class T16 = Omit, class T17 = Omit, class T18 = Omit, class T19 = Omit, class T20 = Omit>
 		struct FrameStack;
 
-		// Skip all-omit case
 		template<class BaseType>
 		struct FrameStack<BaseType,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit>
 		{typedef BaseType type;};
@@ -1407,17 +1379,6 @@ namespace graphene
 			class T11, class T12, class T13, class T14, class T15, class T16, class T17, class T18, class T19, class T20>
 		struct FrameStack<BaseType,FrameType<Omit,P1,P2,P3,P4>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>
 		{typedef typename FrameStack<FrameType<BaseType,P1,P2,P3,P4>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
-
-		//template<typename BaseType, template<typename BaseType> class FrameType>
-		//FrameType<BaseType> operator,(BaseType &&, FrameType<Omit> &&);
-		//template<typename BaseType, template<typename BaseType, typename T1> class FrameType, typename T1>
-		//FrameType<BaseType,T1> operator,(BaseType &&, FrameType<Omit,T1> &&);
-		//template<typename BaseType, template<typename BaseType, typename T1, typename T2> class FrameType, typename T1, typename T2>
-		//FrameType<BaseType,T1,T2> operator,(BaseType &&, FrameType<Omit,T1,T2> &&);
-		//template<typename BaseType, template<typename BaseType, typename T1, typename T2, typename T3> class FrameType, typename T1, typename T2, typename T3>
-		//FrameType<BaseType,T1,T2,T3> operator,(BaseType &&, FrameType<Omit,T1,T2,T3> &&);
-		//template<typename BaseType, template<typename BaseType, typename T1, typename T2, typename T3, typename T4> class FrameType, typename T1, typename T2, typename T3, typename T4>
-		//FrameType<BaseType,T1,T2,T3,T4> operator,(BaseType &&, FrameType<Omit,T1,T2,T3,T4> &&);
 	} // end namespace DSEL
 
 	/** The intention is to let the client easily combine frames to create controls as needed.
@@ -1427,42 +1388,17 @@ namespace graphene
 	 */
 	namespace Controls
 	{
-		using namespace DSEL; // import operator>>
-
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
-		//template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		//struct ButtonBaseHelper
-		//{
-		//	typedef typename FrameStack<
-		//		RectangleType,
-		//		Frames::UniformlyBordered<Omit,typename RectangleType::coordinate_type>,
-		//		Frames::Pressable<Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-		//		Frames::Hightlightable<Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-		//		Frames::Textual<Omit,TextType>,
-		//		Frames::SizedText<Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
-		//		Frames::EventHandling::TwoStagePressable<Omit,typename RectangleType::coordinate_type>
-		//	>::type type;
-		//	//typedef decltype(
-		//	//	std::declval<RectangleType>(),
-		//	//	std::declval<Frames::UniformlyBordered<Omit,typename RectangleType::coordinate_type>>(),
-		//	//	std::declval<Frames::Pressable<Omit,Button<RectangleType,BorderSize,Margin,TextType>>>(),
-		//	//	std::declval<Frames::Hightlightable<Omit,Button<RectangleType,BorderSize,Margin,TextType>>>(),
-		//	//	std::declval<Frames::Textual<Omit,TextType>>(),
-		//	//	std::declval<Frames::SizedText<Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>>(),
-		//	//	std::declval<Frames::EventHandling::TwoStagePressable<Omit,typename RectangleType::coordinate_type>>()
-		//	//) type;
-		//}; // end class ButtonBaseHelper
-
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
-		class ButtonBase : public FrameStack<
+		class ButtonBase : public DSEL::FrameStack<
 			RectangleType,
-			Frames::UniformlyBordered<Omit,typename RectangleType::coordinate_type>,
-			Frames::Pressable<Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-			Frames::Hightlightable<Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-			Frames::Textual<Omit,TextType>,
-			Frames::SizedText<Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
-			Frames::EventHandling::TwoStagePressable<Omit,typename RectangleType::coordinate_type>
+			Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
+			Frames::Pressable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
+			Frames::Hightlightable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
+			Frames::Textual<DSEL::Omit,TextType>,
+			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+			Frames::EventHandling::TwoStagePressable<DSEL::Omit,typename RectangleType::coordinate_type>
 		>::type{};
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
