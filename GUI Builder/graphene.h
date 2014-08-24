@@ -1340,45 +1340,100 @@ namespace graphene
 		// didn't work in the base list context. TODO: replace the explicit specializations with variadic templates when available.
 		struct Omit {};
 
-		template<class T1 = Omit, class T2 = Omit, class T3 = Omit, class T4 = Omit, class T5 = Omit,
-				class T6 = Omit, class T7 = Omit, class T8 = Omit, class T9 = Omit, class T10 = Omit,
+		// TODO: specialize only for type parameters and force frames to use compile-time boolean types?
+
+		// Substitute specializations
+		template<class BaseType, class FrameType> struct Substitute;
+
+		template<class BaseType, template<class BaseType> class FrameType>
+		struct Substitute<BaseType, FrameType<Omit>>
+		{typedef FrameType<BaseType> type;};
+
+		template<class BaseType, template<class BaseType, class> class FrameType, class P1>
+		struct Substitute<BaseType, FrameType<Omit,P1>>
+		{typedef FrameType<BaseType,P1> type;};
+
+		template<class BaseType, template<class BaseType, bool> class FrameType, bool P1>
+		struct Substitute<BaseType, FrameType<Omit,P1>>
+		{typedef FrameType<BaseType,P1> type;};
+
+		template<class BaseType, template<class BaseType, class, class> class FrameType, class P1, class P2>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
+		{typedef FrameType<BaseType,P1,P2> type;};
+
+		template<class BaseType, template<class BaseType, bool, class> class FrameType, bool P1, class P2>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
+		{typedef FrameType<BaseType,P1,P2> type;};
+
+		template<class BaseType, template<class BaseType, class, bool> class FrameType, class P1, bool P2>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
+		{typedef FrameType<BaseType,P1,P2> type;};
+
+		template<class BaseType, template<class BaseType, bool, bool> class FrameType, bool P1, bool P2>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
+		{typedef FrameType<BaseType,P1,P2> type;};
+
+
+		template<class BaseType, template<class BaseType, class, class, class> class FrameType, class P1, class P2, class P3>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
+		{typedef FrameType<BaseType,P1,P2,P3> type;};
+
+		template<class BaseType, template<class BaseType, bool, class, class> class FrameType, bool P1, class P2, class P3>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
+		{typedef FrameType<BaseType,P1,P2,P3> type;};
+
+		template<class BaseType, template<class BaseType, class, bool, class> class FrameType, class P1, bool P2, class P3>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
+		{typedef FrameType<BaseType,P1,P2,P3> type;};
+
+		template<class BaseType, template<class BaseType, bool, bool, class> class FrameType, bool P1, bool P2, class P3>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
+		{typedef FrameType<BaseType,P1,P2,P3> type;};
+
+		template<class BaseType, template<class BaseType, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
+
+		template<class BaseType, template<class BaseType, bool, class, class, class> class FrameType, bool P1, class P2, class P3, class P4>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
+
+		template<class BaseType, template<class BaseType, class, bool, class, class> class FrameType, class P1, bool P2, class P3, class P4>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
+
+		template<class BaseType, template<class BaseType, bool, bool, class, class> class FrameType, bool P1, bool P2, class P3, class P4>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
+
+		template<class BaseType, template<class BaseType, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
+
+		template<class BaseType, template<class BaseType, bool, class, class, class, class> class FrameType, bool P1, class P2, class P3, class P4, class P5>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
+
+		template<class BaseType, template<class BaseType, class, bool, class, class, class> class FrameType, class P1, bool P2, class P3, class P4, class P5>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
+
+		template<class BaseType, template<class BaseType, bool, bool, class, class, class> class FrameType, bool P1, bool P2, class P3, class P4, class P5>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
+
+		// FrameStack specializations
+		template<class BaseType = Omit, class FrameType = Omit,  
+													class T3 = Omit,  class T4 = Omit,  class T5 = Omit,
+				class T6 = Omit,  class T7 = Omit,  class T8 = Omit,  class T9 = Omit,  class T10 = Omit,
 				class T11 = Omit, class T12 = Omit, class T13 = Omit, class T14 = Omit, class T15 = Omit,
 				class T16 = Omit, class T17 = Omit, class T18 = Omit, class T19 = Omit, class T20 = Omit>
-		struct FrameStack;
+		struct FrameStack
+		{typedef typename FrameStack<typename Substitute<BaseType,FrameType>::type,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
 
 		template<class BaseType>
 		struct FrameStack<BaseType,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit>
 		{typedef BaseType type;};
-
-		template<class BaseType, template<class> class FrameType,
-								  class T3,  class T4,  class T5,  class T6,  class T7,  class T8,  class T9, class T10,
-			class T11, class T12, class T13, class T14, class T15, class T16, class T17, class T18, class T19, class T20>
-		struct FrameStack<BaseType,FrameType<Omit>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>
-		{typedef typename FrameStack<FrameType<BaseType>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
-
-		template<class BaseType, template<class, class> class FrameType, class P1,
-								  class T3,  class T4,  class T5,  class T6,  class T7,  class T8,  class T9, class T10,
-			class T11, class T12, class T13, class T14, class T15, class T16, class T17, class T18, class T19, class T20>
-		struct FrameStack<BaseType,FrameType<Omit,P1>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>
-		{typedef typename FrameStack<FrameType<BaseType,P1>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
-
-		template<class BaseType, template<class, class, class> class FrameType, class P1, class P2,
-								  class T3,  class T4,  class T5,  class T6,  class T7,  class T8,  class T9, class T10,
-			class T11, class T12, class T13, class T14, class T15, class T16, class T17, class T18, class T19, class T20>
-		struct FrameStack<BaseType,FrameType<Omit,P1,P2>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>
-		{typedef typename FrameStack<FrameType<BaseType,P1,P2>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
-
-		template<class BaseType, template<class, class, class, class> class FrameType, class P1, class P2, class P3,
-								  class T3,  class T4,  class T5,  class T6,  class T7,  class T8,  class T9, class T10,
-			class T11, class T12, class T13, class T14, class T15, class T16, class T17, class T18, class T19, class T20>
-		struct FrameStack<BaseType,FrameType<Omit,P1,P2,P3>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>
-		{typedef typename FrameStack<FrameType<BaseType,P1,P2,P3>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
-
-		template<class BaseType, template<class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4,
-								  class T3,  class T4,  class T5,  class T6,  class T7,  class T8,  class T9, class T10,
-			class T11, class T12, class T13, class T14, class T15, class T16, class T17, class T18, class T19, class T20>
-		struct FrameStack<BaseType,FrameType<Omit,P1,P2,P3,P4>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>
-		{typedef typename FrameStack<FrameType<BaseType,P1,P2,P3,P4>,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
 	} // end namespace DSEL
 
 	/** The intention is to let the client easily combine frames to create controls as needed.
@@ -1399,7 +1454,7 @@ namespace graphene
 			Frames::Textual<DSEL::Omit,TextType>,
 			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			Frames::EventHandling::TwoStagePressable<DSEL::Omit,typename RectangleType::coordinate_type>
-		>::type{};
+		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		class Button : public Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
@@ -1459,34 +1514,41 @@ namespace graphene
 
 
 		template<typename CoordinateType>
-		class IShapePart : public Bases::Renderable<Bases::Containing<Bases::Movable<Bases::Empty,CoordinateType>>>{}; // poor man's template alias
+		class IShapePart : public DSEL::FrameStack<
+			Bases::Empty,
+			Bases::Movable<DSEL::Omit,CoordinateType>,
+			Bases::Containing<DSEL::Omit,CoordinateType>,
+			Bases::Renderable<DSEL::Omit>			
+		>::type{}; // poor man's template alias
 
 		/** Const instances should be constant and non-const instances should be non constant
 		 */
 		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		class ControlPart : public Frames::Adapting::Rectangular<
-										Frames::Renderable::Colorblind::InversedColor<										
-										Frames::Renderable::Stippled<
-										Frames::Renderable::Colorblind::FilledRectangle<
-										Frames::Movable::HVMovable<
-											Frames::Movable::Rectangular<
-											Bases::Rectangular<IShapePart<CoordinateType>>>,
-										horizontallyMovable,verticallyMovable>>>>,
-									geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+		class ControlPart : public DSEL::FrameStack<
+				IShapePart<CoordinateType>,
+				Bases::Rectangular<DSEL::Omit,CoordinateType>,
+				Frames::Movable::Rectangular<DSEL::Omit,CoordinateType>,
+				Frames::Movable::HVMovable<DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
+				Frames::Renderable::Colorblind::FilledRectangle<DSEL::Omit>,
+				Frames::Renderable::Stippled<DSEL::Omit>,
+				Frames::Renderable::Colorblind::InversedColor<DSEL::Omit>,
+				Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+			>::type
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Adapting::Rectangular<
-						Frames::Renderable::Colorblind::InversedColor<										
-						Frames::Renderable::Stippled<
-						Frames::Renderable::Colorblind::FilledRectangle<
-						Frames::Movable::HVMovable<
-							Frames::Movable::Rectangular<
-							Bases::Rectangular<IShapePart<CoordinateType>>>,
-						horizontallyMovable,verticallyMovable>>>>,
-					geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>> base_type;
+			typedef typename DSEL::FrameStack<
+				IShapePart<CoordinateType>,
+				Bases::Rectangular<DSEL::Omit,CoordinateType>,
+				Frames::Movable::Rectangular<DSEL::Omit,CoordinateType>,
+				Frames::Movable::HVMovable<DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
+				Frames::Renderable::Colorblind::FilledRectangle<DSEL::Omit>,
+				Frames::Renderable::Stippled<DSEL::Omit>,
+				Frames::Renderable::Colorblind::InversedColor<DSEL::Omit>,
+				Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+			>::type base_type;
 			typedef typename ControlPart::rectangle_type rectangle_type;
 			
 			/*********************
@@ -1507,39 +1569,32 @@ namespace graphene
 		}; // end class ControlPart
 
 		template<typename CoordinateType, typename TextType = std::string> 
-		class IControl : public Bases::Renderable<
-								Bases::MultiPart<
-									Bases::Highlightable<
-									Bases::Selectable<
-										Bases::SizedText<
-										Bases::Textual<
-											Bases::UniformlyBordered<
-												Bases::Movable<
-												Bases::Containing<
-												Bases::Rectangular<
-													Bases::Empty,
-												CoordinateType>>>,
-											CoordinateType>,
-										TextType>>,
-									IControl<CoordinateType,TextType>>>,
-								std::unique_ptr<IShapePart<CoordinateType>>,
-								std::unique_ptr<const IShapePart<CoordinateType>>>>{}; // poor man's template alias
+		class IControl : public DSEL::FrameStack<
+			Bases::Empty,
+			Bases::Rectangular<DSEL::Omit,CoordinateType>,
+			Bases::Containing<DSEL::Omit,CoordinateType>,
+			Bases::Movable<DSEL::Omit,CoordinateType>,
+			Bases::UniformlyBordered<DSEL::Omit,CoordinateType>,
+			Bases::Textual<DSEL::Omit,TextType>,
+			Bases::SizedText<DSEL::Omit,CoordinateType>,
+			Bases::Selectable<DSEL::Omit,IControl<CoordinateType,TextType>>,
+			Bases::Highlightable<DSEL::Omit,IControl<CoordinateType,TextType>>,
+			Bases::MultiPart<DSEL::Omit,std::unique_ptr<IShapePart<CoordinateType>>,std::unique_ptr<const IShapePart<CoordinateType>>,CoordinateType>,
+			Bases::Renderable<DSEL::Omit>
+		>::type{}; // poor man's template alias
 																	
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
-		class ControlBase : public Frames::MultiPartBorderedRectangle<
-										Frames::SizedText<
-											Frames::Textual<
-											Frames::Movable::Rectangular<
-											Frames::Hightlightable<
-											Frames::Selectable<
-												Frames::UniformlyBordered<
-													Frames::Adapting::Rectangular<
-														IControl<typename RectangleType::coordinate_type,TextType>,
-													RectangleType>,
-												typename RectangleType::coordinate_type>/*,
-											Control<RectangleType,BorderSize,Margin,TextType>*/>>>>,
-										FunctionObjects::GlutStrokeFontEngine>,
-									ControlPart>{}; // poor man's template alias
+		class ControlBase : public 
+			Frames::MultiPartBorderedRectangle<typename DSEL::FrameStack<
+				IControl<typename RectangleType::coordinate_type,TextType>,
+				Frames::Adapting::Rectangular<DSEL::Omit,RectangleType>,
+				Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
+				Frames::Selectable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>/*Control<RectangleType,BorderSize,Margin,TextType>*/>,
+				Frames::Hightlightable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>>,
+				Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
+				Frames::Textual<DSEL::Omit,TextType>,
+				Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+			>::type,ControlPart>{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
 		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
@@ -1653,11 +1708,13 @@ namespace graphene
 			} // end Paragraph constructor
 		}; // end class Paragraph
 
-		template<typename RectangleType, typename TextType> class LabelBase : public Frames::SizedText<
-																						Frames::Textual<
-																							Frames::Movable::Rectangular<RectangleType>,
-																							TextType>,
-																						FunctionObjects::GlutStrokeFontEngine>{}; // poor man's template alias
+		template<typename RectangleType, typename TextType> 
+		class LabelBase : public DSEL::FrameStack<
+			RectangleType,
+			Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
+			Frames::Textual<DSEL::Omit,TextType>,
+			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename Margin, typename TextType = std::string>
 		class Label : public Frames::Renderable::Sequential<
