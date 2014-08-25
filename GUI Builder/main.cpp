@@ -342,6 +342,7 @@ int main(int argc, char **argv)
 		"This is a sample paragraph for paragraph_control1.\n\nThe text should appear with the two lines separated by a blank line.",8.0f));
 	controls.emplace_back(new Paragraph(20.0f,200.0f,270.0f,230.0f,1.0f,
 		"This is another paragraph. This time for paragraph_control2.\nThis line should be immediately below the previous one.\n",8.0f));
+
 	// event handling initialization
 	glutIdleFunc(idle);
 	glutDisplayFunc(display);

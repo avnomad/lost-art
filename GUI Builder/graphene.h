@@ -164,7 +164,7 @@ namespace graphene
 			virtual const TextType &text() const = 0;
 		}; // end class Textual
 
-		/** SizedText instances have a fixed 'natural' aspect ration, so changing the height,
+		/** SizedText instances have a fixed 'natural' aspect ratio, so changing the height,
 		 *	actually changes the width as well. Some frame stacks, may interpret  text sizes, as
 		 *	preferred instead of mandatory.
 		 */
@@ -184,7 +184,47 @@ namespace graphene
 			// to set/get the aspect ratio.
 			virtual CoordinateType textWidth() const = 0;
 			virtual void setTextWidth(const CoordinateType &value) = 0; // deprecated
+			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
+			// and add prefered width, height read-only properties.
 		}; // end class SizedText
+
+		template<typename BaseType, typename NameType = typename BaseType::name_type>
+		class Named : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef NameType name_type;
+
+			// Methods
+		public:
+			virtual NameType &name() = 0;
+			virtual const NameType &name() const = 0;
+		}; // end class Named
+
+		/** SizedName instances have a fixed 'natural' aspect ratio, so changing the height,
+		 *	actually changes the width as well. Some frame stacks, may interpret  name sizes, as
+		 *	preferred instead of mandatory.
+		 */
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class SizedName : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual CoordinateType &nameHeight() = 0;
+			virtual const CoordinateType &nameHeight() const = 0;
+			// TODO: add support for setting the name width using properties, and perhaps the ability
+			// to set/get the aspect ratio.
+			virtual CoordinateType nameWidth() const = 0;
+			virtual void setNameWidth(const CoordinateType &value) = 0; // deprecated
+			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
+			// and add prefered width, height read-only properties.
+		}; // end class SizedName
 
 		template<typename BaseType, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPart : public BaseType
@@ -485,10 +525,9 @@ namespace graphene
 			{
 				return iText;
 			} // end method text
-
 		}; // end class Textual
 
-		/** BaseType should be Textual, TextEndineType should be default constructible
+		/** BaseType should be Textual, TextEngineType should be default constructible
 		 */
 		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class SizedText : public BaseType
@@ -535,6 +574,85 @@ namespace graphene
 				textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(text());
 			} // end method setTextWidth
 		}; // end class SizedText
+
+		template<typename BaseType, typename NameType = typename BaseType::name_type>
+		class Named : public BaseType
+		{
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			NameType iName;
+
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef NameType name_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			NameType &name()
+			{
+				return iName;
+			} // end method name
+
+			const NameType &name() const
+			{
+				return iName;
+			} // end method name
+		}; // end class Named
+
+		/** BaseType should be Named, TextEngineType should be default constructible
+		 */
+		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
+		class SizedName : public BaseType
+		{
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			CoordinateType iNameHeight;
+
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+			typedef FontEngineType font_engine_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			CoordinateType &nameHeight()
+			{
+				return iNameHeight;
+			} // end method nameHeight
+
+			const CoordinateType &nameHeight() const
+			{
+				return iNameHeight;
+			} // end method nameHeight
+
+			// TODO: add support for setting the name width using properties, and perhaps the ability
+			// to set/get the aspect ratio.
+			CoordinateType nameWidth() const
+			{
+				FontEngineType fontEngine;
+				return fontEngine.stringWidth(name()) * nameHeight() / fontEngine.fontHeight();
+			} // end method nameWidth
+
+			void setNameWidth(const CoordinateType &value) // deprecated
+			{
+				FontEngineType fontEngine;
+				nameHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(name());
+			} // end method setNameWidth
+		}; // end class SizedName
 
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
 		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
@@ -798,7 +916,7 @@ namespace graphene
 				 *	the size returned by the object methods.
 				 */
 				// TODO: Is silent scaling the best option?
-				template<typename BaseType, typename Margin = typename BaseType::margin>
+				template<typename BaseType, typename TextGetter, typename Margin = typename BaseType::margin>
 				class BoxedText : public BaseType
 				{
 					/*********************
@@ -830,8 +948,8 @@ namespace graphene
 						typename BaseType::font_engine_type fontEngine;
 						// scale text down to fit:
 						auto actualTextHeight = std::min(textHeight(),(height()*Margin::den - 2*Margin::num) / Margin::den);
-						auto actualTextWidth = std::min(actualTextHeight * fontEngine.stringWidth(text()) / fontEngine.fontHeight(),(width()*Margin::den - 2*Margin::num) / Margin::den);
-						actualTextHeight = std::min(actualTextHeight, actualTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(text()));
+						auto actualTextWidth = std::min(actualTextHeight * fontEngine.stringWidth(TextGetter()(*this)) / fontEngine.fontHeight(),(width()*Margin::den - 2*Margin::num) / Margin::den);
+						actualTextHeight = std::min(actualTextHeight, actualTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(TextGetter()(*this)));
 
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
@@ -839,9 +957,9 @@ namespace graphene
 								glTranslated((((width() - actualTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
 											 (((height() - actualTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
 											 0); // center text in inner rectangle
-								glScaled(actualTextWidth / fontEngine.stringWidth(text()) , actualTextHeight / fontEngine.fontHeight() , 1);
+								glScaled(actualTextWidth / fontEngine.stringWidth(TextGetter()(*this)) , actualTextHeight / fontEngine.fontHeight() , 1);
 								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
-								fontEngine.render(text());
+								fontEngine.render(TextGetter()(*this));
 							glPopMatrix();
 						glPopAttrib();
 					} // end method render
@@ -857,7 +975,7 @@ namespace graphene
 				 */
 				// TODO: Is silent scaling the best option?
 				// TODO: Add support for dynamic line spacing using SFINAE
-				template<typename BaseType, typename Margin = typename BaseType::margin, typename LineSpacing = typename BaseType::line_spacing>
+				template<typename BaseType, typename TextGetter, typename Margin = typename BaseType::margin, typename LineSpacing = typename BaseType::line_spacing>
 				class BoxedParagraph : public BaseType
 				{
 					/*********************
@@ -901,7 +1019,7 @@ namespace graphene
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
 								glTranslated(innerLeft,innerTop - fontEngine.fontAboveBaseLine()*lineHeight/fontEngine.fontHeight(),0); // set caret to initial position
-								for(auto character : text())
+								for(auto character : TextGetter()(*this))
 								{
 									if(character == '\n') // TODO: use character traits for comparison
 									{
@@ -1255,6 +1373,24 @@ namespace graphene
 			} // end method operator()
 		}; // end struct Highlighted
 
+		struct Textual
+		{
+			template<typename TextualType>
+			auto operator()(const TextualType &textual)->decltype(textual.text())
+			{
+				return textual.text();
+			} // end method operator()
+		}; // end struct Textual
+
+		struct Named
+		{
+			template<typename NamedType>
+			auto operator()(const NamedType &named)->decltype(named.name())
+			{
+				return named.name();
+			} // end method operator()
+		}; // end struct Named
+
 		/** Font engines encapsulate low level font metric and rendering functions, to present 
 		 *	them in a uniform manner. They should be constructible from a font and default 
 		 *	constructible (that should give font a default value).
@@ -1460,14 +1596,14 @@ namespace graphene
 		class Button : public Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 									Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-									Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+									Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
 								Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 									Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 									Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 									FunctionObjects::Highlighted>,
 								FunctionObjects::Pressed>
 		{
@@ -1478,14 +1614,14 @@ namespace graphene
 			typedef Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 						Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
 						Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 							Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 							FunctionObjects::Highlighted>,
 						FunctionObjects::Pressed> base_type;
 			typedef typename Button::coordinate_type coordinate_type;
@@ -1600,14 +1736,14 @@ namespace graphene
 		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 									Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
 									Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 										FunctionObjects::Highlighted>,
 									FunctionObjects::Selected>
 		{
@@ -1618,14 +1754,14 @@ namespace graphene
 			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 						Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>>,
+							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
 						Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin>>,
+								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
 							FunctionObjects::Highlighted>,
 						FunctionObjects::Selected> base_type;
 			typedef typename Control::coordinate_type coordinate_type;
@@ -1656,14 +1792,14 @@ namespace graphene
 		class Paragraph : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 									Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin,LineSpacing>>>,
+										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
 									Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-											Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin,LineSpacing>>,
+											Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
 										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-											Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin,LineSpacing>>,
+											Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
 										FunctionObjects::Highlighted>,
 									FunctionObjects::Selected>
 		{
@@ -1674,14 +1810,14 @@ namespace graphene
 			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 						Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin,LineSpacing>>>,
+							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
 						Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin,LineSpacing>>,
+								Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
 							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
 								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,Margin,LineSpacing>>,
+								Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
 							FunctionObjects::Highlighted>,
 						FunctionObjects::Selected> base_type;
 			typedef typename Paragraph::coordinate_type coordinate_type;
@@ -1720,7 +1856,7 @@ namespace graphene
 		class Label : public Frames::Renderable::Sequential<
 								LabelBase<RectangleType,TextType>,
 								Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
-								Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,Margin>>>
+								Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,FunctionObjects::Textual,Margin>>>
 		{
 			/*********************
 			*    Member Types    *
@@ -1729,7 +1865,7 @@ namespace graphene
 			typedef Frames::Renderable::Sequential<
 						LabelBase<RectangleType,TextType>,
 						Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
-						Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,Margin>>> base_type;
+						Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,FunctionObjects::Textual,Margin>>> base_type;
 			typedef typename Label::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 

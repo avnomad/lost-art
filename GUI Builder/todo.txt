@@ -1,0 +1,6 @@
+	Copyright (C) 2014 Vaptistis Anogeianakis <nomad@cornercase.gr>
+
+TODO:
+
+1.  Add support for static and dynamic coordinate systems to graphene and 
+    redesign frames to use them.
