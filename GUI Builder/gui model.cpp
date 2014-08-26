@@ -7,18 +7,19 @@ using std::vector;
 
 #include <boost/rational.hpp>
 
-namespace gui
+namespace GUIModel
 {
 	void runTestSuite()
 	{
 		using geometry::RectangleSide;
 		typedef boost::rational<long long> Rational;
 
-		Model<int> model;
+		Controls::Model<int> model;
 
-		model.controls.emplace_back(0,0,100,100);
-		model.controls.emplace_back(20,20,80,80);
-		model.controls.emplace_back(0,0,50,50);
+		// TODO: revert to test only relative frame.
+		model.controls.emplace_back(Controls::Model<int>::control_type(0,0,100,100,1,"screen",10));
+		model.controls.emplace_back(Controls::Model<int>::control_type(20,20,80,80,1,"control1",10));
+		model.controls.emplace_back(Controls::Model<int>::control_type(0,0,50,50,1,"control2",10));
 
 		model.constraints.emplace_back("2.3a + 2cm",0,RectangleSide::LEFT,1,RectangleSide::LEFT);
 		model.constraints.emplace_back("2/3a + 3.55b + 2px + cm",0,RectangleSide::RIGHT,1,RectangleSide::RIGHT);
@@ -75,4 +76,4 @@ namespace gui
 		//assert(results[5].pxSizeCoeff == 0);
 	} // end function runTestSuite
 
-} // end namespace gui
+} // end namespace GUIModel

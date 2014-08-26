@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 	Symbolic::Common::testSymbolTable();
 	geometry::runTestSuite();
 	graphene::runTestSuite();
-	gui::runTestSuite();
+	GUIModel::runTestSuite();
 
 	//using geometry::RectangleSide;
 

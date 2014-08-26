@@ -1473,7 +1473,9 @@ namespace graphene
 	namespace DSEL
 	{
 		// Had to workaround many VS2012 and gcc bugs related to decltype. The std::common_type<decltype(...)>::type workaround
-		// didn't work in the base list context. TODO: replace the explicit specializations with variadic templates when available.
+		// didn't work in the base list context.
+		// TODO: Replace the explicit specializations with variadic templates when available.
+		// TODO: Create a real DSEL when decltype becomes available. Include conditionals and sequences.
 		struct Omit {};
 
 		// TODO: specialize only for type parameters and force frames to use compile-time boolean types?

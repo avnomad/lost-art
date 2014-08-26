@@ -20,480 +20,606 @@
 #include <Eigen/Dense>
 
 #include "geometry.h"
+#include "graphene.h"
 #include "symbol table.h"
 #include "linear system solving.h"
 
-namespace gui
+namespace GUIModel
 {
 	void runTestSuite();
 
-	template<typename CoordinateType>
-	class Control : public geometry::Rectangle<CoordinateType>
+	/** Will follow the Frames architecture from Graphene.
+	 */
+	namespace Bases
 	{
-	public:
-		/*********************
-		*    Member Types    *
-		*********************/
 
-		typedef boost::property_tree::ptree property_tree_type;
+	} // end namespace Bases
 
-		// TODO: add color
-		// TODO: add type
-
-	public:
-		/*********************
-		*    Constructors    *
-		*********************/
-
-		/** Construct an uninitialized Control.
-		 */
-		Control(){/* emtpy body */}
-
-		/** Construct a Control with the specified sides.
-		 */
-		Control(CoordinateType left, CoordinateType bottom, CoordinateType right, CoordinateType top)
-			:Rectangle(left,bottom,right,top)
-		{
-			// empty body
-		} // end Control constructor
-
-		Control(const property_tree_type &tree)
-			:Rectangle(tree.get<CoordinateType>("sides.left"),tree.get<CoordinateType>("sides.bottom"),
-						tree.get<CoordinateType>("sides.right"),tree.get<CoordinateType>("sides.top"))
-		{
-			// empty body
-		} // end Control conversion constructor
-
-		/****************
-		*    Methods    *
-		****************/
-
-		operator property_tree_type() const
-		{
-			property_tree_type tree;
-
-			tree.put("sides.left",left());
-			tree.put("sides.bottom",bottom());
-			tree.put("sides.right",right());
-			tree.put("sides.top",top());
-
-			return tree;
-		} // end method operator property_tree_type
-
-	}; // end class Control
-
-
-	struct ConstraintEndPoint
+	namespace Frames
 	{
-		/*********************
-		*    Member Types    *
-		*********************/
 
-		typedef boost::property_tree::ptree property_tree_type;
-		typedef geometry::RectangleSide side_type;
+	} // end namespace Frames
 
-		/***************
-		*    Fields    *
-		***************/
-
-		size_t control; // ordinal number of the referred control
-		side_type side; // enumerator of the referred side
-
-		/*********************
-		*    Constructors    *
-		*********************/
-
-		ConstraintEndPoint(){/* empty body */}
-
-		ConstraintEndPoint(size_t control, side_type side)
-			:control(control),side(side)
-		{
-			// empty body
-		} // end ConstraintEndPoint constructor
-
-		ConstraintEndPoint(const property_tree_type &tree)
-			:control(tree.get<size_t>("control")),side(to<side_type>(tree.get<std::string>("side")))
-		{
-			// empty body
-		} // end ConstraintEndPoint conversion constructor
-
-		/****************
-		*    Methods    *
-		****************/
-
-		operator property_tree_type() const
-		{
-			property_tree_type tree;
-
-			tree.put("control",control);
-			tree.put("side",to<std::string>(side));
-
-			return tree;
-		} // end method operator property_tree_type
-
-	}; // end struct ConstraintEndPoint
-
-
-	template<typename TextType = std::string>
-	class Constraint
+	namespace Controls
 	{
-	public:
-		/*********************
-		*    Member Types    *
-		*********************/
+		template<typename CoordinateType>
+		class IShapePart : public graphene::DSEL::FrameStack<
+			graphene::Bases::Empty,
+			graphene::Bases::Movable<graphene::DSEL::Omit,CoordinateType>,
+			graphene::Bases::Containing<graphene::DSEL::Omit,CoordinateType>,
+			graphene::Bases::Renderable<graphene::DSEL::Omit>			
+		>::type{}; // poor man's template alias
 
-		template<typename IDType, typename RationalType>
-		struct ParseResult
-		{
-			// Fields
-			std::map<IDType,RationalType> varCoeff;
-			RationalType pxSizeCoeff;
-			RationalType rhsConstant;
-		}; // end struct ParseResult
-
-		typedef TextType text_type;
-		typedef boost::property_tree::ptree property_tree_type;
-		typedef ConstraintEndPoint EndPoint;
-		typedef EndPoint::side_type side_type;
-
-	private:
-		/***************
-		*    Fields    *
-		***************/
-
-		TextType iText;
-		EndPoint iEndPoints[2];
-
-	public:
-		/*********************
-		*    Constructors    *
-		*********************/
-
-		/** Construct an uninitialized Constraint.
+		/** Const instances should be constant and non-const instances should be non constant
 		 */
-		Constraint(){/* emtpy body */}
-
-		/** Construct a Constraint with the specified sides.
-		 */
-		Constraint(TextType text, const EndPoint &endPoint1, const EndPoint &endPoint2)
-			:iText(std::move(text))
+		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		class ControlPart : public graphene::DSEL::FrameStack<
+				IShapePart<CoordinateType>,
+				graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>,
+				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
+				graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
+				graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
+				graphene::Frames::Renderable::Stippled<graphene::DSEL::Omit>,
+				graphene::Frames::Renderable::Colorblind::InversedColor<graphene::DSEL::Omit>,
+				graphene::Frames::Adapting::Rectangular<graphene::DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+			>::type
 		{
-			iEndPoints[0] = endPoint1;
-			iEndPoints[1] = endPoint2;
-		} // end Control constructor
-
-		Constraint(TextType text, size_t control1, side_type side1, size_t control2, side_type side2)
-			:iText(std::move(text))
-		{
-			iEndPoints[0].control = control1;
-			iEndPoints[0].side = side1;
-			iEndPoints[1].control = control2;
-			iEndPoints[1].side = side2;
-		} // end Control constructor
-
-		Constraint(const property_tree_type &tree)
-			:iText(tree.get<TextType>("text"))
-		{
-			iEndPoints[0] = EndPoint(tree.get_child("first-end-point"));
-			iEndPoints[1] = EndPoint(tree.get_child("second-end-point"));
-		} // end Constraint conversion constructor
-
-
-		/*************************
-		*    Accessor Methods    *
-		*************************/
-
-		TextType &text()
-		{
-			return iText;
-		} // end method text
-
-		const TextType &text() const
-		{
-			return iText;
-		} // end method text
-
-		EndPoint (&endPoints())[2]
-		{
-			return iEndPoints;
-		} // end method endPoints
-
-		const EndPoint (&endPoints() const)[2]
-		{
-			return iEndPoints;
-		} // end method endPoints
-
-		/****************
-		*    Methods    *
-		****************/
-
-		operator property_tree_type() const
-		{
-			property_tree_type tree;
-
-			tree.put("text",iText);
-			tree.put_child("first-end-point",iEndPoints[0]);
-			tree.put_child("second-end-point",iEndPoints[1]);
-
-			return tree;
-		} // end method operator property_tree_type
-
-		//template<typename RationalType, typename IDType, typename NameType>
-		//ParseResult<IDType,RationalType> parse(std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols) const
-		//{
-		//	namespace qi = boost::spirit::qi;
-		//	namespace px = boost::phoenix;
-		//	using qi::rule;
-		//	using qi::_val;	using qi::_1; using qi::_2;
-		//	using qi::alpha; using qi::alnum; using qi::digit; using qi::char_; using qi::eps; using qi::ulong_long;
-		//	using boost::spirit::ascii::space;
-		//	using boost::spirit::ascii::space_type;
-
-		//	ParseResult<IDType,RationalType> result;
-
-		//	struct Workaround
-		//	{
-		//		/**	s must be a string of digits [0-9].
-		//		 */
-		//		static RationalType decimalPoint(RationalType r, const std::vector<char> &s)
-		//		{ // TODO: make overflow safe
-		//			unsigned long long n = 0;
-		//			unsigned long long d = 1;
-
-		//			for(auto c : s)
-		//			{
-		//				n *= 10;
-		//				n += c - '0';
-		//				d *= 10;
-		//			} // end foreach
-		//			
-		//			return r + RationalType(n,d);
-		//		} // end function decimalPoint
-
-		//		static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
-		//			std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
-		//		{
-		//			if(symbol == "cm")
-		//				result.rhsConstant -= coeff;
-		//			else if(symbol == "px")
-		//				result.pxSizeCoeff += coeff;
-		//			else
-		//				result.varCoeff[symbols->declare(symbol)] += coeff;
-		//		} // end function populate
-		//	}; // end local struct Workaround
-
-		//	rule<TextType::const_iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
-		//	rule<TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
-		//			-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
-		//	rule<TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
-
-		//	auto begin = iText.begin();
-		//	auto end = iText.end();
-
-		//	bool success = phrase_parse(begin,end,constraint,space);
-		//	if(!success || begin != end)
-		//		throw std::runtime_error("Error parsing constraint!");
-
-		//	return result;
-		//} // end method parse
-
-	}; // end class Constraint
-
-
-	template<typename CoordinateType, typename TextType = std::string>
-	class Model
-	{
-	public:
-		/*********************
-		*    Member Types    *
-		*********************/
-
-		typedef boost::property_tree::ptree property_tree_type;
-		typedef CoordinateType coordinate_type;
-		typedef TextType text_type;
-
-	public: // TODO: make private and add methods to manipulate...
-		/***************
-		*    Fields    *
-		***************/
-
-		std::vector<Control<CoordinateType>> controls;
-		std::vector<Constraint<TextType>> constraints;
-
-	public:
-		/*********************
-		*    Constructors    *
-		*********************/
-
-		/** Construct an empty Model.
-		 */
-		Model(){/* emtpy body */}
-
-		/****************
-		*    Methods    *
-		****************/
-
-		void clear()
-		{
-			controls.clear();
-			constraints.clear();
-		} // end method clear
-
-		// TODO: check that there is at least one control (the screen) and that all contraints refer to 
-		// existent controls! Also that endpoints are consistent.
-		void load(const std::string &fileName)
-		{
-			clear();
-			property_tree_type tree;
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef typename graphene::DSEL::FrameStack<
+				IShapePart<CoordinateType>,
+				graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>,
+				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
+				graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
+				graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
+				graphene::Frames::Renderable::Stippled<graphene::DSEL::Omit>,
+				graphene::Frames::Renderable::Colorblind::InversedColor<graphene::DSEL::Omit>,
+				graphene::Frames::Adapting::Rectangular<graphene::DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+			>::type base_type;
+			typedef typename ControlPart::rectangle_type rectangle_type;
 			
-			boost::property_tree::read_xml(fileName,tree);
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			ControlPart(){/* empty body */}
 
-			for(const auto &control : tree.get_child("gui-model.controls"))
-				controls.emplace_back(control.second);
-
-			for(const auto &constraint : tree.get_child("gui-model.constraints"))
-				constraints.emplace_back(constraint.second);
-		} // end method load
-
-
-		void save(const std::string &fileName) const
-		{
-			property_tree_type tree;
-
-			for(const auto &control : controls)
-				tree.add_child("gui-model.controls.control",control);
-
-			for(const auto &constraint : constraints)
-				tree.add_child("gui-model.constraints.constraint",constraint);
-
-			boost::property_tree::write_xml(fileName,tree);
-		} // end method save
-
-
-		//template<typename RationalType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
-		//Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> generateSystemMatrix() const
-		//{
-		//	auto symbols = std::make_shared<Symbolic::Common::SymbolTable<NameType,IDType>>();
-		//	std::vector<Constraint<TextType>::template ParseResult<IDType,RationalType>> parseResults;
-
-		//	for(const auto &constraint : constraints)
-		//		parseResults.push_back(constraint.parse<RationalType,IDType,NameType>(symbols));
-		//	// TODO: optimize to not include unknown constants that are not present.
-
-		//	Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> result; 
-		//	result.setZero(constraints.size(),4*controls.size() + symbols->size() + 1); // 4*(nControls-1) + nSymbols + 4 + 1
-		//	// the layout is control sides, then named variables, then unknown constants then known constant.
-
-		//	// Fill in the augmented system matrix
-		//	size_t i = 0;
-		//	for(const auto &constraint : constraints)
-		//	{
-		//		int coeffs[2] = {1,-1};
-		//		if(controls[constraint.endPoints()[0].control].side(constraint.endPoints()[0].side) > controls[constraint.endPoints()[1].control].side(constraint.endPoints()[1].side))
-		//			std::swap(coeffs[0],coeffs[1]);
-
-		//		for(size_t ep = 0 ; ep < 2 ; ++ep)
-		//		{
-		//			if(constraint.endPoints()[ep].control != 0)
-		//				result(i,4*(constraint.endPoints()[ep].control-1) + size_t(constraint.endPoints()[ep].side)) += coeffs[ep];
-		//			else if(constraint.endPoints()[ep].side == geometry::RectangleSide::RIGHT || constraint.endPoints()[ep].side == geometry::RectangleSide::TOP)
-		//				result(i,4*(controls.size()-1) + symbols->size() + size_t(constraint.endPoints()[ep].side) - 2) += coeffs[ep];
-		//		} // end for
-
-		//		for(const auto &var : parseResults[i].varCoeff)
-		//			result(i,4*(controls.size()-1) + var.first) = var.second;
-
-		//		size_t offset = constraint.endPoints()[0].side == geometry::RectangleSide::LEFT || constraint.endPoints()[0].side == geometry::RectangleSide::RIGHT ? 0 : 1;
-		//		result(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxSizeCoeff;
-
-		//		result(i,4*(controls.size()-1) + symbols->size() + 4) = parseResults[i].rhsConstant; // already moved to rhs during parsing
-
-		//		++i;
-		//	} // end foreach
-
-		//	return result;
-		//} // end method generateSystemMatrix
-
-
-		/** Takes the solution of a linear system (in the form of a vector space base and point space offset 
-		 *	generating the solutions) describing a GUI and generates C++ code for an application 
-		 *	that implements that GUI. The output code is intended to be saved in a file and #included be a 
-		 *	suitable application-template .cpp file. Generated code is not tied to a specific GUI toolkit.
-		 */
-		template<typename RationalType, typename AppCoordType>
-		void outputCppApp(const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &base, const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &offset, std::ostream &output) const
-		{
-			output << "// NO INCLUDE GUARD!!!\n\n";
-			output << "std::vector<geometry::Rectangle<" << typeid(AppCoordType).name() << ">> controls(" << controls.size()-1 << ");\n\n";
-			output << "void updateCoordinates(" << typeid(AppCoordType).name() << " screenWidth, " << typeid(AppCoordType).name() << " screenHeight, " 
-				   << typeid(AppCoordType).name() << " pixelWidth, " << typeid(AppCoordType).name() << " pixelHeight)\n";
-			output << "{\n";
-
-			std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
-			for(size_t i = 0 ; i < controls.size()-1 ; ++i)
+			/** Forwards arguments to the underlying RectangularType constructor
+			 */
+			template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
+			ControlPart(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
+				:base_type(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
 			{
-				for(size_t j = 0 ; j < 4 ; ++j)
-				{ // TODO: optimize for constant functions
-					output << "\tcontrols[" << i << "].sides()[" << j << "] = ";
-					bool nonZeroBefore = false;
-					for(size_t uc = 0 ; uc < 4 ; ++uc)
-						if(base(4*i+j,uc) != 0)
+				// empty body
+			} // end ControlPart constructor
+		}; // end class ControlPart
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>	class Control;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
+		class ControlBase : public 
+			graphene::Frames::MultiPartBorderedRectangle<typename graphene::DSEL::FrameStack<
+				RectangleType,
+				graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
+				graphene::Frames::Selectable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
+				graphene::Frames::Hightlightable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
+				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
+				graphene::Frames::Named<graphene::DSEL::Omit,TextType>,
+				graphene::Frames::SizedName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class Control : public graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+									graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+										graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
+										graphene::Frames::Renderable::Colorblind::InversedColor<
+											graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>>,
+									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+										graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+											graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
+										graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+											graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
+										graphene::FunctionObjects::Highlighted>,
+									graphene::FunctionObjects::Selected>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+						graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+							graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
+							graphene::Frames::Renderable::Colorblind::InversedColor<
+								graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>>,
+						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+							graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+								graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
+							graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+								graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
+							graphene::FunctionObjects::Highlighted>,
+						graphene::FunctionObjects::Selected> base_type;
+			typedef typename Control::coordinate_type coordinate_type;
+			typedef RectangleType rectangle_type;
+			typedef boost::property_tree::ptree property_tree_type;
+
+			// TODO: add color
+			// TODO: add type
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			/** Construct an uninitialized Control.
+			 */
+			Control(){/* empty body */}
+
+			/** Construct a Control with the specified properties.
+			 */
+			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+					TextType name, coordinate_type nameHeight, bool selected = false, bool highlighted = false)
+			{
+				this->left() = left;
+				this->bottom() = bottom;
+				this->right() = right;
+				this->top() = top;
+				this->borderSize() = borderSize;
+				this->name() = name;
+				this->nameHeight() = nameHeight;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+			} // end Control constructor
+
+			// TODO: consider serializing selected and other user interaction states.
+			Control(const property_tree_type &tree)
+			{
+				this->left() = tree.get<coordinate_type>("sides.left");
+				this->bottom() = tree.get<coordinate_type>("sides.bottom");
+				this->right() = tree.get<coordinate_type>("sides.right");
+				this->top() = tree.get<coordinate_type>("sides.top");
+				this->borderSize() = tree.get<coordinate_type>("borderSize");
+				this->name() = tree.get<TextType>("name");
+				this->nameHeight() = tree.get<coordinate_type>("nameHeight");
+				this->selected() = false;
+				this->highlighted() = false;
+			} // end Control conversion constructor
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			// TODO: consider deserializing selected and other user interaction states.
+			operator property_tree_type() const
+			{
+				property_tree_type tree;
+
+				tree.put("sides.left",left());
+				tree.put("sides.bottom",bottom());
+				tree.put("sides.right",right());
+				tree.put("sides.top",top());
+				tree.put("borderSize",borderSize());
+				tree.put("name",name());
+				tree.put("nameHeight",nameHeight());
+				return tree;
+			} // end method operator property_tree_type
+		}; // end class Control
+
+		struct ConstraintEndPoint
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+
+			typedef boost::property_tree::ptree property_tree_type;
+			typedef geometry::RectangleSide side_type;
+
+			/***************
+			*    Fields    *
+			***************/
+
+			size_t control; // ordinal number of the referred control
+			side_type side; // enumerator of the referred side
+
+			/*********************
+			*    Constructors    *
+			*********************/
+
+			ConstraintEndPoint(){/* empty body */}
+
+			ConstraintEndPoint(size_t control, side_type side)
+				:control(control),side(side)
+			{
+				// empty body
+			} // end ConstraintEndPoint constructor
+
+			ConstraintEndPoint(const property_tree_type &tree)
+				:control(tree.get<size_t>("control")),side(to<side_type>(tree.get<std::string>("side")))
+			{
+				// empty body
+			} // end ConstraintEndPoint conversion constructor
+
+			/****************
+			*    Methods    *
+			****************/
+
+			operator property_tree_type() const
+			{
+				property_tree_type tree;
+
+				tree.put("control",control);
+				tree.put("side",to<std::string>(side));
+
+				return tree;
+			} // end method operator property_tree_type
+		}; // end struct ConstraintEndPoint
+
+		template<typename TextType = std::string>
+		class Constraint
+		{
+		public:
+			/*********************
+			*    Member Types    *
+			*********************/
+
+			template<typename IDType, typename RationalType>
+			struct ParseResult
+			{
+				// Fields
+				std::map<IDType,RationalType> varCoeff;
+				RationalType pxSizeCoeff;
+				RationalType rhsConstant;
+			}; // end struct ParseResult
+
+			typedef TextType text_type;
+			typedef boost::property_tree::ptree property_tree_type;
+			typedef ConstraintEndPoint EndPoint;
+			typedef EndPoint::side_type side_type;
+
+		private:
+			/***************
+			*    Fields    *
+			***************/
+
+			TextType iText;
+			EndPoint iEndPoints[2];
+
+		public:
+			/*********************
+			*    Constructors    *
+			*********************/
+
+			/** Construct an uninitialized Constraint.
+			 */
+			Constraint(){/* emtpy body */}
+
+			/** Construct a Constraint with the specified sides.
+			 */
+			Constraint(TextType text, const EndPoint &endPoint1, const EndPoint &endPoint2)
+				:iText(std::move(text))
+			{
+				iEndPoints[0] = endPoint1;
+				iEndPoints[1] = endPoint2;
+			} // end Control constructor
+
+			Constraint(TextType text, size_t control1, side_type side1, size_t control2, side_type side2)
+				:iText(std::move(text))
+			{
+				iEndPoints[0].control = control1;
+				iEndPoints[0].side = side1;
+				iEndPoints[1].control = control2;
+				iEndPoints[1].side = side2;
+			} // end Control constructor
+
+			Constraint(const property_tree_type &tree)
+				:iText(tree.get<TextType>("text"))
+			{
+				iEndPoints[0] = EndPoint(tree.get_child("first-end-point"));
+				iEndPoints[1] = EndPoint(tree.get_child("second-end-point"));
+			} // end Constraint conversion constructor
+
+
+			/*************************
+			*    Accessor Methods    *
+			*************************/
+
+			TextType &text()
+			{
+				return iText;
+			} // end method text
+
+			const TextType &text() const
+			{
+				return iText;
+			} // end method text
+
+			EndPoint (&endPoints())[2]
+			{
+				return iEndPoints;
+			} // end method endPoints
+
+			const EndPoint (&endPoints() const)[2]
+			{
+				return iEndPoints;
+			} // end method endPoints
+
+			/****************
+			*    Methods    *
+			****************/
+
+			operator property_tree_type() const
+			{
+				property_tree_type tree;
+
+				tree.put("text",iText);
+				tree.put_child("first-end-point",iEndPoints[0]);
+				tree.put_child("second-end-point",iEndPoints[1]);
+
+				return tree;
+			} // end method operator property_tree_type
+
+			//template<typename RationalType, typename IDType, typename NameType>
+			//ParseResult<IDType,RationalType> parse(std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols) const
+			//{
+			//	namespace qi = boost::spirit::qi;
+			//	namespace px = boost::phoenix;
+			//	using qi::rule;
+			//	using qi::_val;	using qi::_1; using qi::_2;
+			//	using qi::alpha; using qi::alnum; using qi::digit; using qi::char_; using qi::eps; using qi::ulong_long;
+			//	using boost::spirit::ascii::space;
+			//	using boost::spirit::ascii::space_type;
+
+			//	ParseResult<IDType,RationalType> result;
+
+			//	struct Workaround
+			//	{
+			//		/**	s must be a string of digits [0-9].
+			//		 */
+			//		static RationalType decimalPoint(RationalType r, const std::vector<char> &s)
+			//		{ // TODO: make overflow safe
+			//			unsigned long long n = 0;
+			//			unsigned long long d = 1;
+
+			//			for(auto c : s)
+			//			{
+			//				n *= 10;
+			//				n += c - '0';
+			//				d *= 10;
+			//			} // end foreach
+			//			
+			//			return r + RationalType(n,d);
+			//		} // end function decimalPoint
+
+			//		static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
+			//			std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
+			//		{
+			//			if(symbol == "cm")
+			//				result.rhsConstant -= coeff;
+			//			else if(symbol == "px")
+			//				result.pxSizeCoeff += coeff;
+			//			else
+			//				result.varCoeff[symbols->declare(symbol)] += coeff;
+			//		} // end function populate
+			//	}; // end local struct Workaround
+
+			//	rule<TextType::const_iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
+			//	rule<TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
+			//			-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
+			//	rule<TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
+
+			//	auto begin = iText.begin();
+			//	auto end = iText.end();
+
+			//	bool success = phrase_parse(begin,end,constraint,space);
+			//	if(!success || begin != end)
+			//		throw std::runtime_error("Error parsing constraint!");
+
+			//	return result;
+			//} // end method parse
+		}; // end class Constraint
+
+		template<typename CoordinateType, typename TextType = std::string>
+		class Model
+		{
+		public:
+			/*********************
+			*    Member Types    *
+			*********************/
+
+			typedef boost::property_tree::ptree property_tree_type;
+			typedef CoordinateType coordinate_type;
+			typedef TextType text_type;
+			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> control_type;
+
+		public: // TODO: make private and add methods to manipulate...
+			/***************
+			*    Fields    *
+			***************/
+
+			// TODO: change vector to list for faster operations, updating ConstraintEndPoints.
+			std::vector<control_type> controls;
+			std::vector<Constraint<TextType>> constraints;
+
+		public:
+			/*********************
+			*    Constructors    *
+			*********************/
+
+			/** Construct an empty Model.
+			 */
+			Model(){/* emtpy body */}
+
+			/****************
+			*    Methods    *
+			****************/
+
+			void clear()
+			{
+				controls.clear();
+				constraints.clear();
+			} // end method clear
+
+			// TODO: check that there is at least one control (the screen) and that all contraints refer to 
+			// existent controls! Also that endpoints are consistent.
+			void load(const std::string &fileName)
+			{
+				clear();
+				property_tree_type tree;
+			
+				boost::property_tree::read_xml(fileName,tree);
+
+				for(const auto &control : tree.get_child("gui-model.controls"))
+					controls.emplace_back(control.second);
+
+				for(const auto &constraint : tree.get_child("gui-model.constraints"))
+					constraints.emplace_back(constraint.second);
+			} // end method load
+
+
+			void save(const std::string &fileName) const
+			{
+				property_tree_type tree;
+
+				for(const auto &control : controls)
+					tree.add_child("gui-model.controls.control",control);
+
+				for(const auto &constraint : constraints)
+					tree.add_child("gui-model.constraints.constraint",constraint);
+
+				boost::property_tree::write_xml(fileName,tree);
+			} // end method save
+
+
+			//template<typename RationalType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
+			//Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> generateSystemMatrix() const
+			//{
+			//	auto symbols = std::make_shared<Symbolic::Common::SymbolTable<NameType,IDType>>();
+			//	std::vector<Constraint<TextType>::template ParseResult<IDType,RationalType>> parseResults;
+
+			//	for(const auto &constraint : constraints)
+			//		parseResults.push_back(constraint.parse<RationalType,IDType,NameType>(symbols));
+			//	// TODO: optimize to not include unknown constants that are not present.
+
+			//	Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> result; 
+			//	result.setZero(constraints.size(),4*controls.size() + symbols->size() + 1); // 4*(nControls-1) + nSymbols + 4 + 1
+			//	// the layout is control sides, then named variables, then unknown constants then known constant.
+
+			//	// Fill in the augmented system matrix
+			//	size_t i = 0;
+			//	for(const auto &constraint : constraints)
+			//	{
+			//		int coeffs[2] = {1,-1};
+			//		if(controls[constraint.endPoints()[0].control].side(constraint.endPoints()[0].side) > controls[constraint.endPoints()[1].control].side(constraint.endPoints()[1].side))
+			//			std::swap(coeffs[0],coeffs[1]);
+
+			//		for(size_t ep = 0 ; ep < 2 ; ++ep)
+			//		{
+			//			if(constraint.endPoints()[ep].control != 0)
+			//				result(i,4*(constraint.endPoints()[ep].control-1) + size_t(constraint.endPoints()[ep].side)) += coeffs[ep];
+			//			else if(constraint.endPoints()[ep].side == geometry::RectangleSide::RIGHT || constraint.endPoints()[ep].side == geometry::RectangleSide::TOP)
+			//				result(i,4*(controls.size()-1) + symbols->size() + size_t(constraint.endPoints()[ep].side) - 2) += coeffs[ep];
+			//		} // end for
+
+			//		for(const auto &var : parseResults[i].varCoeff)
+			//			result(i,4*(controls.size()-1) + var.first) = var.second;
+
+			//		size_t offset = constraint.endPoints()[0].side == geometry::RectangleSide::LEFT || constraint.endPoints()[0].side == geometry::RectangleSide::RIGHT ? 0 : 1;
+			//		result(i,4*(controls.size()-1) + symbols->size() + 2 + offset) = parseResults[i].pxSizeCoeff;
+
+			//		result(i,4*(controls.size()-1) + symbols->size() + 4) = parseResults[i].rhsConstant; // already moved to rhs during parsing
+
+			//		++i;
+			//	} // end foreach
+
+			//	return result;
+			//} // end method generateSystemMatrix
+
+
+			/** Takes the solution of a linear system (in the form of a vector space base and point space offset 
+			 *	generating the solutions) describing a GUI and generates C++ code for an application 
+			 *	that implements that GUI. The output code is intended to be saved in a file and #included be a 
+			 *	suitable application-template .cpp file. Generated code is not tied to a specific GUI toolkit.
+			 */
+			template<typename RationalType, typename AppCoordType>
+			void outputCppApp(const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &base, const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &offset, std::ostream &output) const
+			{
+				output << "// NO INCLUDE GUARD!!!\n\n";
+				output << "std::vector<geometry::Rectangle<" << typeid(AppCoordType).name() << ">> controls(" << controls.size()-1 << ");\n\n";
+				output << "void updateCoordinates(" << typeid(AppCoordType).name() << " screenWidth, " << typeid(AppCoordType).name() << " screenHeight, " 
+					   << typeid(AppCoordType).name() << " pixelWidth, " << typeid(AppCoordType).name() << " pixelHeight)\n";
+				output << "{\n";
+
+				std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
+				for(size_t i = 0 ; i < controls.size()-1 ; ++i)
+				{
+					for(size_t j = 0 ; j < 4 ; ++j)
+					{ // TODO: optimize for constant functions
+						output << "\tcontrols[" << i << "].sides()[" << j << "] = ";
+						bool nonZeroBefore = false;
+						for(size_t uc = 0 ; uc < 4 ; ++uc)
+							if(base(4*i+j,uc) != 0)
+							{
+								if(nonZeroBefore)
+									output << " + ";
+								nonZeroBefore = true;
+
+								if(base(4*i+j,uc).numerator() != 1)
+									output << base(4*i+j,uc).numerator() << '*';
+								output << unknownConstants[uc];
+								if(base(4*i+j,uc).denominator() != 1)
+									output << '/' << base(4*i+j,uc).denominator();
+							} // end if
+						if(offset(4*i+j) != 0 || !nonZeroBefore)
 						{
 							if(nonZeroBefore)
 								output << " + ";
 							nonZeroBefore = true;
 
-							if(base(4*i+j,uc).numerator() != 1)
-								output << base(4*i+j,uc).numerator() << '*';
-							output << unknownConstants[uc];
-							if(base(4*i+j,uc).denominator() != 1)
-								output << '/' << base(4*i+j,uc).denominator();
+							output << offset(4*i+j).numerator();
+							if(offset(4*i+j).denominator() != 1)
+								output << "/(float)" << offset(4*i+j).denominator();
 						} // end if
-					if(offset(4*i+j) != 0 || !nonZeroBefore)
-					{
-						if(nonZeroBefore)
-							output << " + ";
-						nonZeroBefore = true;
-
-						output << offset(4*i+j).numerator();
-						if(offset(4*i+j).denominator() != 1)
-							output << "/(float)" << offset(4*i+j).denominator();
-					} // end if
-					output << ";\n";
+						output << ";\n";
+					} // end for
+					if(i != controls.size()-2) output << "\n";
 				} // end for
-				if(i != controls.size()-2) output << "\n";
-			} // end for
 
-			output << "} // end function updateCoordinates\n";
-		} // end method outputOpenGLCppApp
+				output << "} // end function updateCoordinates\n";
+			} // end method outputOpenGLCppApp
 
-		//template<typename RationalType, typename AppCoordType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
-		//void compile(const std::string &headerName) const
-		//{
-		//	auto systemMatrix = generateSystemMatrix<RationalType,IDType,NameType>();
+			//template<typename RationalType, typename AppCoordType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
+			//void compile(const std::string &headerName) const
+			//{
+			//	auto systemMatrix = generateSystemMatrix<RationalType,IDType,NameType>();
 
-		//	LinearSystem::numericReducedRowEchelonFormNoPivot(systemMatrix);
-		//	auto investigation = LinearSystem::semiSymbolicInvestigate(systemMatrix,4);
-		//	auto solution = LinearSystem::semiSymbolicSolve(systemMatrix,4);
-		//	auto base = std::get<0>(solution);
-		//	auto offset = std::get<1>(solution);
+			//	LinearSystem::numericReducedRowEchelonFormNoPivot(systemMatrix);
+			//	auto investigation = LinearSystem::semiSymbolicInvestigate(systemMatrix,4);
+			//	auto solution = LinearSystem::semiSymbolicSolve(systemMatrix,4);
+			//	auto base = std::get<0>(solution);
+			//	auto offset = std::get<1>(solution);
 
-		//	// assume unique solution for now...
-		//	std::ofstream output(headerName);
-		//	outputCppApp<RationalType,AppCoordType>(base,offset,output);
-		//	output.close();
+			//	// assume unique solution for now...
+			//	std::ofstream output(headerName);
+			//	outputCppApp<RationalType,AppCoordType>(base,offset,output);
+			//	output.close();
 
-		//	std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
-		//	std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
-		//} // end method compile
+			//	std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
+			//	std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
+			//} // end method compile
 
-		void run(const std::string &executableName) const
-		{
-			std::system(executableName.c_str());
-		} // end method run
+			void run(const std::string &executableName) const
+			{
+				std::system(executableName.c_str());
+			} // end method run
 
-	}; // end class Model
+		}; // end class Model
 
-} // end namespace gui
+	} // end namespace Controls
+
+} // end namespace GUIModel
 
 #endif // GUI_MODEL_H
