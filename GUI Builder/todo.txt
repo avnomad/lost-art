@@ -3,4 +3,4 @@
 TODO:
 
 1.  Add support for static and dynamic coordinate systems to graphene and 
-    redesign frames to use them.
+    redesign frames to use them. That should allow a single movable frame.

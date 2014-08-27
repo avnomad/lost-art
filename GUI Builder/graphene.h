@@ -1254,12 +1254,12 @@ namespace graphene
 				*    Methods    *
 				****************/
 			public:
-				virtual void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y){}
-				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y){}
-				virtual void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y){}
-				virtual void mouseEnter(CoordinateType x, CoordinateType y){}
-				virtual void mouseMove(CoordinateType x, CoordinateType y){}
-				virtual void mouseExit(CoordinateType x, CoordinateType y){}
+				void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y){}
+				void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y){}
+				void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y){}
+				void mouseEnter(CoordinateType x, CoordinateType y){}
+				void mouseMove(CoordinateType x, CoordinateType y){}
+				void mouseExit(CoordinateType x, CoordinateType y){}
 			}; // end class KeyboardAndMouseStub
 
 			// TODO: should use atomic operations for thread safety...
@@ -1293,12 +1293,12 @@ namespace graphene
 				*    Methods    *
 				****************/
 			public:
-				virtual void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
+				void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
 				{
 					// ignore keyboard events
 				} // end method keyboardAscii
 
-				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
+				void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
 				{
 					if(button == 0)
 					{
@@ -1313,12 +1313,12 @@ namespace graphene
 					} // end if
 				} // end method mouseButton
 
-				virtual void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y)
+				void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y)
 				{
 					// ignore mouse wheel events
 				} // end method mouseWheel
 
-				virtual void mouseEnter(CoordinateType x, CoordinateType y)
+				void mouseEnter(CoordinateType x, CoordinateType y)
 				{
 					if(target == nullptr)
 						highlight();
@@ -1326,12 +1326,12 @@ namespace graphene
 						press();
 				} // end method mouseEnter
 
-				virtual void mouseMove(CoordinateType x, CoordinateType y)
+				void mouseMove(CoordinateType x, CoordinateType y)
 				{
 					// nothing to do
 				} // end method mouseMove
 
-				virtual void mouseExit(CoordinateType x, CoordinateType y)
+				void mouseExit(CoordinateType x, CoordinateType y)
 				{
 					if(target == nullptr)
 						dehighlight();
