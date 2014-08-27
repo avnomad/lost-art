@@ -226,6 +226,9 @@ namespace graphene
 			// and add prefered width, height read-only properties.
 		}; // end class SizedName
 
+		/** If a MultiPart is also Containing then partUnderPoint(x,y) should return a value designating "no part"
+		 *	if and only if contains(x,y) returns false.
+		 */
 		template<typename BaseType, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPart : public BaseType
 		{

@@ -490,6 +490,7 @@ namespace GUIModel
 			//} // end method parse
 		}; // end class Constraint
 
+		// TODO: split button and control handling code and move them into separate classes. ButtonManager?
 		template<typename CoordinateType, typename TextType = std::string>
 		class Model : public geometry::Rectangle<CoordinateType>
 		{
@@ -502,6 +503,7 @@ namespace GUIModel
 			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
 			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> control_type;
+			typedef Constraint<TextType> constraint_type;
 			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
 
 		public: // TODO: make private and add methods to manipulate...
@@ -515,10 +517,20 @@ namespace GUIModel
 
 			// TODO: change vector to list for faster operations, updating ConstraintEndPoints.
 			std::vector<control_type> controls;
-			std::vector<Constraint<TextType>> constraints;
+			std::vector<constraint_type> constraints;
 			std::vector<std::pair<button_type,std::function<void()>>> buttons;
 
-			typename std::common_type<decltype(buttons)>::type::iterator pressedButton; // workaround for decltype not working alone
+			typename std::common_type<decltype(buttons)>::type::iterator highlightedButton; // workaround for decltype not working alone
+			typename std::common_type<decltype(buttons)>::type::iterator pressedButton;
+
+			typename std::common_type<decltype(controls)>::type::iterator highlightedControl;
+			typename std::common_type<decltype(controls)>::type::iterator selectedControl;
+			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
+
+			coordinate_type lastX; // TODO: consider making lastPressX (this will require saving initial movable control position as well)
+			coordinate_type lastY;
+
+			bool firstResize; // GLUT workaround (can't do first resize in constructor)
 
 		public:
 			/*********************
@@ -528,14 +540,23 @@ namespace GUIModel
 			/** Construct an empty Model.
 			 */
 			Model()
+				:firstResize(true)
 			{
-				// create buttons
+				// initialize buttons
 				buttons.emplace_back(button_type(0,0,0,0,1,"Load",10),[](){std::cout << "Load" << std::endl;});
 				buttons.emplace_back(button_type(0,0,0,0,1,"Save",10),[](){std::cout << "Save" << std::endl;});
 				buttons.emplace_back(button_type(0,0,0,0,1,"Compile",10),[](){std::cout << "Compile" << std::endl;});
 				buttons.emplace_back(button_type(0,0,0,0,1,"Run",10),[](){std::cout << "Run" << std::endl;});
 				
+				// initialize controls
+				controls.push_back(control_type(0,0,0,0,1,"Screen",10)); // emplace_back can't take 6+ arguments yet...
+
+				// initialize pointers and iterators
+				highlightedButton = buttons.end();
 				pressedButton = buttons.end();
+				highlightedControl = controls.end();
+				selectedControl = controls.end();
+				selectedPart = nullptr;
 			} // end Model constructor
 
 			/****************
@@ -704,9 +725,16 @@ namespace GUIModel
 			// UI
 			void render() const
 			{
-				// render buttons
+				// render controls
+				for(const auto &control : controls)
+					control.render();
+
+				// render buttons (buttons should be in front)
 				for(const auto &button : buttons)
 					button.first.render();
+
+				if(selectedPart)
+					selectedPart->render();
 			} // end method render
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
@@ -719,13 +747,31 @@ namespace GUIModel
 				if(button == 0)
 					if(down)
 					{
-						for(auto button = buttons.begin() ; button < buttons.end() ; ++button)
-							if(button->first.contains(x,y))
+						if(highlightedButton != buttons.end())
+						{
+							highlightedButton->first.press();
+							pressedButton = highlightedButton;
+						}
+						else
+						{ // pressing a button should not deselect
+							// deselect all
+							if(selectedControl != controls.end())
 							{
-								pressedButton = button;
-								pressedButton->first.press();
-								break;
+								selectedControl->deselect();
+								selectedControl = controls.end();
 							} // end if
+						} // end else
+
+						if(highlightedControl != controls.end())
+						{
+							// TODO: bring to front
+							highlightedControl->select();
+							selectedControl = highlightedControl;
+							selectedPart = highlightedControl->partUnderPoint(x,y);
+
+							lastX = x;
+							lastY = y;
+						} // end if
 					}
 					else
 					{
@@ -735,6 +781,9 @@ namespace GUIModel
 							pressedButton->first.depress();
 						} // end if
 						pressedButton = buttons.end();
+
+						if(selectedPart)
+							selectedPart = nullptr;
 					} // end else
 			} // end method mouseButton
 
@@ -748,8 +797,45 @@ namespace GUIModel
 				if(pressedButton != buttons.end())
 					pressedButton->first.pressed() = pressedButton->first.contains(x,y);
 				else
-					for(auto &button : buttons)
-						button.first.highlighted() = button.first.contains(x,y);
+				{
+					// dehighlight all
+					if(highlightedButton != buttons.end())
+					{
+						highlightedButton->first.dehighlight();
+						highlightedButton = buttons.end();
+					} // end if
+
+					if(highlightedControl != controls.end())
+					{
+						highlightedControl->dehighlight();
+						highlightedControl = controls.end();
+					} // end if
+
+					if(selectedPart)
+					{
+						selectedPart->move(x-lastX,y-lastY);
+						lastX = x;
+						lastY = y;
+					}
+					else // if dropping an object on another makes sence, then highlighting should be done regardless of selectedPart
+					// highlight only the front-most
+						for(auto button = buttons.begin() ; button < buttons.end() ; ++button)
+							if(button->first.contains(x,y))
+							{
+								button->first.highlight();
+								highlightedButton = button;
+								break;
+							} // end if
+
+					if(highlightedButton == buttons.end())
+						for(auto control = controls.begin() ; control < controls.end() ; ++control)
+							if(control->contains(x,y))
+							{
+								control->highlight();
+								highlightedControl = control;
+								break;
+							} // end if
+				} // end else
 			} // end method mouseMove
 
 			void mouseExit(CoordinateType x, CoordinateType y)
@@ -785,6 +871,16 @@ namespace GUIModel
 				buttons[3].first.bottom() = top-margin-buttonHeight;
 				buttons[3].first.right() = right-margin;
 				buttons[3].first.top() = top-margin;
+
+				// screen control
+				if(firstResize)
+				{
+					firstResize = false;
+					controls.front().left() = left+margin;
+					controls.front().bottom() = bottom+margin;
+					controls.front().right() = right-margin;
+					controls.front().top() = top-2*margin-buttonHeight;
+				} // end if
 			} // end method resize
 		}; // end class Model
 
