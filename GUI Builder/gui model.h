@@ -502,15 +502,23 @@ namespace GUIModel
 			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
 			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> control_type;
+			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
 
 		public: // TODO: make private and add methods to manipulate...
 			/***************
 			*    Fields    *
 			***************/
 
+			static const int margin = 10; // in millimeters
+			static const int buttonHeight = 15;  // in millimeters
+			static const int buttonWidth = static_cast<int>(buttonHeight*1.61803)/* golden ration */;  // in millimeters
+
 			// TODO: change vector to list for faster operations, updating ConstraintEndPoints.
 			std::vector<control_type> controls;
 			std::vector<Constraint<TextType>> constraints;
+			std::vector<std::pair<button_type,std::function<void()>>> buttons;
+
+			typename std::common_type<decltype(buttons)>::type::iterator pressedButton; // workaround for decltype not working alone
 
 		public:
 			/*********************
@@ -519,7 +527,16 @@ namespace GUIModel
 
 			/** Construct an empty Model.
 			 */
-			Model(){/* emtpy body */}
+			Model()
+			{
+				// create buttons
+				buttons.emplace_back(button_type(0,0,0,0,1,"Load",10),[](){std::cout << "Load" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,1,"Save",10),[](){std::cout << "Save" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,1,"Compile",10),[](){std::cout << "Compile" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,1,"Run",10),[](){std::cout << "Run" << std::endl;});
+				
+				pressedButton = buttons.end();
+			} // end Model constructor
 
 			/****************
 			*    Methods    *
@@ -687,7 +704,9 @@ namespace GUIModel
 			// UI
 			void render() const
 			{
-				// stub
+				// render buttons
+				for(const auto &button : buttons)
+					button.first.render();
 			} // end method render
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
@@ -697,24 +716,76 @@ namespace GUIModel
 
 			void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
 			{
-				// stub
+				if(button == 0)
+					if(down)
+					{
+						for(auto button = buttons.begin() ; button < buttons.end() ; ++button)
+							if(button->first.contains(x,y))
+							{
+								pressedButton = button;
+								pressedButton->first.press();
+								break;
+							} // end if
+					}
+					else
+					{
+						if(pressedButton != buttons.end() && pressedButton->first.pressed())
+						{
+							pressedButton->second();
+							pressedButton->first.depress();
+						} // end if
+						pressedButton = buttons.end();
+					} // end else
 			} // end method mouseButton
 
 			void mouseEnter(CoordinateType x, CoordinateType y)
 			{
-				// stub
+				// do nothing
 			} // end method mouseEnter
 
 			void mouseMove(CoordinateType x, CoordinateType y)
 			{
-				// stub
+				if(pressedButton != buttons.end())
+					pressedButton->first.pressed() = pressedButton->first.contains(x,y);
+				else
+					for(auto &button : buttons)
+						button.first.highlighted() = button.first.contains(x,y);
 			} // end method mouseMove
 
 			void mouseExit(CoordinateType x, CoordinateType y)
 			{
-				// stub
+				// do nothing
 			} // end method mouseExit
 
+			// TODO: perhaps replace resize with use of properties for left,right,bottom,top?
+			void resize(CoordinateType left, CoordinateType bottom, CoordinateType right, CoordinateType top)
+			{
+				this->left() = left;
+				this->bottom() = bottom;
+				this->right() = right;
+				this->top() = top;
+
+				// load button
+				buttons[0].first.left() = left+margin;
+				buttons[0].first.bottom() = top-margin-buttonHeight;
+				buttons[0].first.right() = left+margin+buttonWidth;
+				buttons[0].first.top() = top-margin;
+				// save button
+				buttons[1].first.left() = right-3*margin-3*buttonWidth;
+				buttons[1].first.bottom() = top-margin-buttonHeight;
+				buttons[1].first.right() = right-3*margin-2*buttonWidth;
+				buttons[1].first.top() = top-margin;
+				// compile button
+				buttons[2].first.left() = right-2*margin-2*buttonWidth;
+				buttons[2].first.bottom() = top-margin-buttonHeight;
+				buttons[2].first.right() = right-2*margin-buttonWidth;
+				buttons[2].first.top() = top-margin;
+				// run button
+				buttons[3].first.left() = right-margin-buttonWidth;
+				buttons[3].first.bottom() = top-margin-buttonHeight;
+				buttons[3].first.right() = right-margin;
+				buttons[3].first.top() = top-margin;
+			} // end method resize
 		}; // end class Model
 
 	} // end namespace Controls

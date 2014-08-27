@@ -1987,10 +1987,16 @@ namespace graphene
 					if(wasInside)
 						rootControl.mouseMove(sceneX,sceneY);
 					else
+					{
 						rootControl.mouseEnter(sceneX,sceneY);
+						wasInside = true;
+					} // end else
 				else
 					if(wasInside)
+					{
 						rootControl.mouseExit(sceneX,sceneY);
+						wasInside = false;
+					}
 					else
 					{
 						// do nothing
@@ -1999,10 +2005,13 @@ namespace graphene
 
 			static void reshape(int windowWidth, int windowHeight)
 			{
+				// TODO: perhaps replace resize with use of properties for left,right,bottom,top?
+				rootControl.resize(0,0,pixelWidth*windowWidth,pixelHeight*windowHeight);
+
 				glViewport(0, 0, windowWidth, windowHeight);
 				glMatrixMode(GL_PROJECTION);
 				glLoadIdentity();
-				gluOrtho2D(0, pixelWidth*windowWidth, 0, pixelHeight*windowHeight);
+				gluOrtho2D(rootControl.left(),rootControl.right(),rootControl.bottom(),rootControl.top());
 			} // end function reshape
 		}; // end class GLUT
 
