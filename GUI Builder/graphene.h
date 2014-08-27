@@ -916,7 +916,7 @@ namespace graphene
 				 *	the size returned by the object methods.
 				 */
 				// TODO: Is silent scaling the best option?
-				template<typename BaseType, typename TextGetter, typename Margin = typename BaseType::margin>
+				template<typename BaseType, typename TextConceptMap, typename Margin = typename BaseType::margin>
 				class BoxedText : public BaseType
 				{
 					/*********************
@@ -947,9 +947,9 @@ namespace graphene
 					{
 						typename BaseType::font_engine_type fontEngine;
 						// scale text down to fit:
-						auto actualTextHeight = std::min(textHeight(),(height()*Margin::den - 2*Margin::num) / Margin::den);
-						auto actualTextWidth = std::min(actualTextHeight * fontEngine.stringWidth(TextGetter()(*this)) / fontEngine.fontHeight(),(width()*Margin::den - 2*Margin::num) / Margin::den);
-						actualTextHeight = std::min(actualTextHeight, actualTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(TextGetter()(*this)));
+						auto actualTextHeight = std::min(TextConceptMap().textHeight(*this),(height()*Margin::den - 2*Margin::num) / Margin::den);
+						auto actualTextWidth = std::min(actualTextHeight * fontEngine.stringWidth(TextConceptMap().text(*this)) / fontEngine.fontHeight(),(width()*Margin::den - 2*Margin::num) / Margin::den);
+						actualTextHeight = std::min(actualTextHeight, actualTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(TextConceptMap().text(*this)));
 
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
@@ -957,9 +957,9 @@ namespace graphene
 								glTranslated((((width() - actualTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
 											 (((height() - actualTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
 											 0); // center text in inner rectangle
-								glScaled(actualTextWidth / fontEngine.stringWidth(TextGetter()(*this)) , actualTextHeight / fontEngine.fontHeight() , 1);
+								glScaled(actualTextWidth / fontEngine.stringWidth(TextConceptMap().text(*this)) , actualTextHeight / fontEngine.fontHeight() , 1);
 								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
-								fontEngine.render(TextGetter()(*this));
+								fontEngine.render(TextConceptMap().text(*this));
 							glPopMatrix();
 						glPopAttrib();
 					} // end method render
@@ -975,7 +975,7 @@ namespace graphene
 				 */
 				// TODO: Is silent scaling the best option?
 				// TODO: Add support for dynamic line spacing using SFINAE
-				template<typename BaseType, typename TextGetter, typename Margin = typename BaseType::margin, typename LineSpacing = typename BaseType::line_spacing>
+				template<typename BaseType, typename TextConceptMap, typename Margin = typename BaseType::margin, typename LineSpacing = typename BaseType::line_spacing>
 				class BoxedParagraph : public BaseType
 				{
 					/*********************
@@ -1012,14 +1012,14 @@ namespace graphene
 						auto innerRight  = (std::max(left(),right())*Margin::den - Margin::num)/Margin::den;
 						auto innerTop    = (std::max(bottom(),top())*Margin::den - Margin::num)/Margin::den;
 						typename BaseType::text_type currentLine;
-						auto lineHeight = textHeight(); // change later...
+						auto lineHeight = TextConceptMap().textHeight(*this); // change later...
 
 						// TODO: add line wrapping.
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
 								glTranslated(innerLeft,innerTop - fontEngine.fontAboveBaseLine()*lineHeight/fontEngine.fontHeight(),0); // set caret to initial position
-								for(auto character : TextGetter()(*this))
+								for(auto character : TextConceptMap().text(*this))
 								{
 									if(character == '\n') // TODO: use character traits for comparison
 									{
@@ -1373,22 +1373,60 @@ namespace graphene
 			} // end method operator()
 		}; // end struct Highlighted
 
+		// TODO: use concept maps instead when available
 		struct Textual
 		{
 			template<typename TextualType>
-			auto operator()(const TextualType &textual)->decltype(textual.text())
+			auto text(const TextualType &textual)->decltype(textual.text())
 			{
 				return textual.text();
-			} // end method operator()
+			} // end method text
+
+			template<typename TextualType>
+			auto textHeight(const TextualType &textual)->decltype(textual.textHeight())
+			{
+				return textual.textHeight();
+			} // end method textHeight
+
+			template<typename TextualType>
+			auto textWidth(const TextualType &textual)->decltype(textual.textWidth())
+			{
+				return textual.textWidth();
+			} // end method textWidth
+
+			template<typename TextualType>
+			void setTextWidth(const TextualType &textual, const typename TextualType::coordinate_type &value)
+			{
+				textual.setTextWidth(value);
+			} // end method setTextWidth
 		}; // end struct Textual
 
+		// TODO: use concept maps instead when available
 		struct Named
 		{
 			template<typename NamedType>
-			auto operator()(const NamedType &named)->decltype(named.name())
+			auto text(const NamedType &named)->decltype(named.name())
 			{
 				return named.name();
-			} // end method operator()
+			} // end method text
+
+			template<typename NamedType>
+			auto textHeight(const NamedType &named)->decltype(named.nameHeight())
+			{
+				return named.nameHeight();
+			} // end method textHeight
+
+			template<typename NamedType>
+			auto textWidth(const NamedType &named)->decltype(named.nameWidth())
+			{
+				return named.nameWidth();
+			} // end method textWidth
+
+			template<typename NamedType>
+			void setTextWidth(const NamedType &named, const typename NamedType::coordinate_type &value)
+			{
+				named.setNameWidth(value);
+			} // end method setTextWidth
 		}; // end struct Named
 
 		/** Font engines encapsulate low level font metric and rendering functions, to present 
