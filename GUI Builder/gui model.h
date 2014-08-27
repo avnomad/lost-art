@@ -42,6 +42,74 @@ namespace GUIModel
 
 	namespace Controls
 	{
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
+		class ButtonBase : public graphene::DSEL::FrameStack<
+			RectangleType,
+			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
+			graphene::Frames::Pressable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
+			graphene::Frames::Hightlightable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
+			graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
+			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+		>::type{}; // poor man's template alias
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class Button : public graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+								graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+									graphene::Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
+									graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
+								graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+									graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+										graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+									graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+										graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+									graphene::FunctionObjects::Highlighted>,
+								graphene::FunctionObjects::Pressed>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+						graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+							graphene::Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
+							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
+						graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+							graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+								graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+							graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+								graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+							graphene::FunctionObjects::Highlighted>,
+						graphene::FunctionObjects::Pressed> base_type;
+			typedef typename Button::coordinate_type coordinate_type;
+			typedef RectangleType rectangle_type;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Button(){/* empty body */}
+
+			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
+			{
+				this->left() = left;
+				this->bottom() = bottom;
+				this->right() = right;
+				this->top() = top;
+				this->borderSize() = borderSize;
+				this->text() = text;
+				this->textHeight() = textHeight;
+				this->pressed() = pressed;
+				this->highlighted() = highlighted;
+			} // end Button constructor
+		}; // end class Button
+
 		template<typename CoordinateType>
 		class IShapePart : public graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
@@ -423,7 +491,7 @@ namespace GUIModel
 		}; // end class Constraint
 
 		template<typename CoordinateType, typename TextType = std::string>
-		class Model
+		class Model : public geometry::Rectangle<CoordinateType>
 		{
 		public:
 			/*********************
@@ -615,6 +683,37 @@ namespace GUIModel
 			{
 				std::system(executableName.c_str());
 			} // end method run
+
+			// UI
+			void render() const
+			{
+				// stub
+			} // end method render
+
+			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
+			{
+				// stub
+			} // end method keyboardAscii
+
+			void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
+			{
+				// stub
+			} // end method mouseButton
+
+			void mouseEnter(CoordinateType x, CoordinateType y)
+			{
+				// stub
+			} // end method mouseEnter
+
+			void mouseMove(CoordinateType x, CoordinateType y)
+			{
+				// stub
+			} // end method mouseMove
+
+			void mouseExit(CoordinateType x, CoordinateType y)
+			{
+				// stub
+			} // end method mouseExit
 
 		}; // end class Model
 

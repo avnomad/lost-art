@@ -1892,6 +1892,7 @@ namespace graphene
 
 	namespace EventAdaptors
 	{
+		// TODO: rethink about who should be responsible to define the coordinate system.
 		template<typename RootControlType>
 		class GLUT
 		{
@@ -1900,19 +1901,120 @@ namespace graphene
 			*********************/
 		public:
 			typedef RootControlType root_control_type;
+			typedef typename root_control_type::coordinate_type coordinate_type;
 
 			/***************
 			*    Fields    *
 			***************/
 		private:
 			static RootControlType rootControl;
+			static coordinate_type pixelWidth, pixelHeight; // in milimetres
+			static bool wasInside;
 
 			/****************
 			*    Methods    *
 			****************/
 		public:
-			// TODO: add static methods implementing GLUT event handling functions
+			// TODO: add support for initializing rootControl
+			/** GLUT must be initialized before calling this method
+			 */
+			static void initialize()
+			{
+				pixelWidth = (coordinate_type)glutGet(GLUT_SCREEN_WIDTH_MM) / glutGet(GLUT_SCREEN_WIDTH);
+				pixelHeight = (coordinate_type)glutGet(GLUT_SCREEN_HEIGHT_MM) / glutGet(GLUT_SCREEN_HEIGHT);
+				wasInside = false;
+			} // end method initialize
+
+			// TODO: add static methods implementing the rest of GLUT event handling functions
+			// TODO: use SFINAE to revert to default behaviour if root control does not implement
+			// all methods
+			static void idle()
+			{
+				glutPostRedisplay();
+			} // end function idle
+
+			static void display() // TODO: what if I have to clear more buffers?
+			{
+				glClear(GL_COLOR_BUFFER_BIT);
+
+				rootControl.render();
+				
+				glutSwapBuffers();
+			} // end function display
+
+			static void keyboard(unsigned char key, int glutX, int glutY)
+			{
+				// TODO: define the control stack model and exit only when stack is empty.
+				switch(key)
+				{
+					case 27:	// escape key
+						std::exit(0);
+				} // end switch
+
+				coordinate_type sceneX = glutX*pixelWidth;
+				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
+
+				rootControl.keyboardAscii(key,true,sceneX,sceneY);
+			} // end function keyboard
+
+			static void keyboardUp(unsigned char key, int glutX, int glutY)
+			{
+				coordinate_type sceneX = glutX*pixelWidth;
+				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
+
+				rootControl.keyboardAscii(key,false,sceneX,sceneY);
+			} // end function keyboard
+
+			static void mouse(int button, int state, int glutX, int glutY)
+			{
+				coordinate_type sceneX = glutX*pixelWidth;
+				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
+
+				rootControl.mouseButton(button == GLUT_LEFT_BUTTON ? 0 : (button == GLUT_RIGHT_BUTTON ? 1 : 2),state == GLUT_DOWN,sceneX,sceneY);
+			} // end function motion
+
+			static void motion(int glutX, int glutY)
+			{
+				passiveMotion(glutX,glutY);
+			} // end function motion
+
+			static void passiveMotion(int glutX, int glutY)
+			{
+				coordinate_type sceneX = glutX*pixelWidth;
+				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
+
+				if(rootControl.contains(sceneX,sceneY))
+					if(wasInside)
+						rootControl.mouseMove(sceneX,sceneY);
+					else
+						rootControl.mouseEnter(sceneX,sceneY);
+				else
+					if(wasInside)
+						rootControl.mouseExit(sceneX,sceneY);
+					else
+					{
+						// do nothing
+					} // end else
+			} // end function motion
+
+			static void reshape(int windowWidth, int windowHeight)
+			{
+				glViewport(0, 0, windowWidth, windowHeight);
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				gluOrtho2D(0, pixelWidth*windowWidth, 0, pixelHeight*windowHeight);
+			} // end function reshape
 		}; // end class GLUT
+
+		// Out-of-class static field definitions
+		template<typename RootControlType>
+		RootControlType GLUT<RootControlType>::rootControl;
+		template<typename RootControlType>
+		typename GLUT<RootControlType>::coordinate_type GLUT<RootControlType>::pixelWidth;  // in milimetres
+		template<typename RootControlType>
+		typename GLUT<RootControlType>::coordinate_type GLUT<RootControlType>::pixelHeight; // in milimetres
+		template<typename RootControlType>
+		bool GLUT<RootControlType>::wasInside;
 
 	} // end namespace EventAdaptors
 

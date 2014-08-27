@@ -34,244 +34,6 @@ using Eigen::Matrix;
 #include "graphene.h"
 #include "gui model.h"
 
-typedef graphene::Controls::IControl<float> IControl;
-typedef graphene::Controls::Button<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Button;
-typedef graphene::Controls::Control<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>> Control;
-typedef graphene::Controls::Paragraph<geometry::Rectangle<float>,std::ratio<1>,std::ratio<2>,std::ratio<1,2>> Paragraph;
-typedef graphene::Controls::Label<geometry::Rectangle<float>,std::ratio<1>> Label;
-
-float lastX, lastY;
-float pixelWidth, pixelHeight; // in milimetres
-
-Button button1(10,10,90,50,1,"button1",20);
-Button button2(10,60,90,100,1,"button2",20);
-Button *lastContaining = nullptr;
-
-Label label1(5,110,95,130,"Feel the groove!",10);
-Label label2(25,140,75,160,"Hello World!",10);
-Label label3(25,170,75,185,"This is a very long text!",10);
-
-list<unique_ptr<IControl>> controls;
-unique_ptr<graphene::Controls::IShapePart<float>> selectedPart;
-IControl *selectedControl = nullptr;
-IControl *highlightedControl = nullptr;
-
-void idle()
-{
-	glutPostRedisplay();
-} // end function idle
-
-
-void display()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	button1.render();
-	button2.render();
-
-	label1.render();
-	label2.render();
-	label3.render();
-
-	for(auto &control : controls)
-		control->render();
-
-	if(selectedPart)
-		selectedPart->render();
-
-	glutSwapBuffers();
-} // end function display
-
-
-void keyboard(unsigned char key, int x, int y)
-{
-	switch(key)
-	{
-		case 27:	// escape key
-			std::exit(0);
-	} // end switch
-
-	float fx = x*pixelWidth;
-	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-
-	button1.keyboardAscii(key,true,fx,fy);
-	button2.keyboardAscii(key,true,fx,fy);
-} // end function keyboard
-
-
-void mouse(int button, int state, int x, int y)
-{
-	float fx = x*pixelWidth;
-	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-
-	if(button == GLUT_LEFT_BUTTON)
-		if(button1.target != nullptr)
-			static_cast<decltype(button1)*>(button1.target)->mouseButton(0,state==GLUT_DOWN,fx,fy);
-		else
-		{
-			if(button1.contains(fx,fy))
-				button1.mouseButton(0,state==GLUT_DOWN,fx,fy);
-			if(button1.target == nullptr)
-				if(button2.contains(fx,fy))
-					button2.mouseButton(0,state==GLUT_DOWN,fx,fy);
-		} // end else
-
-	if(button == GLUT_LEFT_BUTTON)	// TODO: add bring-to-front
-		if(state == GLUT_DOWN)
-		{
-			lastX = fx;
-			lastY = fy;
-			if(selectedControl)
-				selectedControl->deselect();
-			for(auto &control : controls)
-				if(selectedPart = control->partUnderPoint(fx,fy))
-				{
-					selectedControl = &control->select();
-					break;
-				} // end if
-		}
-		else
-		{
-			selectedPart = nullptr;
-		} // end else
-} // end function mouse
-
-
-void motion(int x, int y)
-{
-	float fx = x*pixelWidth;
-	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-
-	if(button1.target != nullptr)
-	{
-		if(static_cast<decltype(button1)*>(button1.target)->contains(fx,fy))
-		{
-			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
-				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
-			else
-				(lastContaining = static_cast<decltype(button1)*>(button1.target))->mouseEnter(fx,fy);
-		}
-		else
-		{
-			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
-			{
-				lastContaining = nullptr;
-				static_cast<decltype(button1)*>(button1.target)->mouseExit(fx,fy);
-			}
-			else
-				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
-		} // end else
-	}
-	else
-	{
-		if(button1.contains(fx,fy))
-		{
-			if(&button1 == lastContaining)
-				button1.mouseMove(fx,fy);
-			else
-				(lastContaining = &button1)->mouseEnter(fx,fy);
-		}
-		else if(&button1 == lastContaining)
-		{
-			lastContaining = nullptr;
-			button1.mouseExit(fx,fy);
-		} // end else
-
-		if(button2.contains(fx,fy))
-		{
-			if(&button2 == lastContaining)
-				button2.mouseMove(fx,fy);
-			else
-				(lastContaining = &button2)->mouseEnter(fx,fy);
-		}
-		else if(&button2 == lastContaining)
-		{
-			lastContaining = nullptr;
-			button2.mouseExit(fx,fy);
-		} // end else
-	} // end else
-
-	if(selectedPart)
-		selectedPart->move(fx-lastX,fy-lastY);
-	lastX = fx;
-	lastY = fy;
-} // end function motion
-
-
-void passiveMotion(int x, int y)
-{
-	float fx = x*pixelWidth;
-	float fy = (glutGet(GLUT_WINDOW_HEIGHT)-1 - y)*pixelHeight;
-
-	if(button1.target != nullptr)
-	{
-		if(static_cast<decltype(button1)*>(button1.target)->contains(fx,fy))
-		{
-			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
-				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
-			else
-				(lastContaining = static_cast<decltype(button1)*>(button1.target))->mouseEnter(fx,fy);
-		}
-		else
-		{
-			if(static_cast<decltype(button1)*>(button1.target) == lastContaining)
-			{
-				lastContaining = nullptr;
-				static_cast<decltype(button1)*>(button1.target)->mouseExit(fx,fy);
-			}
-			else
-				static_cast<decltype(button1)*>(button1.target)->mouseMove(fx,fy);
-		} // end else
-	}
-	else
-	{
-		if(button1.contains(fx,fy))
-		{
-			if(&button1 == lastContaining)
-				button1.mouseMove(fx,fy);
-			else
-				(lastContaining = &button1)->mouseEnter(fx,fy);
-		}
-		else if(&button1 == lastContaining)
-		{
-			lastContaining = nullptr;
-			button1.mouseExit(fx,fy);
-		} // end else
-
-		if(button2.contains(fx,fy))
-		{
-			if(&button2 == lastContaining)
-				button2.mouseMove(fx,fy);
-			else
-				(lastContaining = &button2)->mouseEnter(fx,fy);
-		}
-		else if(&button2 == lastContaining)
-		{
-			lastContaining = nullptr;
-			button2.mouseExit(fx,fy);
-		} // end else
-	} // end else
-
-	if(highlightedControl)
-		highlightedControl->dehighlight();
-	for(auto &control : controls)
-		if(control->contains(fx,fy))
-		{
-			highlightedControl = &control->highlight();
-			break;
-		} // end if
-} // end function motion
-
-
-void reshape(int windowWidth, int windowHeight)
-{
-	glViewport(0, 0, windowWidth, windowHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluOrtho2D(0, pixelWidth*windowWidth, 0, pixelHeight*windowHeight);
-} // end function reshape
-
-
 int main(int argc, char **argv)
 {
 	// run test suites
@@ -281,34 +43,6 @@ int main(int argc, char **argv)
 	geometry::runTestSuite();
 	graphene::runTestSuite();
 	GUIModel::runTestSuite();
-
-	//using geometry::RectangleSide;
-
-	//gui::Model<int> model1;
-
-	//model1.controls.emplace_back(0,0,100,100);
-	//model1.controls.emplace_back(20,20,80,80);
-
-	//model1.constraints.emplace_back("a",0,RectangleSide::LEFT,1,RectangleSide::LEFT);
-	//model1.constraints.emplace_back("a",0,RectangleSide::RIGHT,1,RectangleSide::RIGHT);
-	//model1.constraints.emplace_back("2a",1,RectangleSide::LEFT,1,RectangleSide::RIGHT);
-
-	//model1.constraints.emplace_back("1/2b",0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM);
-	//model1.constraints.emplace_back("1/2b",0,RectangleSide::TOP,1,RectangleSide::TOP);
-	//model1.constraints.emplace_back("b",1,RectangleSide::BOTTOM,1,RectangleSide::TOP);
-
-	//model1.save("test1.las");
-
-	//auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
-	//for(auto constraint : model1.constraints)
-	//	auto result = constraint.parse<boost::rational<long long>>(symbols);
-
-	//model1.compile<boost::rational<long long>,float,int,std::string>("application customization.h");
-	//model1.run("\"..\\Debug\\Win32\\Generated Application.exe\"");
-
-	//gui::Model<int> model2;
-
-	//model2.load("test2.las");
 
 	// glut initialization
 	glutInit(&argc,argv);
@@ -328,29 +62,17 @@ int main(int argc, char **argv)
 	glEnable(GL_POLYGON_SMOOTH);
 
 	// application initialization
-	pixelWidth = (float)glutGet(GLUT_SCREEN_WIDTH_MM) / glutGet(GLUT_SCREEN_WIDTH);
-	pixelHeight = (float)glutGet(GLUT_SCREEN_HEIGHT_MM) / glutGet(GLUT_SCREEN_HEIGHT);
-	//controls.emplace_back(100.0f, 10.0f,150.0f, 40.0f,1.0f,"control1",10.0f); // VS2012 standard library does not support 6+ arguments...
-	//controls.emplace_back(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f);
-	//controls.emplace_back(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f);
-	//controls.emplace_back(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f);
-	controls.emplace_back(new Control(100.0f, 10.0f,150.0f, 40.0f,1.0f,"control1",10.0f));
-	controls.emplace_back(new Control(100.0f, 50.0f,150.0f, 80.0f,1.0f,"control2",10.0f));
-	controls.emplace_back(new Control(100.0f, 90.0f,140.0f,130.0f,1.0f,"control3",10.0f));
-	controls.emplace_back(new Control(100.0f,140.0f,140.0f,180.0f,1.0f,"control4",10.0f));
-	controls.emplace_back(new Paragraph(20.0f,240.0f,270.0f,270.0f,1.0f,
-		"This is a sample paragraph for paragraph_control1.\n\nThe text should appear with the two lines separated by a blank line.",8.0f));
-	controls.emplace_back(new Paragraph(20.0f,200.0f,270.0f,230.0f,1.0f,
-		"This is another paragraph. This time for paragraph_control2.\nThis line should be immediately below the previous one.\n",8.0f));
+	typedef graphene::EventAdaptors::GLUT<GUIModel::Controls::Model<float>> AdaptorType;
+	AdaptorType::initialize();
 
 	// event handling initialization
-	glutIdleFunc(idle);
-	glutDisplayFunc(display);
-	glutKeyboardFunc(keyboard);
-	glutMouseFunc(mouse);
-	glutMotionFunc(motion);
-	glutPassiveMotionFunc(passiveMotion);
-	glutReshapeFunc(reshape);
+	glutIdleFunc(AdaptorType::idle);
+	glutDisplayFunc(AdaptorType::display);
+	glutKeyboardFunc(AdaptorType::keyboard);
+	glutMouseFunc(AdaptorType::mouse);
+	glutMotionFunc(AdaptorType::motion);
+	glutPassiveMotionFunc(AdaptorType::passiveMotion);
+	glutReshapeFunc(AdaptorType::reshape);
 	glutMainLoop();
 
 	return 0;
