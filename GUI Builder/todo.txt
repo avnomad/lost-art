@@ -9,5 +9,10 @@ TODO:
     (dynamic) type of object to be dropped onto them and what action this will 
 	result into. Perhaps along the lines of MultiPart with the returned object
 	encapsulating the action and nullptr reporting unsupported types.
+
 3.  Rethink concrete MultiPart frame: perhaps 9 distinct part types is the way 
     to go (instead of a template template parameter).
+
+4.  Factor out common parts from {Pressable, Highlightable, Selectable} and
+    {Textual, Named} using function-like macros, but wait till code is further
+	stabilized before doing so as macros make bug-hunting harder.

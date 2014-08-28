@@ -53,7 +53,8 @@ namespace GUIModel
 			graphene::Frames::Pressable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
 			graphene::Frames::Hightlightable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
 			graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
-			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+			graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
 		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
@@ -176,7 +177,8 @@ namespace GUIModel
 				graphene::Frames::Hightlightable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
 				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
 				graphene::Frames::Named<graphene::DSEL::Omit,TextType>,
-				graphene::Frames::SizedName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+				graphene::Frames::SizedName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+				graphene::Frames::BoxedAdaptableSizeName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
 			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>

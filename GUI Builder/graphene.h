@@ -188,6 +188,23 @@ namespace graphene
 			// and add prefered width, height read-only properties.
 		}; // end class SizedText
 
+		/** This frame is intended for used in frame stacks that use textHeight/textWidth as a 
+		 *	"preferred" size and need another method to return the actual text height/width.
+		 *	The first pair member is the width and the second the height.
+		 */
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class AdaptableSizeText : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual std::pair<CoordinateType,CoordinateType> effectiveTextSize() const = 0;
+		}; // end class AdaptableSizeText
+
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
 		class Named : public BaseType
 		{
@@ -225,6 +242,23 @@ namespace graphene
 			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
 			// and add prefered width, height read-only properties.
 		}; // end class SizedName
+
+		/** This frame is intended for used in frame stacks that use nameHeight/nameWidth as a 
+		 *	"preferred" size and need another method to return the actual name height/width.
+		 *	The first pair member is the width and the second the height.
+		 */
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class AdaptableSizeName : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual std::pair<CoordinateType,CoordinateType> effectiveNameSize() const = 0;
+		}; // end class AdaptableSizeName
 
 		/** If a MultiPart is also Containing then partUnderPoint(x,y) should return a value designating "no part"
 		 *	if and only if contains(x,y) returns false.
@@ -578,6 +612,37 @@ namespace graphene
 			} // end method setTextWidth
 		}; // end class SizedText
 
+		/** BaseType should be Rectangular and SizedText, TextEngineType should be default constructible
+		 */
+		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename Margin = typename BaseType::margin, typename CoordinateType = typename BaseType::coordinate_type>
+		class BoxedAdaptableSizeText : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+			typedef FontEngineType font_engine_type;
+			typedef Margin margin;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			std::pair<CoordinateType,CoordinateType> effectiveTextSize() const
+			{
+				font_engine_type fontEngine;
+
+				// scale text down to fit in rectangle:
+				CoordinateType effectiveTextHeight = std::min(textHeight(),(height()*margin::den - 2*margin::num) / margin::den);
+				CoordinateType effectiveTextWidth = std::min(effectiveTextHeight * fontEngine.stringWidth(text()) / fontEngine.fontHeight(),(width()*margin::den - 2*margin::num) / margin::den);
+				effectiveTextHeight = std::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(text()));
+
+				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
+			} // end method effectiveTextSize
+		}; // end class BoxedAdaptableSizeText
+
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
 		class Named : public BaseType
 		{
@@ -656,6 +721,37 @@ namespace graphene
 				nameHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(name());
 			} // end method setNameWidth
 		}; // end class SizedName
+
+		/** BaseType should be Rectangular and SizedName, TextEngineType should be default constructible
+		 */
+		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename Margin = typename BaseType::margin, typename CoordinateType = typename BaseType::coordinate_type>
+		class BoxedAdaptableSizeName : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+			typedef FontEngineType font_engine_type;
+			typedef Margin margin;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			std::pair<CoordinateType,CoordinateType> effectiveNameSize() const
+			{
+				font_engine_type fontEngine;
+
+				// scale name down to fit in rectangle:
+				CoordinateType effectiveNameHeight = std::min(nameHeight(),(height()*margin::den - 2*margin::num) / margin::den);
+				CoordinateType effectiveNameWidth = std::min(effectiveNameHeight * fontEngine.stringWidth(name()) / fontEngine.fontHeight(),(width()*margin::den - 2*margin::num) / margin::den);
+				effectiveNameHeight = std::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(name()));
+
+				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
+			} // end method effectiveNameSize
+		}; // end class BoxedAdaptableSizeName
 
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
 		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
@@ -918,8 +1014,8 @@ namespace graphene
 					} // end method render
 				}; // end class BorderedRectangle
 
-				/** BaseType should be Rectangular, Textual, SizedText. Margin should be a compile-time rational type
-				 *	representing the margin reserved between the rectangle sides and the text.
+				/** BaseType should be Rectangular and expose text traits via the supplied TextConceptMap. 
+				 *	Margin should be a compile-time rational type representing the margin reserved between the rectangle sides and the text.
 				 *	If the text cannot fit in the rectangle, it is silently scaled down for rendering. This does not affect
 				 *	the size returned by the object methods.
 				 */
@@ -954,18 +1050,17 @@ namespace graphene
 					void render() const
 					{
 						typename BaseType::font_engine_type fontEngine;
-						// scale text down to fit:
-						auto actualTextHeight = std::min(TextConceptMap().textHeight(*this),(height()*Margin::den - 2*Margin::num) / Margin::den);
-						auto actualTextWidth = std::min(actualTextHeight * fontEngine.stringWidth(TextConceptMap().text(*this)) / fontEngine.fontHeight(),(width()*Margin::den - 2*Margin::num) / Margin::den);
-						actualTextHeight = std::min(actualTextHeight, actualTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(TextConceptMap().text(*this)));
+						auto effectiveTextSize = TextConceptMap().effectiveTextSize(*this);
+						auto effectiveTextWidth = effectiveTextSize.first;
+						auto effectiveTextHeight = effectiveTextSize.second;
 
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
-								glTranslated((((width() - actualTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
-											 (((height() - actualTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
+								glTranslated((((width() - effectiveTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
+											 (((height() - effectiveTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
 											 0); // center text in inner rectangle
-								glScaled(actualTextWidth / fontEngine.stringWidth(TextConceptMap().text(*this)) , actualTextHeight / fontEngine.fontHeight() , 1);
+								glScaled(effectiveTextWidth / fontEngine.stringWidth(TextConceptMap().text(*this)) , effectiveTextHeight / fontEngine.fontHeight() , 1);
 								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
 								fontEngine.render(TextConceptMap().text(*this));
 							glPopMatrix();
@@ -1407,6 +1502,12 @@ namespace graphene
 			{
 				textual.setTextWidth(value);
 			} // end method setTextWidth
+
+			template<typename TextualType>
+			auto effectiveTextSize(const TextualType &textual)->decltype(textual.effectiveTextSize())
+			{
+				return textual.effectiveTextSize();
+			} // end method effectiveTextSize
 		}; // end struct Textual
 
 		// TODO: use concept maps instead when available
@@ -1435,6 +1536,12 @@ namespace graphene
 			{
 				named.setNameWidth(value);
 			} // end method setTextWidth
+
+			template<typename NamedType>
+			auto effectiveTextSize(const NamedType &named)->decltype(named.effectiveNameSize())
+			{
+				return named.effectiveNameSize();
+			} // end method effectiveTextSize
 		}; // end struct Named
 
 		/** Font engines encapsulate low level font metric and rendering functions, to present 
@@ -1637,6 +1744,7 @@ namespace graphene
 			Frames::Hightlightable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
 			Frames::Textual<DSEL::Omit,TextType>,
 			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>,
 			Frames::EventHandling::TwoStagePressable<DSEL::Omit,typename RectangleType::coordinate_type>
 		>::type{}; // poor man's template alias
 
@@ -1777,7 +1885,8 @@ namespace graphene
 				Frames::Hightlightable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>>,
 				Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
 				Frames::Textual<DSEL::Omit,TextType>,
-				Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+				Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+				Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
 			>::type,ControlPart>{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
@@ -1892,28 +2001,29 @@ namespace graphene
 			} // end Paragraph constructor
 		}; // end class Paragraph
 
-		template<typename RectangleType, typename TextType> 
+		template<typename RectangleType, typename Margin, typename TextType> 
 		class LabelBase : public DSEL::FrameStack<
 			RectangleType,
 			Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
 			Frames::Textual<DSEL::Omit,TextType>,
-			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>
+			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
 		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename Margin, typename TextType = std::string>
 		class Label : public Frames::Renderable::Sequential<
-								LabelBase<RectangleType,TextType>,
-								Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
-								Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,FunctionObjects::Textual,Margin>>>
+								LabelBase<RectangleType,Margin,TextType>,
+								Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
+								Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
 			typedef Frames::Renderable::Sequential<
-						LabelBase<RectangleType,TextType>,
-						Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,TextType>>,
-						Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,TextType>,FunctionObjects::Textual,Margin>>> base_type;
+						LabelBase<RectangleType,Margin,TextType>,
+						Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
+						Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>> base_type;
 			typedef typename Label::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
