@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include <cassert>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -114,6 +116,7 @@ namespace GUIModel
 		class IShapePart : public graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
 			graphene::Bases::Movable<graphene::DSEL::Omit,CoordinateType>,
+			graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>, // TODO: move rectangular back to concrete control when the screen special case is handled
 			graphene::Bases::Containing<graphene::DSEL::Omit,CoordinateType>,
 			graphene::Bases::Renderable<graphene::DSEL::Omit>			
 		>::type{}; // poor man's template alias
@@ -123,7 +126,6 @@ namespace GUIModel
 		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 		class ControlPart : public graphene::DSEL::FrameStack<
 				IShapePart<CoordinateType>,
-				graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>,
 				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
 				graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
 				graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
@@ -138,7 +140,6 @@ namespace GUIModel
 		public:
 			typedef typename graphene::DSEL::FrameStack<
 				IShapePart<CoordinateType>,
-				graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>,
 				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
 				graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
 				graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
@@ -529,8 +530,10 @@ namespace GUIModel
 
 			coordinate_type lastX; // TODO: consider making lastPressX (this will require saving initial movable control position as well)
 			coordinate_type lastY;
+			unsigned long long controlIndex;
 
 			bool firstResize; // GLUT workaround (can't do first resize in constructor)
+			bool createOnMove;
 
 		public:
 			/*********************
@@ -540,7 +543,7 @@ namespace GUIModel
 			/** Construct an empty Model.
 			 */
 			Model()
-				:firstResize(true)
+				:firstResize(true),createOnMove(false),controlIndex(0)
 			{
 				// initialize buttons
 				buttons.emplace_back(button_type(0,0,0,0,1,"Load",10),[](){std::cout << "Load" << std::endl;});
@@ -663,7 +666,7 @@ namespace GUIModel
 				for(size_t i = 0 ; i < controls.size()-1 ; ++i)
 				{
 					for(size_t j = 0 ; j < 4 ; ++j)
-					{ // TODO: optimize for constant functions
+					{ // TODO: optimize for constant functions (assign at application initialization)
 						output << "\tcontrols[" << i << "].sides()[" << j << "] = ";
 						bool nonZeroBefore = false;
 						for(size_t uc = 0 ; uc < 4 ; ++uc)
@@ -747,6 +750,8 @@ namespace GUIModel
 				if(button == 0)
 					if(down)
 					{
+						assert(highlightedButton == buttons.end() || highlightedControl == controls.rend());
+
 						if(highlightedButton != buttons.end())
 						{
 							highlightedButton->first.press();
@@ -768,10 +773,22 @@ namespace GUIModel
 							highlightedControl->select();
 							selectedControl = highlightedControl;
 							selectedPart = highlightedControl->partUnderPoint(x,y);
-
-							lastX = x;
-							lastY = y;
 						} // end if
+
+						// TODO: consider representing screen with a different control type and encapsulate special case in part selection code.
+						if(selectedPart && selectedPart->left() == selectedControl->left() && selectedPart->bottom() == selectedControl->bottom()
+							&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.rend()-1)
+						{ // deselect screen central area (effectively make it transparent to mouse clicks)
+							selectedPart = nullptr;
+							selectedControl->deselect();
+							selectedControl = controls.rend();
+						} // end if
+
+						if(pressedButton == buttons.end() && selectedControl == controls.rend())
+							createOnMove = true;
+
+						lastX = x;
+						lastY = y;
 					}
 					else
 					{
@@ -784,6 +801,8 @@ namespace GUIModel
 
 						if(selectedPart)
 							selectedPart = nullptr;
+
+						createOnMove = false;
 					} // end else
 			} // end method mouseButton
 
@@ -798,6 +817,20 @@ namespace GUIModel
 					pressedButton->first.pressed() = pressedButton->first.contains(x,y);
 				else
 				{
+					if(createOnMove)
+					{
+						createOnMove = false;
+						// create new control
+						// TODO: push at front
+						if(highlightedControl != controls.rend())
+							highlightedControl->dehighlight();
+						controls.push_back(control_type(x,y,x,y,1,"control"+std::to_string(controlIndex++),10)); // emplace_back can't take 6+ arguments yet.
+						highlightedControl = selectedControl = controls.rbegin();
+						highlightedControl->highlight();
+						selectedControl->select();
+						selectedPart = selectedControl->partUnderPoint(x,y); // TODO: guarantee this will be a corner
+					} // end if
+
 					// dehighlight all
 					if(highlightedButton != buttons.end())
 					{
