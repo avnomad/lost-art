@@ -678,55 +678,60 @@ namespace graphene
 			*    Methods    *
 			****************/
 		public:
-			// TODO: modify to work even if left() > right() || bottom() > top()
+			// TODO: does it work in every cases where left() > right() || bottom() > top()?
 #define partUnderPointMacro(PartType,Const,Constant) \
 			PartType partUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
-				if(left() <= x && x <= right() && bottom() <= y && y <= top())\
+				auto &left = this->left() < this->right() ? this->left() : this->right();\
+				auto &bottom = this->bottom() < this->top() ? this->bottom() : this->top();\
+				auto &right = this->left() >= this->right() ? this->left() : this->right();\
+				auto &top = this->bottom() >= this->top() ? this->bottom() : this->top();\
+				\
+				if(left <= x && x <= right && bottom <= y && y <= top)\
 				{\
-					if(x <= left()+borderSize())\
+					if(x <= left+borderSize())\
 					{\
-						if(y <= bottom()+borderSize())\
+						if(y <= bottom+borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,false,false>(left(),bottom(),left()+borderSize(),bottom()+borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,false,false>(left,bottom,left+borderSize(),bottom+borderSize()));\
 						}\
-						else if(y < top()-borderSize())\
+						else if(y < top-borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,true,false,false,false>(left(),bottom()+borderSize(),left()+borderSize(),top()-borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,true,false,false,false>(left,bottom+borderSize(),left+borderSize(),top-borderSize()));\
 						}\
-						else /* top()-borderSize() <= y */\
+						else /* top-borderSize() <= y */\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,false,false,true>(left(),top()-borderSize(),left()+borderSize(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,false,false,true>(left,top-borderSize(),left+borderSize(),top));\
 						} /* end else */\
 					}\
-					else if(x < right()-borderSize())\
+					else if(x < right-borderSize())\
 					{\
-						if(y <= bottom()+borderSize())\
+						if(y <= bottom+borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,true,false,false>(left()+borderSize(),bottom(),right()-borderSize(),bottom()+borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,true,false,false>(left+borderSize(),bottom,right-borderSize(),bottom+borderSize()));\
 						}\
-						else if(y < top()-borderSize())\
+						else if(y < top-borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,true,true>(left(),bottom(),right(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,true,true>(left,bottom,right,top));\
 						}\
-						else /* top()-borderSize() <= y */\
+						else /* top-borderSize() <= y */\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,false,false,true>(left()+borderSize(),top()-borderSize(),right()-borderSize(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,false,false,true>(left+borderSize(),top-borderSize(),right-borderSize(),top));\
 						} /* end else */\
 					}\
-					else /* right()-borderSize() <= x */\
+					else /* right-borderSize() <= x */\
 					{\
-						if(y <= bottom()+borderSize())\
+						if(y <= bottom+borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,true,true,false>(right()-borderSize(),bottom(),right(),bottom()+borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,true,true,false>(right-borderSize(),bottom,right,bottom+borderSize()));\
 						}\
-						else if(y < top()-borderSize())\
+						else if(y < top-borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,false,false,true,false>(right()-borderSize(),bottom()+borderSize(),right(),top()-borderSize()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,false,false,true,false>(right-borderSize(),bottom+borderSize(),right,top-borderSize()));\
 						}\
-						else /* top()-borderSize() <= y */\
+						else /* top-borderSize() <= y */\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,false,true,true>(right()-borderSize(),top()-borderSize(),right(),top()));\
+							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,false,true,true>(right-borderSize(),top-borderSize(),right,top));\
 						} /* end else */\
 					} /* end else */\
 				}\
