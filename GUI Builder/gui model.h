@@ -523,8 +523,8 @@ namespace GUIModel
 			typename std::common_type<decltype(buttons)>::type::iterator highlightedButton; // workaround for decltype not working alone
 			typename std::common_type<decltype(buttons)>::type::iterator pressedButton;
 
-			typename std::common_type<decltype(controls)>::type::iterator highlightedControl;
-			typename std::common_type<decltype(controls)>::type::iterator selectedControl;
+			typename std::common_type<decltype(controls)>::type::reverse_iterator highlightedControl;
+			typename std::common_type<decltype(controls)>::type::reverse_iterator selectedControl;
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
 
 			coordinate_type lastX; // TODO: consider making lastPressX (this will require saving initial movable control position as well)
@@ -554,8 +554,8 @@ namespace GUIModel
 				// initialize pointers and iterators
 				highlightedButton = buttons.end();
 				pressedButton = buttons.end();
-				highlightedControl = controls.end();
-				selectedControl = controls.end();
+				highlightedControl = controls.rend();
+				selectedControl = controls.rend();
 				selectedPart = nullptr;
 			} // end Model constructor
 
@@ -755,14 +755,14 @@ namespace GUIModel
 						else
 						{ // pressing a button should not deselect
 							// deselect all
-							if(selectedControl != controls.end())
+							if(selectedControl != controls.rend())
 							{
 								selectedControl->deselect();
-								selectedControl = controls.end();
+								selectedControl = controls.rend();
 							} // end if
 						} // end else
 
-						if(highlightedControl != controls.end())
+						if(highlightedControl != controls.rend())
 						{
 							// TODO: bring to front
 							highlightedControl->select();
@@ -805,10 +805,10 @@ namespace GUIModel
 						highlightedButton = buttons.end();
 					} // end if
 
-					if(highlightedControl != controls.end())
+					if(highlightedControl != controls.rend())
 					{
 						highlightedControl->dehighlight();
-						highlightedControl = controls.end();
+						highlightedControl = controls.rend();
 					} // end if
 
 					if(selectedPart)
@@ -828,7 +828,7 @@ namespace GUIModel
 							} // end if
 
 					if(highlightedButton == buttons.end())
-						for(auto control = controls.begin() ; control < controls.end() ; ++control)
+						for(auto control = controls.rbegin() ; control < controls.rend() ; ++control) // TODO: restore front to back iteration when screen-at-front issue fixed
 							if(control->contains(x,y))
 							{
 								control->highlight();
