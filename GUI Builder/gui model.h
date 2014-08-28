@@ -742,7 +742,13 @@ namespace GUIModel
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
 			{
-				// stub
+				if(down && code == 0x7f) // delete key
+					if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
+					{
+						controls.erase(selectedControl.base()-1); // TODO: delete constraints pointing to control as well
+						highlightedControl = selectedControl = controls.rend();
+						selectedPart = nullptr;						 
+					} // end if
 			} // end method keyboardAscii
 
 			void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
