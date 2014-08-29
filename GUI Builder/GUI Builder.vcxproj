@@ -29,6 +29,10 @@
     <ClInclude Include="symbol table.h" />
     <ClInclude Include="symbolic computation.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="notes.txt" />
+    <Text Include="todo.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{26777C5F-3B14-49DF-B16D-26B073EB1F1F}</ProjectGuid>
     <RootNamespace>GUIBuilder</RootNamespace>

@@ -51,7 +51,7 @@ namespace GUIModel
 			RectangleType,
 			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
 			graphene::Frames::Pressable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-			graphene::Frames::Hightlightable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
+			graphene::Frames::Highlightable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
 			graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
 			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
@@ -174,7 +174,7 @@ namespace GUIModel
 				RectangleType,
 				graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
 				graphene::Frames::Selectable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
-				graphene::Frames::Hightlightable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
+				graphene::Frames::Highlightable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
 				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
 				graphene::Frames::Named<graphene::DSEL::Omit,TextType>,
 				graphene::Frames::SizedName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,

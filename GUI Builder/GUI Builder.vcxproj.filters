@@ -16,6 +16,9 @@
     <Filter Include="Generated Files">
       <UniqueIdentifier>{07a834a6-f33e-47cc-8a3a-fcf3098b6dd5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Support Files">
+      <UniqueIdentifier>{6baf246b-7604-4092-bb1f-44517aedb3b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -65,5 +68,13 @@
     <ClInclude Include="opengl overloads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="notes.txt">
+      <Filter>Support Files</Filter>
+    </Text>
+    <Text Include="todo.txt">
+      <Filter>Support Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
