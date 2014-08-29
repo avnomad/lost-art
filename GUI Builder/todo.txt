@@ -13,6 +13,7 @@ TODO:
 3.  Rethink concrete MultiPart frame: perhaps 9 distinct part types is the way 
     to go (instead of a template template parameter).
 
-4.  Factor out common parts from {Pressable, Highlightable, Selectable} and
-    {Textual, Named} using function-like macros, but wait till code is further
-	stabilized before doing so as macros make bug-hunting harder.
+4.  Factor out common parts from {Pressable, Highlightable, Selectable, 
+    Focusable} and {Textual, Named} using function-like macros, but wait till 
+    code is further	stabilized before doing so as macros make bug-hunting 
+    harder.

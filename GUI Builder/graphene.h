@@ -136,6 +136,22 @@ namespace graphene
 			virtual const bool &highlighted() const = 0;
 		}; // end class Highlightable
 
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
+		class Focusable : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef FrameStackType frame_stack_type;
+
+			// Methods
+		public:
+			virtual FrameStackType &focus() = 0;
+			virtual FrameStackType &unfocus() = 0;
+			virtual bool &focused() = 0;
+			virtual const bool &focused() const = 0;
+		}; // end class Focusable
+
 		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
 		class UniformlyBordered : public BaseType
 		{
@@ -456,9 +472,9 @@ namespace graphene
 		}; // end class Pressable
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Hightlightable : public BaseType
+		class Highlightable : public BaseType
 		{
-			// must test that FrameStackType is indeed a subclass of Hightlightable and that
+			// must test that FrameStackType is indeed a subclass of Highlightable and that
 			// the this pointer indeed points to a FrameStackType...
 			// Is there something wrong with VS2012 std::is_base_of?
 
@@ -500,7 +516,54 @@ namespace graphene
 			{
 				return iHighlighted;
 			} // end method highlighted
-		}; // end class Hightlightable
+		}; // end class Highlightable
+
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
+		class Focusable : public BaseType
+		{
+			// must test that FrameStackType is indeed a subclass of Focusable and that
+			// the this pointer indeed points to a FrameStackType...
+			// Is there something wrong with VS2012 std::is_base_of?
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			bool iFocused;
+
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef FrameStackType frame_stack_type;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			FrameStackType &focus()
+			{
+				iFocused = true;
+				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+			} // end method focus
+
+			FrameStackType &unfocus()
+			{
+				iFocused = false;
+				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+			} // end method unfocus
+
+			bool &focused()
+			{
+				return iFocused;
+			} // end method focused
+
+			const bool &focused() const
+			{
+				return iFocused;
+			} // end method focused
+		}; // end class Focusable
 
 		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
 		class UniformlyBordered : public BaseType
@@ -1476,6 +1539,15 @@ namespace graphene
 			} // end method operator()
 		}; // end struct Highlighted
 
+		struct Focused
+		{
+			template<typename FocusableType>
+			bool operator()(const FocusableType &focusable)
+			{
+				return focusable.focused();
+			} // end method operator()
+		}; // end struct Focused
+
 		// TODO: use concept maps instead when available
 		struct Textual
 		{
@@ -1741,7 +1813,7 @@ namespace graphene
 			RectangleType,
 			Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
 			Frames::Pressable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-			Frames::Hightlightable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
+			Frames::Highlightable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
 			Frames::Textual<DSEL::Omit,TextType>,
 			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>,
@@ -1882,7 +1954,7 @@ namespace graphene
 				Frames::Adapting::Rectangular<DSEL::Omit,RectangleType>,
 				Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
 				Frames::Selectable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>/*Control<RectangleType,BorderSize,Margin,TextType>*/>,
-				Frames::Hightlightable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>>,
+				Frames::Highlightable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>>,
 				Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
 				Frames::Textual<DSEL::Omit,TextType>,
 				Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
