@@ -753,6 +753,11 @@ namespace GUIModel
 					} // end if
 			} // end method keyboardAscii
 
+			void keyboardNonAscii(graphene::Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
+			{
+				// stub
+			} // end method keyboardNonAscii
+
 			void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
 			{
 				if(button == 0)

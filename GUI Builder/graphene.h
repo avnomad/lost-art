@@ -345,6 +345,8 @@ namespace graphene
 
 		namespace EventHandling
 		{
+			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,HOME,END,LEFT,RIGHT,UP,DOWN,INSERT};
+
 			/** Controls implementing this interface should document whether they expect to recieve all
 			 *	mouse events or only the ones that happen above them.
 			 */
@@ -359,6 +361,7 @@ namespace graphene
 				// Methods
 			public:
 				virtual void keyboardAscii(unsigned char charCode, bool down, CoordinateType x, CoordinateType y) = 0;
+				virtual void keyboardNonAscii(NonAsciiKey key, bool down, CoordinateType x, CoordinateType y) = 0;
 				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y) = 0;
 				virtual void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y) = 0;
 				virtual void mouseEnter(CoordinateType x, CoordinateType y) = 0;
@@ -1605,6 +1608,7 @@ namespace graphene
 				****************/
 			public:
 				void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y){}
+				void keyboardNonAscii(Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y){}
 				void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y){}
 				void mouseWheel(CoordinateType wx, CoordinateType wy, CoordinateType x, CoordinateType y){}
 				void mouseEnter(CoordinateType x, CoordinateType y){}
@@ -1647,6 +1651,11 @@ namespace graphene
 				{
 					// ignore keyboard events
 				} // end method keyboardAscii
+
+				void keyboardNonAscii(Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
+				{
+					// ignore keyboard events... for now.
+				} // end method keyboardNonAscii
 
 				void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
 				{
@@ -2419,6 +2428,55 @@ namespace graphene
 
 				rootControl.keyboardAscii(key,false,sceneX,sceneY);
 			} // end function keyboard
+
+			static Bases::EventHandling::NonAsciiKey grapheneKey(int glutKey)
+			{
+				using Bases::EventHandling::NonAsciiKey;
+
+				// TODO: add more keys if the appear in GLUT the documentation
+				switch(glutKey)
+				{
+				case GLUT_KEY_F1: return NonAsciiKey::F1;
+				case GLUT_KEY_F2: return NonAsciiKey::F2;
+				case GLUT_KEY_F3: return NonAsciiKey::F3;
+				case GLUT_KEY_F4: return NonAsciiKey::F4;
+				case GLUT_KEY_F5: return NonAsciiKey::F5;
+				case GLUT_KEY_F6: return NonAsciiKey::F6;
+				case GLUT_KEY_F7: return NonAsciiKey::F7;
+				case GLUT_KEY_F8: return NonAsciiKey::F8;
+				case GLUT_KEY_F9: return NonAsciiKey::F9;
+				case GLUT_KEY_F10: return NonAsciiKey::F10;
+				case GLUT_KEY_F11: return NonAsciiKey::F11;
+				case GLUT_KEY_F12: return NonAsciiKey::F12;
+				case GLUT_KEY_PAGE_DOWN: return NonAsciiKey::PAGE_DOWN;
+				case GLUT_KEY_PAGE_UP: return NonAsciiKey::PAGE_UP;
+				case GLUT_KEY_HOME: return NonAsciiKey::HOME;
+				case GLUT_KEY_END: return NonAsciiKey::END;
+				case GLUT_KEY_LEFT: return NonAsciiKey::LEFT;
+				case GLUT_KEY_RIGHT: return NonAsciiKey::RIGHT;
+				case GLUT_KEY_UP: return NonAsciiKey::UP;
+				case GLUT_KEY_DOWN: return NonAsciiKey::DOWN;
+				case GLUT_KEY_INSERT: return NonAsciiKey::INSERT;
+				default:
+					throw std::runtime_error("Unknown GLUT key code!");
+				} // end switch
+			} // end function grapheneKey
+
+			static void special(int glutKey, int glutX, int glutY)
+			{
+				coordinate_type sceneX = glutX*pixelWidth;
+				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
+
+				rootControl.keyboardNonAscii(grapheneKey(glutKey),true,sceneX,sceneY);
+			} // end function special
+
+			static void specialUp(int glutKey, int glutX, int glutY)
+			{
+				coordinate_type sceneX = glutX*pixelWidth;
+				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
+
+				rootControl.keyboardNonAscii(grapheneKey(glutKey),false,sceneX,sceneY);
+			} // end function specialUp
 
 			static void mouse(int button, int state, int glutX, int glutY)
 			{

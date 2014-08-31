@@ -69,6 +69,9 @@ int main(int argc, char **argv)
 	glutIdleFunc(AdaptorType::idle);
 	glutDisplayFunc(AdaptorType::display);
 	glutKeyboardFunc(AdaptorType::keyboard);
+	glutKeyboardUpFunc(AdaptorType::keyboardUp);
+	glutSpecialFunc(AdaptorType::special);
+	glutSpecialUpFunc(AdaptorType::specialUp);
 	glutMouseFunc(AdaptorType::mouse);
 	glutMotionFunc(AdaptorType::motion);
 	glutPassiveMotionFunc(AdaptorType::passiveMotion);
