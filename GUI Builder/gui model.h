@@ -166,120 +166,6 @@ namespace GUIModel
 			} // end ControlPart constructor
 		}; // end class ControlPart
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>	class Control;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
-		class ControlBase : public 
-			graphene::Frames::MultiPartBorderedRectangle<typename graphene::DSEL::FrameStack<
-				RectangleType,
-				graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
-				graphene::Frames::Selectable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
-				graphene::Frames::Highlightable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,TextType>>,
-				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
-				graphene::Frames::Named<graphene::DSEL::Omit,TextType>,
-				graphene::Frames::SizedName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
-				graphene::Frames::BoxedAdaptableSizeName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
-			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class Control : public graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-									graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-										graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-										graphene::Frames::Renderable::Colorblind::InversedColor<
-											graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>>,
-									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-										graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-											graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
-										graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-											graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
-										graphene::FunctionObjects::Highlighted>,
-									graphene::FunctionObjects::Selected>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			typedef graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-							graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-							graphene::Frames::Renderable::Colorblind::InversedColor<
-								graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>>,
-						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-							graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
-							graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Named,Margin>>,
-							graphene::FunctionObjects::Highlighted>,
-						graphene::FunctionObjects::Selected> base_type;
-			typedef typename Control::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
-			typedef boost::property_tree::ptree property_tree_type;
-
-			// TODO: add color
-			// TODO: add type
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			/** Construct an uninitialized Control.
-			 */
-			Control(){/* empty body */}
-
-			/** Construct a Control with the specified properties.
-			 */
-			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
-					TextType name, coordinate_type nameHeight, bool selected = false, bool highlighted = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->name() = name;
-				this->nameHeight() = nameHeight;
-				this->selected() = selected;
-				this->highlighted() = highlighted;
-			} // end Control constructor
-
-			// TODO: consider serializing selected and other user interaction states.
-			Control(const property_tree_type &tree)
-			{
-				this->left() = tree.get<coordinate_type>("sides.left");
-				this->bottom() = tree.get<coordinate_type>("sides.bottom");
-				this->right() = tree.get<coordinate_type>("sides.right");
-				this->top() = tree.get<coordinate_type>("sides.top");
-				this->borderSize() = tree.get<coordinate_type>("borderSize");
-				this->name() = tree.get<TextType>("name");
-				this->nameHeight() = tree.get<coordinate_type>("nameHeight");
-				this->selected() = false;
-				this->highlighted() = false;
-			} // end Control conversion constructor
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			// TODO: consider deserializing selected and other user interaction states.
-			operator property_tree_type() const
-			{
-				property_tree_type tree;
-
-				tree.put("sides.left",left());
-				tree.put("sides.bottom",bottom());
-				tree.put("sides.right",right());
-				tree.put("sides.top",top());
-				tree.put("borderSize",borderSize());
-				tree.put("name",name());
-				tree.put("nameHeight",nameHeight());
-				return tree;
-			} // end method operator property_tree_type
-		}; // end class Control
-
 		template<typename CoordinateType, typename CharType>
 		class ICaret : public graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
@@ -332,6 +218,141 @@ namespace GUIModel
 			} // end Caret constructor
 		}; // end class Caret
 
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string>	class Control;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType> 
+		class ControlBase : public 
+			graphene::Frames::MultiPartBorderedRectangle<typename graphene::DSEL::FrameStack<
+				RectangleType,
+				graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
+				graphene::Frames::Selectable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+				graphene::Frames::Highlightable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+				graphene::Frames::Focusable<graphene::DSEL::Omit,Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
+				graphene::Frames::Named<graphene::DSEL::Omit,TextType>,
+				graphene::Frames::SizedName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+				graphene::Frames::BoxedAdaptableSizeName<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>,
+				graphene::Frames::MultiCharBorderedRectangle<graphene::DSEL::Omit,graphene::FunctionObjects::Named,graphene::FunctionObjects::GlutStrokeFontEngine,
+					std::unique_ptr<      ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
+					std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
+						  Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Named,typename TextType::value_type,      Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
+					const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Named,typename TextType::value_type,const Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
+					typename RectangleType::coordinate_type>
+			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
+		class Control : public graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+										graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+											graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+											graphene::Frames::Renderable::Colorblind::InversedColor<
+												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
+										graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+											graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
+											graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
+											graphene::FunctionObjects::Highlighted>,
+										graphene::FunctionObjects::Selected>,
+									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+										graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
+											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>>>,
+										graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+										graphene::FunctionObjects::Focused>>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+							graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+								graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+								graphene::Frames::Renderable::Colorblind::InversedColor<
+									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
+							graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+								graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
+								graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
+								graphene::FunctionObjects::Highlighted>,
+							graphene::FunctionObjects::Selected>,
+						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>>>,
+							graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+							graphene::FunctionObjects::Focused>> base_type;
+			typedef typename Control::coordinate_type coordinate_type;
+			typedef RectangleType rectangle_type;
+			typedef boost::property_tree::ptree property_tree_type;
+
+			// TODO: add color
+			// TODO: add type
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			/** Construct an uninitialized Control.
+			 */
+			Control(){/* empty body */}
+
+			/** Construct a Control with the specified properties.
+			 */
+			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+					TextType name, coordinate_type nameHeight, bool selected = false, bool highlighted = false, bool focused = false)
+			{
+				this->left() = left;
+				this->bottom() = bottom;
+				this->right() = right;
+				this->top() = top;
+				this->borderSize() = borderSize;
+				this->name() = name;
+				this->nameHeight() = nameHeight;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+				this->focused() = focused;
+			} // end Control constructor
+
+			// TODO: consider serializing selected and other user interaction states.
+			Control(const property_tree_type &tree)
+			{
+				this->left() = tree.get<coordinate_type>("sides.left");
+				this->bottom() = tree.get<coordinate_type>("sides.bottom");
+				this->right() = tree.get<coordinate_type>("sides.right");
+				this->top() = tree.get<coordinate_type>("sides.top");
+				this->borderSize() = tree.get<coordinate_type>("borderSize");
+				this->name() = tree.get<TextType>("name");
+				this->nameHeight() = tree.get<coordinate_type>("nameHeight");
+				this->selected() = false;
+				this->highlighted() = false;
+				this->focused() = false;
+			} // end Control conversion constructor
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			// TODO: consider deserializing selected and other user interaction states.
+			operator property_tree_type() const
+			{
+				property_tree_type tree;
+
+				tree.put("sides.left",left());
+				tree.put("sides.bottom",bottom());
+				tree.put("sides.right",right());
+				tree.put("sides.top",top());
+				tree.put("borderSize",borderSize());
+				tree.put("name",name());
+				tree.put("nameHeight",nameHeight());
+				return tree;
+			} // end method operator property_tree_type
+		}; // end class Control
+
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string> class TextBox;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType> 
@@ -349,8 +370,7 @@ namespace GUIModel
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
 				      Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,const TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
-				typename RectangleType::coordinate_type
-			>
+				typename RectangleType::coordinate_type>
 		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
@@ -641,7 +661,7 @@ namespace GUIModel
 			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
 			typedef typename TextType::value_type char_type;
-			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> control_type;
+			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> control_type;
 			typedef Constraint<TextType> constraint_type;
 			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
 			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
@@ -666,6 +686,7 @@ namespace GUIModel
 
 			typename std::common_type<decltype(controls)>::type::reverse_iterator highlightedControl;
 			typename std::common_type<decltype(controls)>::type::reverse_iterator selectedControl;
+			typename std::common_type<decltype(controls)>::type::reverse_iterator focusedControl;
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
 
 			std::unique_ptr<ICaret<CoordinateType,char_type>> caret;
@@ -701,6 +722,7 @@ namespace GUIModel
 				pressedButton = buttons.end();
 				highlightedControl = controls.rend();
 				selectedControl = controls.rend();
+				focusedControl = controls.rend();
 				selectedPart = nullptr;
 				caret = nullptr;
 			} // end Model constructor
@@ -713,6 +735,12 @@ namespace GUIModel
 			{
 				controls.clear();
 				constraints.clear();
+
+				highlightedControl = controls.rend();
+				selectedControl = controls.rend();
+				focusedControl = controls.rend();
+				selectedPart = nullptr;
+				caret = nullptr; // TODO: change to only become null if not pointing to text box.
 			} // end method clear
 
 			// TODO: check that there is at least one control (the screen) and that all contraints refer to 
@@ -891,7 +919,15 @@ namespace GUIModel
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
 			{
-				if(caret)
+				// TODO: move application exit somewhere outside Model class (or any UI widget for that matter)
+				if(code == 27 && down) // escape key
+				{
+					if(caret)
+						caret = nullptr;
+					else
+						std::exit(0);
+				}
+				else if(caret)
 					caret->keyboardAscii(code,down,x,y);
 				else if(down && code == 0x7f) // delete key
 					if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
@@ -913,31 +949,32 @@ namespace GUIModel
 				if(button == 0)
 					if(down)
 					{
-						assert(highlightedButton == buttons.end() || highlightedControl == controls.rend());
+						assert(highlightedButton == buttons.end() || highlightedControl == controls.rend() || !tbFileName.highlighted());
 
 						if(highlightedButton != buttons.end())
 						{
 							highlightedButton->first.press();
 							pressedButton = highlightedButton;
-						}
+						} // pressing a button should not deselect
+						else if(tbFileName.highlighted())
+						{
+							if(focusedControl != controls.rend())
+							{
+								focusedControl->unfocus();
+								focusedControl = controls.rend();
+							} // end if
+							tbFileName.focus();
+							caret = tbFileName.charUnderPoint(x,y);
+						} // clicking the text box should not deselect either
 						else
-						{ // pressing a button should not deselect
+						{
 							// deselect all
 							if(selectedControl != controls.rend())
 							{
 								selectedControl->deselect();
 								selectedControl = controls.rend();
 							} // end if
-
-							tbFileName.unfocus();
-							caret = nullptr;
 						} // end else
-
-						if(tbFileName.highlighted())
-						{
-							tbFileName.focus();
-							caret = tbFileName.charUnderPoint(x,y);
-						} // end if
 
 						if(highlightedControl != controls.rend())
 						{
@@ -945,15 +982,24 @@ namespace GUIModel
 							highlightedControl->select();
 							selectedControl = highlightedControl;
 							selectedPart = highlightedControl->partUnderPoint(x,y);
-						} // end if
 
-						// TODO: consider representing screen with a different control type and encapsulate special case in part selection code.
-						if(selectedPart && selectedPart->left() == selectedControl->left() && selectedPart->bottom() == selectedControl->bottom()
-							&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.rend()-1)
-						{ // deselect screen central area (effectively make it transparent to mouse clicks)
-							selectedPart = nullptr;
-							selectedControl->deselect();
-							selectedControl = controls.rend();
+							// TODO: consider representing screen with a different control type and encapsulate special case in part selection code.
+							if(selectedPart && selectedPart->left() == selectedControl->left() && selectedPart->bottom() == selectedControl->bottom()
+								&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.rend()-1)
+							{ // deselect screen central area (effectively make it transparent to mouse clicks)
+								selectedPart = nullptr;
+								selectedControl->deselect();
+								selectedControl = controls.rend();
+							}
+							else
+							{
+								tbFileName.unfocus();
+								if(focusedControl != controls.rend())
+									focusedControl->unfocus();
+								highlightedControl->focus();
+								focusedControl = highlightedControl;
+								caret = highlightedControl->charUnderPoint(x,y);
+							} // end else
 						} // end if
 
 						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.focused())
@@ -993,13 +1039,18 @@ namespace GUIModel
 						createOnMove = false;
 						// create new control
 						// TODO: push at front
+						tbFileName.unfocus();
+						if(focusedControl != controls.rend())
+							focusedControl->unfocus();
 						if(highlightedControl != controls.rend())
 							highlightedControl->dehighlight();
 						controls.push_back(control_type(x,y,x,y,1,"control"+std::to_string(controlIndex++),10)); // emplace_back can't take 6+ arguments yet.
-						highlightedControl = selectedControl = controls.rbegin();
+						focusedControl = highlightedControl = selectedControl = controls.rbegin();
 						highlightedControl->highlight();
 						selectedControl->select();
 						selectedPart = selectedControl->partUnderPoint(x,y); // TODO: guarantee this will be a corner
+						focusedControl->focus();
+						caret = focusedControl->charUnderPoint(x,y);
 					} // end if
 
 					// dehighlight all

@@ -1842,6 +1842,42 @@ namespace graphene
 				} // end method render
 			}; // end class Sequential
 
+			/** A rendering frame that does not actually render anything.
+			 *	Useful when you only want to render something in one clause of
+			 *	the conditional rendering frame.
+			 */
+			template<typename BaseType>
+			class Null : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Null(){/* empty body */}
+
+				template<typename OtherType>
+				Null(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
+				{
+					// empty body
+				} // end Null forwarding constructor (may move/copy/convert)
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void render() const
+				{
+					// do nothing
+				} // end method render
+			}; // end class Null
+
 		} // end namespace Renderable
 
 		namespace EventHandling
@@ -2726,13 +2762,6 @@ namespace graphene
 
 			static void keyboard(unsigned char key, int glutX, int glutY)
 			{
-				// TODO: define the control stack model and exit only when stack is empty.
-				switch(key)
-				{
-					case 27:	// escape key
-						std::exit(0);
-				} // end switch
-
 				coordinate_type sceneX = glutX*pixelWidth;
 				coordinate_type sceneY = (glutGet(GLUT_WINDOW_HEIGHT)-1 - glutY)*pixelHeight;
 
