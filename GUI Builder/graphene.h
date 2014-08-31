@@ -377,6 +377,8 @@ namespace graphene
 			// TODO: consider arguments like wraparround:bool
 			virtual void nextPosition() = 0;
 			virtual void prevPosition() = 0;
+			virtual void firstPosition() = 0;
+			virtual void lastPosition() = 0;
 			virtual void eraseNext() = 0;
 			virtual void erasePrev() = 0;
 			virtual void insert(CharType character) = 0;
@@ -1255,6 +1257,18 @@ namespace graphene
 				} // end if
 			} // end method prevPosition
 
+			void firstPosition()
+			{
+				index() = 0;
+				xOffset() = 0;
+			} // end method firstPosition
+
+			void lastPosition()
+			{
+				index() = iTextConceptMap.text(*pointer()).size();
+				xOffset() = iFontEngine.stringWidth(iTextConceptMap.text(*pointer()));
+			} // end method lastPosition
+
 			void eraseNext()
 			{
 				iTextConceptMap.text(*pointer()).erase(index(),1);
@@ -1988,6 +2002,12 @@ namespace graphene
 							return;
 						case NonAsciiKey::RIGHT:
 							nextPosition();
+							return;
+						case NonAsciiKey::HOME:
+							firstPosition();
+							return;
+						case NonAsciiKey::END:
+							lastPosition();
 							return;
 						default:
 							// do nothing
