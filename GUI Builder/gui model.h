@@ -640,9 +640,11 @@ namespace GUIModel
 			typedef boost::property_tree::ptree property_tree_type;
 			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
+			typedef typename TextType::value_type char_type;
 			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> control_type;
 			typedef Constraint<TextType> constraint_type;
 			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
+			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
 
 		public: // TODO: make private and add methods to manipulate...
 			/***************
@@ -657,6 +659,7 @@ namespace GUIModel
 			std::vector<control_type> controls;
 			std::vector<constraint_type> constraints;
 			std::vector<std::pair<button_type,std::function<void()>>> buttons;
+			text_box_type tbFileName;
 
 			typename std::common_type<decltype(buttons)>::type::iterator highlightedButton; // workaround for decltype not working alone
 			typename std::common_type<decltype(buttons)>::type::iterator pressedButton;
@@ -664,6 +667,8 @@ namespace GUIModel
 			typename std::common_type<decltype(controls)>::type::reverse_iterator highlightedControl;
 			typename std::common_type<decltype(controls)>::type::reverse_iterator selectedControl;
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
+
+			std::unique_ptr<ICaret<CoordinateType,char_type>> caret;
 
 			coordinate_type lastX; // TODO: consider making lastPressX (this will require saving initial movable control position as well)
 			coordinate_type lastY;
@@ -680,7 +685,7 @@ namespace GUIModel
 			/** Construct an empty Model.
 			 */
 			Model()
-				:firstResize(true),createOnMove(false),controlIndex(0)
+				:firstResize(true),createOnMove(false),controlIndex(0),tbFileName(0,0,0,0,1,"last session.las",10)
 			{
 				// initialize buttons
 				buttons.emplace_back(button_type(0,0,0,0,1,"Load",10),[](){std::cout << "Load" << std::endl;});
@@ -697,6 +702,7 @@ namespace GUIModel
 				highlightedControl = controls.rend();
 				selectedControl = controls.rend();
 				selectedPart = nullptr;
+				caret = nullptr;
 			} // end Model constructor
 
 			/****************
@@ -873,13 +879,21 @@ namespace GUIModel
 				for(const auto &button : buttons)
 					button.first.render();
 
+				// render text boxes (text boxes as well)
+				tbFileName.render();
+
 				if(selectedPart)
 					selectedPart->render();
+
+				if(caret)
+					caret->render();
 			} // end method render
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
 			{
-				if(down && code == 0x7f) // delete key
+				if(caret)
+					caret->keyboardAscii(code,down,x,y);
+				else if(down && code == 0x7f) // delete key
 					if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
 					{
 						controls.erase(selectedControl.base()-1); // TODO: delete constraints pointing to control as well
@@ -890,7 +904,8 @@ namespace GUIModel
 
 			void keyboardNonAscii(graphene::Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
 			{
-				// stub
+				if(caret)
+					caret->keyboardNonAscii(key,down,x,y);
 			} // end method keyboardNonAscii
 
 			void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
@@ -913,7 +928,16 @@ namespace GUIModel
 								selectedControl->deselect();
 								selectedControl = controls.rend();
 							} // end if
+
+							tbFileName.unfocus();
+							caret = nullptr;
 						} // end else
+
+						if(tbFileName.highlighted())
+						{
+							tbFileName.focus();
+							caret = tbFileName.charUnderPoint(x,y);
+						} // end if
 
 						if(highlightedControl != controls.rend())
 						{
@@ -932,7 +956,7 @@ namespace GUIModel
 							selectedControl = controls.rend();
 						} // end if
 
-						if(pressedButton == buttons.end() && selectedControl == controls.rend())
+						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.focused())
 							createOnMove = true;
 
 						lastX = x;
@@ -947,8 +971,7 @@ namespace GUIModel
 						} // end if
 						pressedButton = buttons.end();
 
-						if(selectedPart)
-							selectedPart = nullptr;
+						selectedPart = nullptr;
 
 						createOnMove = false;
 					} // end else
@@ -992,6 +1015,8 @@ namespace GUIModel
 						highlightedControl = controls.rend();
 					} // end if
 
+					tbFileName.dehighlight();
+
 					if(selectedPart)
 					{
 						selectedPart->move(x-lastX,y-lastY);
@@ -1009,6 +1034,9 @@ namespace GUIModel
 							} // end if
 
 					if(highlightedButton == buttons.end())
+						tbFileName.highlighted() = tbFileName.contains(x,y);
+
+					if(!tbFileName.highlighted())
 						for(auto control = controls.rbegin() ; control < controls.rend() ; ++control) // TODO: restore front to back iteration when screen-at-front issue fixed
 							if(control->contains(x,y))
 							{
@@ -1052,6 +1080,12 @@ namespace GUIModel
 				buttons[3].first.bottom() = top-margin-buttonHeight;
 				buttons[3].first.right() = right-margin;
 				buttons[3].first.top() = top-margin;
+
+				// file name text box
+				tbFileName.left() = left+2*margin+buttonWidth;
+				tbFileName.bottom() = top-margin-buttonHeight;
+				tbFileName.right() = right-4*margin-3*buttonWidth;
+				tbFileName.top() = top-margin;
 
 				// screen control
 				if(firstResize)
