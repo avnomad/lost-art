@@ -1059,6 +1059,30 @@ namespace graphene
 			typedef CoordinateType coordinate_type;
 			// TODO: add template alias for ConcretePartTemplate when implemented
 
+			// TODO: Are concrete return types a good idea? Should they be public?
+			struct concrete_return_type
+			{
+				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true, true,false,false>       bottom_left;
+				typedef const ConcretePartTemplate<CoordinateType, true, true, true, true, true,false,false> const_bottom_left;
+				typedef       ConcretePartTemplate<CoordinateType, true,false,false, true,false,false,false>       left;
+				typedef const ConcretePartTemplate<CoordinateType, true,false, true, true,false,false,false> const_left;
+				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true,false,false, true>       top_left;
+				typedef const ConcretePartTemplate<CoordinateType, true, true, true, true,false,false, true> const_top_left;
+				typedef       ConcretePartTemplate<CoordinateType,false, true,false,false, true,false,false>       bottom;
+				typedef const ConcretePartTemplate<CoordinateType,false, true, true,false, true,false,false> const_bottom;
+				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true, true, true, true>       center;
+				typedef const ConcretePartTemplate<CoordinateType, true, true, true, true, true, true, true> const_center;
+				typedef       ConcretePartTemplate<CoordinateType,false, true,false,false,false,false, true>       top;
+				typedef const ConcretePartTemplate<CoordinateType,false, true, true,false,false,false, true> const_top;
+				typedef       ConcretePartTemplate<CoordinateType, true, true,false,false, true, true,false>       bottom_right;
+				typedef const ConcretePartTemplate<CoordinateType, true, true, true,false, true, true,false> const_bottom_right;
+				typedef       ConcretePartTemplate<CoordinateType, true,false,false,false,false, true,false>       right;
+				typedef const ConcretePartTemplate<CoordinateType, true,false, true,false,false, true,false> const_right;
+				typedef       ConcretePartTemplate<CoordinateType, true, true,false,false,false, true, true>       top_right;
+				typedef const ConcretePartTemplate<CoordinateType, true, true, true,false,false, true, true> const_top_right;
+			}; // end struct concrete_return_type
+			// TODO: use typedefs in partUnderPoint implementation (use ## ?)
+
 			/****************
 			*    Methods    *
 			****************/
