@@ -343,6 +343,26 @@ namespace graphene
 			virtual ConstPartType partUnderPoint(CoordinateType x, CoordinateType y) const = 0;
 		}; // end class MultiPart
 
+		/** If a MultiChar is also Containing then charUnderPoint(x,y) should return a value designating "no part"
+		 *	if and only if contains(x,y) returns false.
+		 */
+		// TODO: perhaps find a better name to disambiguate with char?
+		template<typename BaseType, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type, typename CoordinateType = typename BaseType::coordinate_type>
+		class MultiChar : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CharType char_type;
+			typedef ConstCharType const_char_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual CharType charUnderPoint(CoordinateType x, CoordinateType y) = 0;
+			virtual ConstCharType charUnderPoint(CoordinateType x, CoordinateType y) const = 0;
+		}; // end class MultiChar
+
 		namespace EventHandling
 		{
 			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,HOME,END,LEFT,RIGHT,UP,DOWN,INSERT};
@@ -1088,8 +1108,62 @@ namespace graphene
 			partUnderPointMacro(PartType,/* omit */,false)
 			partUnderPointMacro(ConstPartType,const,true)
 #undef partUnderPointMacro
-
 		}; // end class MultiPartBorderedRectangle
+
+		/**	BaseType should be Rectangular, UniformlyBordered, Containing, have a font_engine_type member type and
+		 *  expose text traits via the supplied TextConceptMap. CharType should be a (preferably smart) pointer type.
+		 *	ConcreteCharTemplate instantiations should be constructible from a reference to *this, an index and an instance of CoordinateType.
+		 */
+		template<typename BaseType, typename TextConceptMap, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
+			typename ConcreteCharType = typename BaseType::concrete_char_type, typename ConstConcreteCharType = typename BaseType::const_concrete_char_type, 
+			typename CoordinateType = typename BaseType::coordinate_type>
+		class MultiCharBorderedRectangle : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CharType char_type;
+			typedef ConstCharType const_char_type;
+			typedef ConcreteCharType concrete_char_type;
+			typedef ConstConcreteCharType const_concrete_char_type;
+			typedef CoordinateType coordinate_type;
+			// TODO: add template alias for ConcreteCharTemplate when implemented
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			// TODO: does it work in every cases where left() > right() || bottom() > top()?
+#define charUnderPointMacro(CharType,ConcreteCharType,Const) \
+			CharType charUnderPoint(CoordinateType x, CoordinateType y) Const\
+			{\
+				TextConceptMap textConceptMap;\
+				auto left   = std::min(this->left(),this->right());\
+				auto bottom = std::min(this->bottom(),this->top());\
+				auto right  = std::max(this->left(),this->right());\
+				auto top    = std::max(this->bottom(),this->top());\
+				\
+				if(contains(x,y))\
+				{\
+					size_t i = 0;\
+					coordinate_type textLeftX = left + (this->width() - textConceptMap.effectiveTextSize(*this).first)/2;\
+					coordinate_type charLeftX = 0;\
+					for( ; i < textConceptMap.text(*this).size() ; charLeftX += textConceptMap.effectiveTextCharSize(*this,i).first, ++i)\
+						if(x-textLeftX <= charLeftX + textConceptMap.effectiveTextCharSize(*this,i).first/2)\
+							break;\
+					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointed_to_type*>(this),i,charLeftX));\
+															/* TODO: check that this indeed points to that type */\
+				}\
+				else\
+					return nullptr;\
+			} // end method charUnderPoint
+
+			charUnderPointMacro(     CharType,     ConcreteCharType,/* omit */)
+			charUnderPointMacro(ConstCharType,ConstConcreteCharType,const)
+#undef charUnderPointMacro
+		}; // end class MultiCharBorderedRectangle
 
 		/** These are intended primarily to adapt geometric types that are unaware of frame architecture,
 		 *	in order to present them as frames.
