@@ -1699,7 +1699,7 @@ namespace graphene
 		struct Pressed
 		{
 			template<typename PressableType>
-			bool operator()(const PressableType &pressable)
+			bool operator()(const PressableType &pressable) const
 			{
 				return pressable.pressed();
 			} // end method operator()
@@ -1708,7 +1708,7 @@ namespace graphene
 		struct Selected
 		{
 			template<typename SelectableType>
-			bool operator()(const SelectableType &selectable)
+			bool operator()(const SelectableType &selectable) const
 			{
 				return selectable.selected();
 			} // end method operator()
@@ -1717,7 +1717,7 @@ namespace graphene
 		struct Highlighted
 		{
 			template<typename HighlightableType>
-			bool operator()(const HighlightableType &highlightable)
+			bool operator()(const HighlightableType &highlightable) const
 			{
 				return highlightable.highlighted();
 			} // end method operator()
@@ -1726,7 +1726,7 @@ namespace graphene
 		struct Focused
 		{
 			template<typename FocusableType>
-			bool operator()(const FocusableType &focusable)
+			bool operator()(const FocusableType &focusable) const
 			{
 				return focusable.focused();
 			} // end method operator()
@@ -1736,45 +1736,45 @@ namespace graphene
 		struct Textual
 		{
 			template<typename TextualType>
-			auto text(const TextualType &textual)->decltype(textual.text())
+			auto text(TextualType &&textual) const->decltype(textual.text())
 			{
 				return textual.text();
 			} // end method text
 
 			template<typename TextualType>
-			auto textHeight(const TextualType &textual)->decltype(textual.textHeight())
+			auto textHeight(TextualType &&textual) const->decltype(textual.textHeight())
 			{
 				return textual.textHeight();
 			} // end method textHeight
 
 			template<typename TextualType>
-			auto textWidth(const TextualType &textual)->decltype(textual.textWidth())
+			auto textWidth(TextualType &&textual) const->decltype(textual.textWidth())
 			{
 				return textual.textWidth();
 			} // end method textWidth
 
 			template<typename TextualType>
-			auto textCharWidth(const TextualType &textual, size_t index)->decltype(textual.textCharWidth(index))
+			auto textCharWidth(TextualType &&textual, size_t index) const->decltype(textual.textCharWidth(index))
 			{
 				return textual.textCharWidth(index);
 			} // end method textCharWidth
 
 			template<typename TextualType>
-			void setTextWidth(const TextualType &textual, const typename TextualType::coordinate_type &value)
+			void setTextWidth(TextualType &&textual, const typename TextualType::coordinate_type &value) const
 			{
 				textual.setTextWidth(value);
 			} // end method setTextWidth
 
 			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveTextSize is not available.
 			template<typename TextualType>
-			auto effectiveTextSize(const TextualType &textual)->decltype(textual.effectiveTextSize())
+			auto effectiveTextSize(TextualType &&textual) const->decltype(textual.effectiveTextSize())
 			{
 				return textual.effectiveTextSize();
 			} // end method effectiveTextSize
 
 			// TODO: use SFINAE to fallback to (textCharWidth,textHeight) if effectiveTextCharSize is not available.
 			template<typename TextualType>
-			auto effectiveTextCharSize(const TextualType &textual, size_t index)->decltype(textual.effectiveTextCharSize(index))
+			auto effectiveTextCharSize(TextualType &&textual, size_t index) const->decltype(textual.effectiveTextCharSize(index))
 			{
 				return textual.effectiveTextCharSize(index);
 			} // end method effectiveTextCharSize
@@ -1784,45 +1784,45 @@ namespace graphene
 		struct Named
 		{
 			template<typename NamedType>
-			auto text(const NamedType &named)->decltype(named.name())
+			auto text(NamedType &&named) const->decltype(named.name())
 			{
 				return named.name();
 			} // end method text
 
 			template<typename NamedType>
-			auto textHeight(const NamedType &named)->decltype(named.nameHeight())
+			auto textHeight(NamedType &&named) const->decltype(named.nameHeight())
 			{
 				return named.nameHeight();
 			} // end method textHeight
 
 			template<typename NamedType>
-			auto textWidth(const NamedType &named)->decltype(named.nameWidth())
+			auto textWidth(NamedType &&named) const->decltype(named.nameWidth())
 			{
 				return named.nameWidth();
 			} // end method textWidth
 
 			template<typename NamedType>
-			auto textCharWidth(const NamedType &named, size_t index)->decltype(named.nameCharWidth(index))
+			auto textCharWidth(NamedType &&named, size_t index) const->decltype(named.nameCharWidth(index))
 			{
 				return named.nameCharWidth(index);
 			} // end method textCharWidth
 
 			template<typename NamedType>
-			void setTextWidth(const NamedType &named, const typename NamedType::coordinate_type &value)
+			void setTextWidth(NamedType &&named, const typename NamedType::coordinate_type &value) const
 			{
 				named.setNameWidth(value);
 			} // end method setTextWidth
 
 			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveNameSize is not available.
 			template<typename NamedType>
-			auto effectiveTextSize(const NamedType &named)->decltype(named.effectiveNameSize())
+			auto effectiveTextSize(NamedType &&named) const->decltype(named.effectiveNameSize())
 			{
 				return named.effectiveNameSize();
 			} // end method effectiveTextSize
 
 			// TODO: use SFINAE to fallback to (nameWidth,nameHeight) if effectiveNameCharSize is not available.
 			template<typename NamedType>
-			auto effectiveTextCharSize(const NamedType &named, size_t index)->decltype(named.effectiveNameCharSize(index))
+			auto effectiveTextCharSize(NamedType &&named, size_t index) const->decltype(named.effectiveNameCharSize(index))
 			{
 				return named.effectiveNameCharSize(index);
 			} // end method effectiveTextSize
