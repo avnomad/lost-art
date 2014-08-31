@@ -86,7 +86,51 @@ namespace graphene
 			// Methods
 		public:
 			virtual bool contains(CoordinateType x, CoordinateType y) const = 0;
-		}; // end class Movable
+		}; // end class Containing
+
+		template<typename BaseType, typename PointerType = typename BaseType::pointer_type>
+		class Pointing : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef PointerType pointer_type;
+
+			// Methods
+		public:
+			virtual PointerType &pointer() = 0;
+			virtual const PointerType &pointer() const = 0;
+		}; // end class Pointing
+
+		template<typename BaseType, typename IndexType = typename BaseType::index_type>
+		class Indexing : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef IndexType index_type;
+
+			// Methods
+		public:
+			virtual IndexType &index() = 0;
+			virtual const IndexType &index() const = 0;
+		}; // end class Indexing
+
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class Offset : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			// Methods
+		public:
+			virtual CoordinateType &xOffset() = 0;
+			virtual const CoordinateType &xOffset() const = 0;
+			virtual CoordinateType &yOffset() = 0;
+			virtual const CoordinateType &yOffset() const = 0;
+		}; // end class Offset
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Selectable : public BaseType
@@ -375,6 +419,110 @@ namespace graphene
 			}; // end class HVMovable
 
 		} // end namespace Movable
+
+		template<typename BaseType, typename PointerType = typename BaseType::pointer_type>
+		class Pointing : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef PointerType pointer_type;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			PointerType iPointer;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			PointerType &pointer()
+			{
+				return iPointer;
+			} // end method pointer
+
+			const PointerType &pointer() const
+			{
+				return iPointer;
+			} // end method pointer
+		}; // end class Pointing
+
+		template<typename BaseType, typename IndexType = typename BaseType::index_type>
+		class Indexing : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef IndexType index_type;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			IndexType iIndex;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			IndexType &index()
+			{
+				return iIndex;
+			} // end method index
+
+			const IndexType &index() const
+			{
+				return iIndex;
+			} // end method index
+		}; // end class Indexing
+
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+		class Offset : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CoordinateType coordinate_type;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			CoordinateType iXoffset;
+			CoordinateType iYoffset;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			CoordinateType &xOffset()
+			{
+				return iXoffset;
+			} // end method xOffset
+
+			const CoordinateType &xOffset() const
+			{
+				return iXoffset;
+			} // end method xOffset
+
+			CoordinateType &yOffset()
+			{
+				return iYoffset;
+			} // end method yOffset
+
+			const CoordinateType &yOffset() const
+			{
+				return iYoffset;
+			} // end method yOffset
+		}; // end class Offset
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Selectable : public BaseType
