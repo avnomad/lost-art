@@ -384,7 +384,8 @@ namespace graphene
 
 		namespace EventHandling
 		{
-			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,HOME,END,LEFT,RIGHT,UP,DOWN,INSERT};
+			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,
+				HOME,END,LEFT,RIGHT,UP,DOWN,INSERT,L_SHIFT,R_SHIFT,L_ALT,R_ALT,L_CTRL,R_CTRL,NUM_LOCK};
 
 			/** Controls implementing this interface should document whether they expect to recieve all
 			 *	mouse events or only the ones that happen above them.
@@ -2746,6 +2747,14 @@ namespace graphene
 				case GLUT_KEY_UP: return NonAsciiKey::UP;
 				case GLUT_KEY_DOWN: return NonAsciiKey::DOWN;
 				case GLUT_KEY_INSERT: return NonAsciiKey::INSERT;
+					// FreeGLUT-specific
+				case GLUT_KEY_NUM_LOCK: return NonAsciiKey::NUM_LOCK;
+				case GLUT_KEY_SHIFT_L: return NonAsciiKey::L_SHIFT;
+				case GLUT_KEY_SHIFT_R: return NonAsciiKey::R_SHIFT;
+				case GLUT_KEY_CTRL_L: return NonAsciiKey::L_CTRL;
+				case GLUT_KEY_CTRL_R: return NonAsciiKey::R_CTRL;
+				case GLUT_KEY_ALT_L: return NonAsciiKey::L_ALT;
+				case GLUT_KEY_ALT_R: return NonAsciiKey::R_ALT;
 				default:
 					throw std::runtime_error("Unknown GLUT key code!");
 				} // end switch
