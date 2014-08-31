@@ -363,6 +363,25 @@ namespace graphene
 			virtual ConstCharType charUnderPoint(CoordinateType x, CoordinateType y) const = 0;
 		}; // end class MultiChar
 
+		template<typename BaseType, typename CharType = typename BaseType::char_type>
+		class CaretLike : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+			typedef CharType char_type;
+
+			// Methods
+		public:
+			// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
+			// TODO: consider arguments like wraparround:bool
+			virtual void nextPosition() = 0;
+			virtual void prevPosition() = 0;
+			virtual void eraseNext() = 0;
+			virtual void erasePrev() = 0;
+			virtual void insert(CharType character) = 0;
+		}; // end class CaretLike
+
 		namespace EventHandling
 		{
 			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,HOME,END,LEFT,RIGHT,UP,DOWN,INSERT};
@@ -1165,6 +1184,67 @@ namespace graphene
 #undef charUnderPointMacro
 		}; // end class MultiCharBorderedRectangle
 
+		template<typename BaseType, typename TextConceptMap, typename CharType = typename BaseType::char_type>
+		class IndirectCaretLike : public BaseType
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			typedef BaseType base_type;
+			typedef CharType char_type;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			TextConceptMap iTextConceptMap;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
+			// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
+			// TODO: consider arguments like wraparround:bool
+			void nextPosition()
+			{
+				if(index() < iTextConceptMap.text(*pointer()).size())
+				{
+					xOffset() += iTextConceptMap.effectiveTextCharSize(*pointer(),index()).first;
+					++index();
+				} // end if
+			} // end method nextPosition
+
+			void prevPosition()
+			{
+				if(index() > 0)
+				{
+					--index();
+					xOffset() -= iTextConceptMap.effectiveTextCharSize(*pointer(),index()).first;
+				} // end if
+			} // end method prevPosition
+
+			void eraseNext()
+			{
+				iTextConceptMap.text(*pointer()).erase(index(),1);
+			} // end method eraseNext
+
+			void erasePrev()
+			{
+				if(index() > 0)
+				{
+					prevPosition();
+					eraseNext();
+				} // end if
+			} // end method erasePrev
+
+			void insert(CharType character)
+			{
+				iTextConceptMap.text(*pointer()).insert(index(),1,character);
+				nextPosition();
+			} // end method insert
+		}; // end class IndirectCaretLike
+
 		/** These are intended primarily to adapt geometric types that are unaware of frame architecture,
 		 *	in order to present them as frames.
 		 */
@@ -1511,6 +1591,60 @@ namespace graphene
 					} // end method render
 				}; // end class InversedColor
 
+				/** Renders a caret as a vertical line. Deprecated
+				 */
+				// TODO: remove and compose from smaller frames when able to present IndirectCaret as rectangle
+				template<typename BaseType, typename TextConceptMap, typename Width = typename BaseType::width>
+				class IndirectCaret : public BaseType
+				{
+					/*********************
+					*    Member Types    *
+					*********************/
+				public:
+					typedef BaseType base_type;
+					typedef Width width;
+
+					/*********************
+					*    Constructors    *
+					*********************/
+				public:
+					IndirectCaret(){/* empty body */}
+
+					template<typename OtherType>
+					IndirectCaret(OtherType &&other) // this class does not add extra members
+						:BaseType(std::forward<OtherType>(other))
+					{
+						// empty body
+					} // end IndirectCaret forwarding constructor (may move/copy/convert)
+
+					/****************
+					*    Methods    *
+					****************/
+				public:
+					void render() const
+					{
+						auto left   = std::min(pointer()->left(),pointer()->right());
+						auto bottom = std::min(pointer()->bottom(),pointer()->top());
+						auto right  = std::max(pointer()->left(),pointer()->right());
+						auto top    = std::max(pointer()->bottom(),pointer()->top());
+
+						auto textLeft = left + (pointer()->width() - TextConceptMap().effectiveTextSize(*pointer()).first)/2;
+
+						float fgColor[4], bgColor[4];
+						glPushAttrib(GL_CURRENT_BIT);
+							glGetFloatv(GL_CURRENT_COLOR,fgColor);
+							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
+							
+							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
+							glRect(((textLeft + xOffset())*2*width::den - width::num)/(2*width::den),bottom+pointer()->borderSize(),
+									((textLeft + xOffset())*2*width::den + width::num)/(2*width::den),top-pointer()->borderSize());
+							glColor4fv(fgColor);
+							glRect(((textLeft + xOffset())*6*width::den - width::num)/(6*width::den),((bottom+pointer()->borderSize())*3*width::den + width::num)/(3*width::den),
+									((textLeft + xOffset())*6*width::den + width::num)/(6*width::den),((top-pointer()->borderSize())*3*width::den - width::num)/(3*width::den));
+						glPopAttrib();
+					} // end method render
+				}; // end class IndirectCaret
+
 			} // end namespace Colorblind
 
 			namespace Colored
@@ -1772,6 +1906,63 @@ namespace graphene
 						depress();
 				} // end method mouseExit
 			}; // end class TwoStagePressable
+
+			/** BaseType must be conform to the CaretLike interface.
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class CaretLike : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef CoordinateType coordinate_type;
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
+				{
+					if(down) // ignore up events
+					{
+						switch(code)
+						{
+						case 0x7f: // delete key
+							eraseNext();
+							return;
+						case '\b': // backspace key
+							erasePrev();
+							return;
+						default:
+							insert(code);
+							return;
+						} // end switch
+					} // end if
+				} // end method keyboardAscii
+
+				void keyboardNonAscii(Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
+				{
+					using Bases::EventHandling::NonAsciiKey;
+
+					if(down) // ignore up events
+					{
+						switch(key)
+						{
+						case NonAsciiKey::LEFT:
+							prevPosition();
+							return;
+						case NonAsciiKey::RIGHT:
+							nextPosition();
+							return;
+						default:
+							// do nothing
+							return;
+						} // end switch
+					} // end if
+				} // end method keyboardNonAscii
+			}; // end class CaretLike
 
 		} // end namespace EventHandling
 
