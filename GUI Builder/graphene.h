@@ -243,6 +243,7 @@ namespace graphene
 			// TODO: add support for setting the text width using properties, and perhaps the ability
 			// to set/get the aspect ratio.
 			virtual CoordinateType textWidth() const = 0;
+			virtual CoordinateType textCharWidth(size_t index) const = 0;
 			virtual void setTextWidth(const CoordinateType &value) = 0; // deprecated
 			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
 			// and add prefered width, height read-only properties.
@@ -263,6 +264,7 @@ namespace graphene
 			// Methods
 		public:
 			virtual std::pair<CoordinateType,CoordinateType> effectiveTextSize() const = 0;
+			virtual std::pair<CoordinateType,CoordinateType> effectiveTextCharSize(size_t index) const = 0;
 		}; // end class AdaptableSizeText
 
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
@@ -298,6 +300,7 @@ namespace graphene
 			// TODO: add support for setting the name width using properties, and perhaps the ability
 			// to set/get the aspect ratio.
 			virtual CoordinateType nameWidth() const = 0;
+			virtual CoordinateType nameCharWidth(size_t index) const = 0;
 			virtual void setNameWidth(const CoordinateType &value) = 0; // deprecated
 			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
 			// and add prefered width, height read-only properties.
@@ -318,6 +321,7 @@ namespace graphene
 			// Methods
 		public:
 			virtual std::pair<CoordinateType,CoordinateType> effectiveNameSize() const = 0;
+			virtual std::pair<CoordinateType,CoordinateType> effectiveNameCharSize(size_t index) const = 0;
 		}; // end class AdaptableSizeName
 
 		/** If a MultiPart is also Containing then partUnderPoint(x,y) should return a value designating "no part"
@@ -816,6 +820,12 @@ namespace graphene
 				return fontEngine.stringWidth(text()) * textHeight() / fontEngine.fontHeight();
 			} // end method textWidth
 
+			CoordinateType textCharWidth(size_t index) const
+			{
+				FontEngineType fontEngine;
+				return fontEngine.charWidth(text().at(index)) * textHeight() / fontEngine.fontHeight();
+			} // end method textCharWidth
+
 			void setTextWidth(const CoordinateType &value) // deprecated
 			{
 				FontEngineType fontEngine;
@@ -852,7 +862,17 @@ namespace graphene
 
 				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
 			} // end method effectiveTextSize
-		}; // end class BoxedAdaptableSizeText
+
+			// TODO: This is too inefficient. Consider caching.
+			std::pair<CoordinateType,CoordinateType> effectiveTextCharSize(size_t index) const
+			{
+				font_engine_type fontEngine;
+				auto result = effectiveTextSize();
+				result.first = fontEngine.charWidth(text().at(index)) * result.second / fontEngine.fontHeight();
+
+				return  result;
+			} // end method textCharWidth
+		}; // end class effectiveTextCharSize
 
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
 		class Named : public BaseType
@@ -926,6 +946,12 @@ namespace graphene
 				return fontEngine.stringWidth(name()) * nameHeight() / fontEngine.fontHeight();
 			} // end method nameWidth
 
+			CoordinateType nameCharWidth(size_t index) const
+			{
+				FontEngineType fontEngine;
+				return fontEngine.charWidth(name().at(index)) * nameHeight() / fontEngine.fontHeight();
+			} // end method nameCharWidth
+
 			void setNameWidth(const CoordinateType &value) // deprecated
 			{
 				FontEngineType fontEngine;
@@ -962,6 +988,16 @@ namespace graphene
 
 				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
 			} // end method effectiveNameSize
+
+			// TODO: This is too inefficient. Consider caching.
+			std::pair<CoordinateType,CoordinateType> effectiveNameCharSize(size_t index) const
+			{
+				font_engine_type fontEngine;
+				auto result = effectiveNameSize();
+				result.first = fontEngine.charWidth(name().at(index)) * result.second / fontEngine.fontHeight();
+
+				return  result;
+			} // end method nameCharWidth
 		}; // end class BoxedAdaptableSizeName
 
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
@@ -1718,16 +1754,30 @@ namespace graphene
 			} // end method textWidth
 
 			template<typename TextualType>
+			auto textCharWidth(const TextualType &textual, size_t index)->decltype(textual.textCharWidth(index))
+			{
+				return textual.textCharWidth(index);
+			} // end method textCharWidth
+
+			template<typename TextualType>
 			void setTextWidth(const TextualType &textual, const typename TextualType::coordinate_type &value)
 			{
 				textual.setTextWidth(value);
 			} // end method setTextWidth
 
+			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveTextSize is not available.
 			template<typename TextualType>
 			auto effectiveTextSize(const TextualType &textual)->decltype(textual.effectiveTextSize())
 			{
 				return textual.effectiveTextSize();
 			} // end method effectiveTextSize
+
+			// TODO: use SFINAE to fallback to (textCharWidth,textHeight) if effectiveTextCharSize is not available.
+			template<typename TextualType>
+			auto effectiveTextCharSize(const TextualType &textual, size_t index)->decltype(textual.effectiveTextCharSize(index))
+			{
+				return textual.effectiveTextCharSize(index);
+			} // end method effectiveTextCharSize
 		}; // end struct Textual
 
 		// TODO: use concept maps instead when available
@@ -1752,15 +1802,29 @@ namespace graphene
 			} // end method textWidth
 
 			template<typename NamedType>
+			auto textCharWidth(const NamedType &named, size_t index)->decltype(named.nameCharWidth(index))
+			{
+				return named.nameCharWidth(index);
+			} // end method textCharWidth
+
+			template<typename NamedType>
 			void setTextWidth(const NamedType &named, const typename NamedType::coordinate_type &value)
 			{
 				named.setNameWidth(value);
 			} // end method setTextWidth
 
+			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveNameSize is not available.
 			template<typename NamedType>
 			auto effectiveTextSize(const NamedType &named)->decltype(named.effectiveNameSize())
 			{
 				return named.effectiveNameSize();
+			} // end method effectiveTextSize
+
+			// TODO: use SFINAE to fallback to (nameWidth,nameHeight) if effectiveNameCharSize is not available.
+			template<typename NamedType>
+			auto effectiveTextCharSize(const NamedType &named, size_t index)->decltype(named.effectiveNameCharSize(index))
+			{
+				return named.effectiveNameCharSize(index);
 			} // end method effectiveTextSize
 		}; // end struct Named
 
