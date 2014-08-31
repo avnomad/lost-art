@@ -903,6 +903,8 @@ namespace graphene
 				// scale text down to fit in rectangle:
 				CoordinateType effectiveTextHeight = std::min(textHeight(),(height()*margin::den - 2*margin::num) / margin::den);
 				CoordinateType effectiveTextWidth = std::min(effectiveTextHeight * fontEngine.stringWidth(text()) / fontEngine.fontHeight(),(width()*margin::den - 2*margin::num) / margin::den);
+				if(text().empty())
+					return std::make_pair(static_cast<CoordinateType>(0),effectiveTextHeight); // avoid divition by zero
 				effectiveTextHeight = std::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(text()));
 
 				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
@@ -1029,6 +1031,8 @@ namespace graphene
 				// scale name down to fit in rectangle:
 				CoordinateType effectiveNameHeight = std::min(nameHeight(),(height()*margin::den - 2*margin::num) / margin::den);
 				CoordinateType effectiveNameWidth = std::min(effectiveNameHeight * fontEngine.stringWidth(name()) / fontEngine.fontHeight(),(width()*margin::den - 2*margin::num) / margin::den);
+				if(name().empty())
+					return std::make_pair(static_cast<CoordinateType>(0),effectiveNameHeight); // avoid divition by zero
 				effectiveNameHeight = std::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(name()));
 
 				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
@@ -1199,7 +1203,7 @@ namespace graphene
 					size_t i = 0;\
 					coordinate_type sceneTextLeft = left + (this->width() - textConceptMap.effectiveTextSize(*this).first)/2;\
 					coordinate_type fontX = (x-sceneTextLeft)*fontEngine.stringWidth(textConceptMap.text(*this)) / textConceptMap.effectiveTextSize(*this).first;\
-					coordinate_type fontCharLeft = 0;\
+					coordinate_type fontCharLeft = 0; /* fontX calculation can cause a division by zero, but then the loop won't run and return value will be correct. */\
 					for( ; i < textConceptMap.text(*this).size() ; fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[i]), ++i)\
 						if(fontX <= fontCharLeft + fontEngine.charWidth(textConceptMap.text(*this)[i])/2)\
 							break;\
@@ -1675,7 +1679,8 @@ namespace graphene
 						auto top    = std::max(pointer()->bottom(),pointer()->top());
 
 						auto textLeft = left + (pointer()->width() - TextConceptMap().effectiveTextSize(*pointer()).first)/2;
-						auto caretMiddle = textLeft + xOffset()*TextConceptMap().effectiveTextSize(*pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*pointer()));
+						auto caretMiddle = textLeft + (TextConceptMap().text(*pointer()).empty() ? 0 : 
+							xOffset()*TextConceptMap().effectiveTextSize(*pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*pointer())));
 
 						float fgColor[4], bgColor[4];
 						glPushAttrib(GL_CURRENT_BIT);

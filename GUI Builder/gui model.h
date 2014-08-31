@@ -923,7 +923,13 @@ namespace GUIModel
 				if(code == 27 && down) // escape key
 				{
 					if(caret)
+					{
 						caret = nullptr;
+						if(focusedControl != controls.rend())
+							focusedControl->unfocus();
+						focusedControl = controls.rend();
+						tbFileName.unfocus();
+					}
 					else
 						std::exit(0);
 				}
@@ -1002,7 +1008,7 @@ namespace GUIModel
 							} // end else
 						} // end if
 
-						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.focused())
+						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted())
 							createOnMove = true;
 
 						lastX = x;
