@@ -11,3 +11,7 @@ Issues:
     all the frames? Or allow certain frames to store function object callbacks
     internally and call them on certain occasions. The later is one way to allow 
     Pressable frames to thicken the rectangle border used for part calculation.
+
+2.  GLUT functions return character width as an int effectively discarding at 
+    least 2 digits after decimal point. I can probably fix that by getting the 
+	length of a string of 100 instances of the same character and dividing.

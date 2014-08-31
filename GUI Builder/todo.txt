@@ -21,5 +21,3 @@ TODO:
 5.  Consider adding the 'rebase' protocol to frames for use with the 
     corresponding DSEL. (eases changing BaseType from Omit when non-type and 
     template template parameters are present)
-
-6.  Fix problem with created caret not adapting when text is resized.

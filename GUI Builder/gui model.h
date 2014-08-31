@@ -294,10 +294,10 @@ namespace GUIModel
 				graphene::Frames::Indexing<graphene::DSEL::Omit,size_t>,
 				graphene::Frames::Offset<graphene::DSEL::Omit,CoordinateType>,
 				graphene::Frames::Pointing<graphene::DSEL::Omit,PointedToType*>,
-				graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,CharType>,
+				graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,CharType>,
 				graphene::Frames::EventHandling::KeyboardAndMouseStub<graphene::DSEL::Omit,CoordinateType>, // TODO: remove...
 				graphene::Frames::EventHandling::CaretLike<graphene::DSEL::Omit,CoordinateType>, // ...and handle in parent
-				graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,graphene::FunctionObjects::Textual,Width>
+				graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,Width>
 			>::type
 		{
 			/*********************
@@ -309,10 +309,10 @@ namespace GUIModel
 				graphene::Frames::Indexing<graphene::DSEL::Omit,size_t>,
 				graphene::Frames::Offset<graphene::DSEL::Omit,CoordinateType>,
 				graphene::Frames::Pointing<graphene::DSEL::Omit,PointedToType*>,
-				graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,CharType>,
+				graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,CharType>,
 				graphene::Frames::EventHandling::KeyboardAndMouseStub<graphene::DSEL::Omit,CoordinateType>, // TODO: remove...
 				graphene::Frames::EventHandling::CaretLike<graphene::DSEL::Omit,CoordinateType>, // ...and handle in parent
-				graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,graphene::FunctionObjects::Textual,Width>
+				graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,Width>
 			>::type base_type;
 			typedef PointedToType pointed_to_type;
 			typedef Width width;
@@ -344,7 +344,7 @@ namespace GUIModel
 			graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
 			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>,
-			graphene::Frames::MultiCharBorderedRectangle<graphene::DSEL::Omit,graphene::FunctionObjects::Textual,
+			graphene::Frames::MultiCharBorderedRectangle<graphene::DSEL::Omit,graphene::FunctionObjects::Textual,graphene::FunctionObjects::GlutStrokeFontEngine,
 				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
 				      Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,

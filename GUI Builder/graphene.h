@@ -1158,7 +1158,8 @@ namespace graphene
 		 *  expose text traits via the supplied TextConceptMap. CharType should be a (preferably smart) pointer type.
 		 *	ConcreteCharTemplate instantiations should be constructible from a reference to *this, an index and an instance of CoordinateType.
 		 */
-		template<typename BaseType, typename TextConceptMap, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
+		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type,
+			typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
 			typename ConcreteCharType = typename BaseType::concrete_char_type, typename ConstConcreteCharType = typename BaseType::const_concrete_char_type, 
 			typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiCharBorderedRectangle : public BaseType
@@ -1168,6 +1169,7 @@ namespace graphene
 			*********************/
 		public:
 			typedef BaseType base_type;
+			typedef FontEngineType font_engine_type;
 			typedef CharType char_type;
 			typedef ConstCharType const_char_type;
 			typedef ConcreteCharType concrete_char_type;
@@ -1184,6 +1186,7 @@ namespace graphene
 			CharType charUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
 				TextConceptMap textConceptMap;\
+				FontEngineType fontEngine;\
 				auto left   = std::min(this->left(),this->right());\
 				auto bottom = std::min(this->bottom(),this->top());\
 				auto right  = std::max(this->left(),this->right());\
@@ -1192,12 +1195,13 @@ namespace graphene
 				if(contains(x,y))\
 				{\
 					size_t i = 0;\
-					coordinate_type textLeftX = left + (this->width() - textConceptMap.effectiveTextSize(*this).first)/2;\
-					coordinate_type charLeftX = 0;\
-					for( ; i < textConceptMap.text(*this).size() ; charLeftX += textConceptMap.effectiveTextCharSize(*this,i).first, ++i)\
-						if(x-textLeftX <= charLeftX + textConceptMap.effectiveTextCharSize(*this,i).first/2)\
+					coordinate_type sceneTextLeft = left + (this->width() - textConceptMap.effectiveTextSize(*this).first)/2;\
+					coordinate_type fontX = (x-sceneTextLeft)*fontEngine.stringWidth(textConceptMap.text(*this)) / textConceptMap.effectiveTextSize(*this).first;\
+					coordinate_type fontCharLeft = 0;\
+					for( ; i < textConceptMap.text(*this).size() ; fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[i]), ++i)\
+						if(fontX <= fontCharLeft + fontEngine.charWidth(textConceptMap.text(*this)[i])/2)\
 							break;\
-					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointed_to_type*>(this),i,charLeftX));\
+					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointed_to_type*>(this),i,fontCharLeft));\
 															/* TODO: check that this indeed points to that type */\
 				}\
 				else\
@@ -1209,7 +1213,7 @@ namespace graphene
 #undef charUnderPointMacro
 		}; // end class MultiCharBorderedRectangle
 
-		template<typename BaseType, typename TextConceptMap, typename CharType = typename BaseType::char_type>
+		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type, typename CharType = typename BaseType::char_type>
 		class IndirectCaretLike : public BaseType
 		{
 			/*********************
@@ -1218,12 +1222,14 @@ namespace graphene
 		public:
 			typedef BaseType base_type;
 			typedef CharType char_type;
+			typedef FontEngineType font_engine_type;
 
 			/***************
 			*    Fields    *
 			***************/
 		private:
 			TextConceptMap iTextConceptMap;
+			FontEngineType iFontEngine;
 
 			/****************
 			*    Methods    *
@@ -1235,7 +1241,7 @@ namespace graphene
 			{
 				if(index() < iTextConceptMap.text(*pointer()).size())
 				{
-					xOffset() += iTextConceptMap.effectiveTextCharSize(*pointer(),index()).first;
+					xOffset() += iFontEngine.charWidth(iTextConceptMap.text(*pointer())[index()]);
 					++index();
 				} // end if
 			} // end method nextPosition
@@ -1245,7 +1251,7 @@ namespace graphene
 				if(index() > 0)
 				{
 					--index();
-					xOffset() -= iTextConceptMap.effectiveTextCharSize(*pointer(),index()).first;
+					xOffset() -= iFontEngine.charWidth(iTextConceptMap.text(*pointer())[index()]);
 				} // end if
 			} // end method prevPosition
 
@@ -1619,7 +1625,7 @@ namespace graphene
 				/** Renders a caret as a vertical line. Deprecated
 				 */
 				// TODO: remove and compose from smaller frames when able to present IndirectCaret as rectangle
-				template<typename BaseType, typename TextConceptMap, typename Width = typename BaseType::width>
+				template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type, typename Width = typename BaseType::width>
 				class IndirectCaret : public BaseType
 				{
 					/*********************
@@ -1627,6 +1633,7 @@ namespace graphene
 					*********************/
 				public:
 					typedef BaseType base_type;
+					typedef FontEngineType font_engine_type;
 					typedef Width width;
 
 					/*********************
@@ -1654,6 +1661,7 @@ namespace graphene
 						auto top    = std::max(pointer()->bottom(),pointer()->top());
 
 						auto textLeft = left + (pointer()->width() - TextConceptMap().effectiveTextSize(*pointer()).first)/2;
+						auto caretMiddle = textLeft + xOffset()*TextConceptMap().effectiveTextSize(*pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*pointer()));
 
 						float fgColor[4], bgColor[4];
 						glPushAttrib(GL_CURRENT_BIT);
@@ -1661,11 +1669,11 @@ namespace graphene
 							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
 							
 							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
-							glRect(((textLeft + xOffset())*2*width::den - width::num)/(2*width::den),bottom+pointer()->borderSize(),
-									((textLeft + xOffset())*2*width::den + width::num)/(2*width::den),top-pointer()->borderSize());
+							glRect((caretMiddle*2*width::den - width::num)/(2*width::den),bottom+pointer()->borderSize(),
+									(caretMiddle*2*width::den + width::num)/(2*width::den),top-pointer()->borderSize());
 							glColor4fv(fgColor);
-							glRect(((textLeft + xOffset())*6*width::den - width::num)/(6*width::den),((bottom+pointer()->borderSize())*3*width::den + width::num)/(3*width::den),
-									((textLeft + xOffset())*6*width::den + width::num)/(6*width::den),((top-pointer()->borderSize())*3*width::den - width::num)/(3*width::den));
+							glRect((caretMiddle*6*width::den - width::num)/(6*width::den),((bottom+pointer()->borderSize())*3*width::den + width::num)/(3*width::den),
+									(caretMiddle*6*width::den + width::num)/(6*width::den),((top-pointer()->borderSize())*3*width::den - width::num)/(3*width::den));
 						glPopAttrib();
 					} // end method render
 				}; // end class IndirectCaret
