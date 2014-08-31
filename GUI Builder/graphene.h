@@ -1920,10 +1920,12 @@ namespace graphene
 		// Substitute specializations
 		template<class BaseType, class FrameType> struct Substitute;
 
+		// base + 0 args
 		template<class BaseType, template<class BaseType> class FrameType>
 		struct Substitute<BaseType, FrameType<Omit>>
 		{typedef FrameType<BaseType> type;};
 
+		// base + 1 args
 		template<class BaseType, template<class BaseType, class> class FrameType, class P1>
 		struct Substitute<BaseType, FrameType<Omit,P1>>
 		{typedef FrameType<BaseType,P1> type;};
@@ -1932,6 +1934,7 @@ namespace graphene
 		struct Substitute<BaseType, FrameType<Omit,P1>>
 		{typedef FrameType<BaseType,P1> type;};
 
+		// base + 2 args
 		template<class BaseType, template<class BaseType, class, class> class FrameType, class P1, class P2>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
 		{typedef FrameType<BaseType,P1,P2> type;};
@@ -1948,7 +1951,7 @@ namespace graphene
 		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
 		{typedef FrameType<BaseType,P1,P2> type;};
 
-
+		// base + 3 args
 		template<class BaseType, template<class BaseType, class, class, class> class FrameType, class P1, class P2, class P3>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
 		{typedef FrameType<BaseType,P1,P2,P3> type;};
@@ -1965,6 +1968,7 @@ namespace graphene
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
 		{typedef FrameType<BaseType,P1,P2,P3> type;};
 
+		// base + 4 args
 		template<class BaseType, template<class BaseType, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
@@ -1981,6 +1985,7 @@ namespace graphene
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
 
+		// base + 5 args
 		template<class BaseType, template<class BaseType, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
@@ -1996,6 +2001,16 @@ namespace graphene
 		template<class BaseType, template<class BaseType, bool, bool, class, class, class> class FrameType, bool P1, bool P2, class P3, class P4, class P5>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
+
+		// base + 6 args
+		template<class BaseType, template<class BaseType, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6> type;};
+
+		// base + 7 args
+		template<class BaseType, template<class BaseType, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7> type;};
 
 		// FrameStack specializations
 		template<class BaseType = Omit, class FrameType = Omit,  
