@@ -435,19 +435,25 @@ namespace GUIModel
 			} // end TextBox constructor
 		}; // end class TextBox
 
+		// TODO: rework design of ConstraintEndPoint
+		template<typename ControlContainerType>
 		struct ConstraintEndPoint
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 
+			typedef ControlContainerType control_container_type;
+			typedef typename control_container_type::value_type::coordinate_type coordinate_type;
 			typedef boost::property_tree::ptree property_tree_type;
 			typedef geometry::RectangleSide side_type;
 
 			/***************
 			*    Fields    *
 			***************/
-
+		private:
+			ControlContainerType *iContainer;
+		public:
 			size_t control; // ordinal number of the referred control
 			side_type side; // enumerator of the referred side
 
@@ -457,22 +463,38 @@ namespace GUIModel
 
 			ConstraintEndPoint(){/* empty body */}
 
-			ConstraintEndPoint(size_t control, side_type side)
-				:control(control),side(side)
+			ConstraintEndPoint(ControlContainerType *container, size_t control, side_type side)
+				:iContainer(container),control(control),side(side)
 			{
 				// empty body
 			} // end ConstraintEndPoint constructor
 
-			ConstraintEndPoint(const property_tree_type &tree)
-				:control(tree.get<size_t>("control")),side(to<side_type>(tree.get<std::string>("side")))
+			ConstraintEndPoint(const property_tree_type &tree, ControlContainerType *container)
+				:iContainer(container),control(tree.get<size_t>("control")),side(to<side_type>(tree.get<std::string>("side")))
 			{
 				// empty body
 			} // end ConstraintEndPoint conversion constructor
+
+			/*************************
+			*    Accessor Methods    *
+			*************************/
+
+			ControlContainerType *&container()
+			{
+				return iContainer;
+			} // end method container
+
+			ControlContainerType *const &container() const
+			{
+				return iContainer;
+			} // end method container
 
 			/****************
 			*    Methods    *
 			****************/
 
+			// iContainer is not serialized because there is only one container in application.
+			// May need to generalize later.
 			operator property_tree_type() const
 			{
 				property_tree_type tree;
@@ -482,10 +504,36 @@ namespace GUIModel
 
 				return tree;
 			} // end method operator property_tree_type
+
+			auto referredSide()->decltype((*iContainer)[control].side(side))
+			{
+				return (*iContainer)[control].side(side);
+			} // end method referredSide
+
+			auto referredSide() const->decltype((*iContainer)[control].side(side))
+			{
+				return (*iContainer)[control].side(side);
+			} // end method referredSide
+
+			auto referredControl()->decltype((*iContainer)[control])
+			{
+				return (*iContainer)[control];
+			} // end method referredControl
+
+			auto referredControl() const->decltype((*iContainer)[control])
+			{
+				return (*iContainer)[control];
+			} // end method referredControl
 		}; // end struct ConstraintEndPoint
 
-		template<typename TextType = std::string>
-		class Constraint
+		// TODO: decompose Constraint to frames
+		template<typename ControlContainerType, typename CoordinateType, typename LineWidth, typename TextType = std::string>
+		class Constraint : public	graphene::DSEL::FrameStack<
+										geometry::Rectangle<CoordinateType>,
+										graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
+										graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,CoordinateType>,
+										graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,std::ratio<0>,CoordinateType>
+									>::type
 		{
 		public:
 			/*********************
@@ -501,18 +549,29 @@ namespace GUIModel
 				RationalType rhsConstant;
 			}; // end struct ParseResult
 
+			typedef typename graphene::DSEL::FrameStack<
+				geometry::Rectangle<CoordinateType>,
+				graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
+				graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,CoordinateType>,
+				graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,std::ratio<0>,CoordinateType>
+			>::type base_type;
+			typedef ControlContainerType control_container_type;
+			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
 			typedef boost::property_tree::ptree property_tree_type;
-			typedef ConstraintEndPoint EndPoint;
-			typedef EndPoint::side_type side_type;
+			typedef ConstraintEndPoint<ControlContainerType> EndPoint;
+			typedef typename EndPoint::side_type side_type;
+			typedef std::unique_ptr<IShapePart<CoordinateType>> PartType;
+			typedef std::unique_ptr<const IShapePart<CoordinateType>> ConstPartType;
+			typedef LineWidth line_width;
 
 		private:
 			/***************
 			*    Fields    *
 			***************/
 
-			TextType iText;
 			EndPoint iEndPoints[2];
+			CoordinateType iLocalSides[2];
 
 		public:
 			/*********************
@@ -525,43 +584,44 @@ namespace GUIModel
 
 			/** Construct a Constraint with the specified sides.
 			 */
-			Constraint(TextType text, const EndPoint &endPoint1, const EndPoint &endPoint2)
-				:iText(std::move(text))
+			Constraint(const EndPoint &endPoint1, const EndPoint &endPoint2, CoordinateType localSide1, CoordinateType localSide2, TextType text, CoordinateType textHeight)
 			{
-				iEndPoints[0] = endPoint1;
-				iEndPoints[1] = endPoint2;
+				endPoints()[0] = endPoint1;
+				endPoints()[1] = endPoint2;
+				localSides()[0] = std::move(localSide1);
+				localSides()[1] = std::move(localSide2);
+				this->text() = std::move(text);
+				this->textHeight() = textHeight;
 			} // end Control constructor
 
-			Constraint(TextType text, size_t control1, side_type side1, size_t control2, side_type side2)
-				:iText(std::move(text))
+			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, 
+				CoordinateType localSide1, CoordinateType localSide2, TextType text, CoordinateType textHeight)
 			{
-				iEndPoints[0].control = control1;
-				iEndPoints[0].side = side1;
-				iEndPoints[1].control = control2;
-				iEndPoints[1].side = side2;
+				endPoints()[0].container() = container;
+				endPoints()[0].control = control1;
+				endPoints()[0].side = side1;
+				endPoints()[1].container() = container;
+				endPoints()[1].control = control2;
+				endPoints()[1].side = side2;
+				localSides()[0] = std::move(localSide1);
+				localSides()[1] = std::move(localSide2);
+				this->text() = std::move(text);
+				this->textHeight() = textHeight;
 			} // end Control constructor
 
-			Constraint(const property_tree_type &tree)
-				:iText(tree.get<TextType>("text"))
+			Constraint(const property_tree_type &tree, ControlContainerType *container)
 			{
-				iEndPoints[0] = EndPoint(tree.get_child("first-end-point"));
-				iEndPoints[1] = EndPoint(tree.get_child("second-end-point"));
+				endPoints()[0] = EndPoint(tree.get_child("first-end-point"),container);
+				endPoints()[1] = EndPoint(tree.get_child("second-end-point",container));
+				localSides()[0] = tree.get<CoordinateType>("first-local-side");
+				localSides()[1] = tree.get<CoordinateType>("second-local-side");
+				this->text() = tree.get<TextType>("text");
+				this->textHeight() = tree.get<CoordinateType>("text-height");
 			} // end Constraint conversion constructor
-
 
 			/*************************
 			*    Accessor Methods    *
 			*************************/
-
-			TextType &text()
-			{
-				return iText;
-			} // end method text
-
-			const TextType &text() const
-			{
-				return iText;
-			} // end method text
 
 			EndPoint (&endPoints())[2]
 			{
@@ -573,20 +633,202 @@ namespace GUIModel
 				return iEndPoints;
 			} // end method endPoints
 
+			CoordinateType (&localSides())[2]
+			{
+				return iLocalSides;
+			} // end method localSides
+
+			const CoordinateType (&localSides() const)[2]
+			{
+				return iLocalSides;
+			} // end method localSides
+
 			/****************
 			*    Methods    *
 			****************/
-
+			
 			operator property_tree_type() const
 			{
 				property_tree_type tree;
 
-				tree.put("text",iText);
-				tree.put_child("first-end-point",iEndPoints[0]);
-				tree.put_child("second-end-point",iEndPoints[1]);
+				tree.put("text",text());
+				tree.put("text-height",testHeight());
+				tree.put_child("first-end-point",endPoints()[0]);
+				tree.put_child("second-end-point",endPoints()[1]);
+				tree.put("first-local-side",localSides()[0]);
+				tree.put("second-local-side",localSides()[1]);
 
 				return tree;
 			} // end method operator property_tree_type
+
+			// vertical constraints have horizontal end points and vice versa
+			bool isVertical() const
+			{
+				assert(geometry::isHorizontal(iEndPoints[0].side) == geometry::isHorizontal(iEndPoints[1].side));
+				return geometry::isHorizontal(iEndPoints[0].side);
+			} // end method isVertical
+
+			bool isHorizontal() const
+			{
+				assert(geometry::isVertical(iEndPoints[0].side) == geometry::isVertical(iEndPoints[1].side));
+				return geometry::isVertical(iEndPoints[0].side);
+			} // end method isHorizontal
+
+			/** Returns whether the point (x,y) is inside the rectangle defined by 
+			 *	the two constraint end points and the two supplementary sides.
+			 *	Supplementary sides should be adjacent to constraint text.
+			 */
+			bool contains(CoordinateType x, CoordinateType y) const
+			{
+				auto left   = isHorizontal() ? std::min(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::min(iLocalSides[0],iLocalSides[1]);
+				auto bottom = isVertical()   ? std::min(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::min(iLocalSides[0],iLocalSides[1]);
+				auto right  = isHorizontal() ? std::max(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::max(iLocalSides[0],iLocalSides[1]);
+				auto top    = isVertical()   ? std::max(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::max(iLocalSides[0],iLocalSides[1]);
+				return left <= x && x <= right && bottom <= y && y <= top;
+			} // end method contains
+
+			PartType partUnderPoint(CoordinateType x, CoordinateType y)
+			{
+				if(contains(x,y))
+					if(isHorizontal())
+						return PartType(new ControlPart<CoordinateType,false,true,false,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
+					else
+						return PartType(new ControlPart<CoordinateType,true,false,false,true,false,true,false>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
+				else
+					return nullptr;
+			} // end method partUnderPoint
+
+			ConstPartType partUnderPoint(CoordinateType x, CoordinateType y) const
+			{
+				if(contains(x,y))
+					if(isHorizontal())
+						return ConstPartType(new const ControlPart<CoordinateType,false,true,true,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
+					else
+						return ConstPartType(new const ControlPart<CoordinateType,true,false,true,true,true,true,true>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
+				else
+					return nullptr;
+			} // end method partUnderPoint
+
+			void render() const
+			{
+				graphene::FunctionObjects::GlutStrokeFontEngine fontEngine;
+
+				glPushAttrib(GL_POLYGON_BIT|GL_TRANSFORM_BIT);
+					glPolygonMode(GL_FRONT,GL_FILL);
+					glMatrixMode(GL_MODELVIEW);
+					if(isHorizontal())
+					{
+						CoordinateType left   = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						CoordinateType bottom = std::min(localSides()[0],localSides()[1]);
+						CoordinateType right  = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						CoordinateType top    = std::max(localSides()[0],localSides()[1]);
+
+						auto leftEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+						auto rightEndPoint = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+
+						// render lines consistent with control borders (borders are rendered inside the controls)
+						CoordinateType innerLeft  = std::min(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right()) == leftEndPoint.referredSide() ? 
+														(left *LineWidth::den + LineWidth::num) / LineWidth::den : (left *LineWidth::den - LineWidth::num) / LineWidth::den;
+						CoordinateType innerRight = std::min(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right()) == rightEndPoint.referredSide() ? 
+														(right*LineWidth::den + LineWidth::num) / LineWidth::den : (right*LineWidth::den - LineWidth::num) / LineWidth::den;
+						std::tie(left,innerLeft) = std::minmax(left,innerLeft);
+						std::tie(innerRight,right) = std::minmax(innerRight,right);
+
+						// left vertical
+						if(top > leftEndPoint.referredControl().top())
+							glRect(left,leftEndPoint.referredControl().top(),innerLeft,top);
+						if(bottom < leftEndPoint.referredControl().bottom())
+							glRect(left,bottom,innerLeft,leftEndPoint.referredControl().bottom());
+
+						// right vertical
+						if(top > rightEndPoint.referredControl().top())
+							glRect(innerRight,rightEndPoint.referredControl().top(),right,top);
+						if(bottom < rightEndPoint.referredControl().bottom())
+							glRect(innerRight,bottom,right,rightEndPoint.referredControl().bottom());
+
+						// text
+						// TODO: remove this monstrosity!
+						const_cast<CoordinateType&>(this->left())   = innerLeft;
+						const_cast<CoordinateType&>(this->bottom()) = bottom;
+						const_cast<CoordinateType&>(this->right())  = innerRight;
+						const_cast<CoordinateType&>(this->top())    = top;
+						CoordinateType effectiveTextWidth,effectiveTextHeight;
+						std::tie(effectiveTextWidth,effectiveTextHeight) = effectiveTextSize();
+						CoordinateType textLeft = this->left() + (width() - effectiveTextWidth) / 2;
+						CoordinateType textBottom = this->bottom() + (height() - effectiveTextHeight) / 2;
+
+						glPushMatrix();
+							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
+							glScaled(effectiveTextWidth / fontEngine.stringWidth(text()) , effectiveTextHeight / fontEngine.fontHeight() , 1);
+							glTranslated(0,fontEngine.fontBelowBaseLine(),0);
+							fontEngine.render(text());
+						glPopMatrix();
+
+						// left horizontal
+						glRect(innerLeft,((2*bottom + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textLeft,((2*bottom + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+
+						// right horizontal
+						auto textRight = this->right() - (width() - effectiveTextWidth) / 2;
+						glRect(textRight,((2*bottom + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerRight,((2*bottom + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+					}
+					else
+					{
+						CoordinateType left   = std::min(localSides()[0],localSides()[1]);
+						CoordinateType bottom = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						CoordinateType right  = std::max(localSides()[0],localSides()[1]);
+						CoordinateType top    = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+
+						auto bottomEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+						auto topEndPoint     = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+
+						// render lines consistent with control borders (borders are rendered inside the controls)
+						CoordinateType innerBottom  = std::min(bottomEndPoint.referredControl().bottom(),bottomEndPoint.referredControl().top()) == bottomEndPoint.referredSide() ? 
+														(bottom *LineWidth::den + LineWidth::num) / LineWidth::den : (bottom *LineWidth::den - LineWidth::num) / LineWidth::den;
+						CoordinateType innerTop = std::min(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top()) == topEndPoint.referredSide() ? 
+														(top*LineWidth::den + LineWidth::num) / LineWidth::den : (top*LineWidth::den - LineWidth::num) / LineWidth::den;
+						std::tie(bottom,innerBottom) = std::minmax(bottom,innerBottom);
+						std::tie(innerTop,top) = std::minmax(innerTop,top);
+
+						// bottom horizontal
+						if(right > bottomEndPoint.referredControl().right())
+							glRect(bottomEndPoint.referredControl().right(),bottom,right,innerBottom);
+						if(left < bottomEndPoint.referredControl().left())
+							glRect(left,bottom,bottomEndPoint.referredControl().left(),innerBottom);
+
+						// top horizontal
+						if(right > topEndPoint.referredControl().right())
+							glRect(topEndPoint.referredControl().right(),innerTop,right,top);
+						if(left < topEndPoint.referredControl().left())
+							glRect(left,innerTop,topEndPoint.referredControl().left(),top);
+
+						// text
+						// TODO: remove this monstrosity!
+						const_cast<CoordinateType&>(this->left())   = innerBottom;
+						const_cast<CoordinateType&>(this->bottom()) = left;
+						const_cast<CoordinateType&>(this->right())  = innerTop;
+						const_cast<CoordinateType&>(this->top())    = right;
+						CoordinateType effectiveTextWidth,effectiveTextHeight;
+						std::tie(effectiveTextWidth,effectiveTextHeight) = effectiveTextSize();
+						CoordinateType textLeft = this->bottom() + (height() - effectiveTextHeight) / 2;
+						CoordinateType textBottom = this->left() + (width() - effectiveTextWidth) / 2;
+
+						glPushMatrix();
+							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
+							glScaled(effectiveTextHeight / fontEngine.fontHeight() , effectiveTextWidth / fontEngine.stringWidth(text()) , 1);
+							glRotated(90,0,0,1); // rotate by 90 degrees
+							glTranslated(0,-fontEngine.fontAboveBaseLine(),0);
+							fontEngine.render(text());
+						glPopMatrix();
+
+						// bottom vertical
+						glRect(((2*left + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerBottom,((2*left + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),textBottom);
+
+						// top vertical
+						auto textTop = this->right() - (width() - effectiveTextWidth) / 2;
+						glRect(((2*left + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*left + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),innerTop);
+					} // end else
+				glPopAttrib();
+			} // end method render
 
 			//template<typename RationalType, typename IDType, typename NameType>
 			//ParseResult<IDType,RationalType> parse(std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols) const
@@ -637,8 +879,8 @@ namespace GUIModel
 			//			-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
 			//	rule<TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
 
-			//	auto begin = iText.begin();
-			//	auto end = iText.end();
+			//	auto begin = text().begin();
+			//	auto end = text().end();
 
 			//	bool success = phrase_parse(begin,end,constraint,space);
 			//	if(!success || begin != end)
@@ -661,8 +903,9 @@ namespace GUIModel
 			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
 			typedef typename TextType::value_type char_type;
+
 			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> control_type;
-			typedef Constraint<TextType> constraint_type;
+			typedef Constraint<std::vector<control_type>,CoordinateType,std::ratio<1,2>,TextType> constraint_type;
 			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
 			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
 

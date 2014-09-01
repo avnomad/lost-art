@@ -21,13 +21,13 @@ namespace GUIModel
 		model.controls.emplace_back(Controls::Model<int>::control_type(20,20,80,80,1,"control1",10));
 		model.controls.emplace_back(Controls::Model<int>::control_type(0,0,50,50,1,"control2",10));
 
-		model.constraints.emplace_back("2.3a + 2cm",0,RectangleSide::LEFT,1,RectangleSide::LEFT);
-		model.constraints.emplace_back("2/3a + 3.55b + 2px + cm",0,RectangleSide::RIGHT,1,RectangleSide::RIGHT);
-		model.constraints.emplace_back("20.1px",1,RectangleSide::LEFT,1,RectangleSide::RIGHT);
+		model.constraints.emplace_back(Controls::Model<int>::constraint_type(&model.controls,0,RectangleSide::LEFT,1,RectangleSide::LEFT,0,0,"2.3a + 2cm",10));
+		model.constraints.emplace_back(Controls::Model<int>::constraint_type(&model.controls,0,RectangleSide::RIGHT,1,RectangleSide::RIGHT,0,0,"2/3a + 3.55b + 2px + cm",10));
+		model.constraints.emplace_back(Controls::Model<int>::constraint_type(&model.controls,1,RectangleSide::LEFT,1,RectangleSide::RIGHT,0,0,"20.1px",10));
 
-		model.constraints.emplace_back("0.03cm",0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM);
-		model.constraints.emplace_back("1/2b",0,RectangleSide::TOP,1,RectangleSide::TOP);
-		model.constraints.emplace_back("c",1,RectangleSide::BOTTOM,1,RectangleSide::TOP);
+		model.constraints.emplace_back(Controls::Model<int>::constraint_type(&model.controls,0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM,0,0,"0.03cm",10));
+		model.constraints.emplace_back(Controls::Model<int>::constraint_type(&model.controls,0,RectangleSide::TOP,1,RectangleSide::TOP,0,0,"1/2b",10));
+		model.constraints.emplace_back(Controls::Model<int>::constraint_type(&model.controls,1,RectangleSide::BOTTOM,1,RectangleSide::TOP,0,0,"c",10));
 
 		//auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
 		//vector<Constraint<>::ParseResult<int,Rational>> results;
