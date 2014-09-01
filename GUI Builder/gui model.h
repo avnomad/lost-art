@@ -2,6 +2,7 @@
 #define GUI_MODEL_H
 
 #include <map>
+#include <tuple>
 #include <vector>
 #include <string>
 #include <memory>
@@ -726,25 +727,31 @@ namespace GUIModel
 						auto leftEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 						auto rightEndPoint = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 
+						CoordinateType leftControlLeft, leftControlBottom, leftControlRight, leftControlTop, rightControlLeft, rightControlBottom, rightControlRight, rightControlTop;
+						std::tie(leftControlLeft,leftControlRight) = std::minmax(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right());
+						std::tie(leftControlBottom,leftControlTop) = std::minmax(leftEndPoint.referredControl().bottom(),leftEndPoint.referredControl().top());
+						std::tie(rightControlLeft,rightControlRight) = std::minmax(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right());
+						std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
+
 						// render lines consistent with control borders (borders are rendered inside the controls)
-						CoordinateType innerLeft  = std::min(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right()) == leftEndPoint.referredSide() ? 
+						CoordinateType innerLeft  = leftControlLeft == leftEndPoint.referredSide() ? 
 														(left *LineWidth::den + LineWidth::num) / LineWidth::den : (left *LineWidth::den - LineWidth::num) / LineWidth::den;
-						CoordinateType innerRight = std::min(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right()) == rightEndPoint.referredSide() ? 
+						CoordinateType innerRight = rightControlLeft == rightEndPoint.referredSide() ? 
 														(right*LineWidth::den + LineWidth::num) / LineWidth::den : (right*LineWidth::den - LineWidth::num) / LineWidth::den;
-						std::tie(left,innerLeft) = std::minmax(left,innerLeft);
-						std::tie(innerRight,right) = std::minmax(innerRight,right);
+						std::tie(left,innerLeft) = std::pair<CoordinateType,CoordinateType>(std::minmax(left,innerLeft)); // won't work without creating a copy...
+						std::tie(innerRight,right) = std::pair<CoordinateType,CoordinateType>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
 
 						// left vertical
-						if(top > leftEndPoint.referredControl().top())
-							glRect(left,leftEndPoint.referredControl().top(),innerLeft,top);
-						if(bottom < leftEndPoint.referredControl().bottom())
-							glRect(left,bottom,innerLeft,leftEndPoint.referredControl().bottom());
+						if(top > leftControlTop)
+							glRect(left,leftControlTop,innerLeft,top);
+						if(bottom < leftControlBottom)
+							glRect(left,bottom,innerLeft,leftControlBottom);
 
 						// right vertical
-						if(top > rightEndPoint.referredControl().top())
-							glRect(innerRight,rightEndPoint.referredControl().top(),right,top);
-						if(bottom < rightEndPoint.referredControl().bottom())
-							glRect(innerRight,bottom,right,rightEndPoint.referredControl().bottom());
+						if(top > rightControlTop)
+							glRect(innerRight,rightControlTop,right,top);
+						if(bottom < rightControlBottom)
+							glRect(innerRight,bottom,right,rightControlBottom);
 
 						// text
 						// TODO: remove this monstrosity!
@@ -781,25 +788,31 @@ namespace GUIModel
 						auto bottomEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 						auto topEndPoint     = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 
+						CoordinateType bottomControlLeft, bottomControlBottom, bottomControlRight, bottomControlTop, topControlLeft, topControlBottom, topControlRight, topControlTop;
+						std::tie(bottomControlLeft,bottomControlRight) = std::minmax(bottomEndPoint.referredControl().left(),bottomEndPoint.referredControl().right());
+						std::tie(bottomControlBottom,bottomControlTop) = std::minmax(bottomEndPoint.referredControl().bottom(),bottomEndPoint.referredControl().top());
+						std::tie(topControlLeft,topControlRight) = std::minmax(topEndPoint.referredControl().left(),topEndPoint.referredControl().right());
+						std::tie(topControlBottom,topControlTop) = std::minmax(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top());
+
 						// render lines consistent with control borders (borders are rendered inside the controls)
-						CoordinateType innerBottom  = std::min(bottomEndPoint.referredControl().bottom(),bottomEndPoint.referredControl().top()) == bottomEndPoint.referredSide() ? 
+						CoordinateType innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ? 
 														(bottom *LineWidth::den + LineWidth::num) / LineWidth::den : (bottom *LineWidth::den - LineWidth::num) / LineWidth::den;
-						CoordinateType innerTop = std::min(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top()) == topEndPoint.referredSide() ? 
+						CoordinateType innerTop = topControlBottom == topEndPoint.referredSide() ? 
 														(top*LineWidth::den + LineWidth::num) / LineWidth::den : (top*LineWidth::den - LineWidth::num) / LineWidth::den;
-						std::tie(bottom,innerBottom) = std::minmax(bottom,innerBottom);
-						std::tie(innerTop,top) = std::minmax(innerTop,top);
+						std::tie(bottom,innerBottom) = std::pair<CoordinateType,CoordinateType>(std::minmax(bottom,innerBottom)); // won't work without creating a copy...
+						std::tie(innerTop,top) = std::pair<CoordinateType,CoordinateType>(std::minmax(innerTop,top)); // one of the variables will get overriden before used.
 
 						// bottom horizontal
-						if(right > bottomEndPoint.referredControl().right())
-							glRect(bottomEndPoint.referredControl().right(),bottom,right,innerBottom);
-						if(left < bottomEndPoint.referredControl().left())
-							glRect(left,bottom,bottomEndPoint.referredControl().left(),innerBottom);
+						if(right > bottomControlRight)
+							glRect(bottomControlRight,bottom,right,innerBottom);
+						if(left < bottomControlLeft)
+							glRect(left,bottom,bottomControlLeft,innerBottom);
 
 						// top horizontal
-						if(right > topEndPoint.referredControl().right())
-							glRect(topEndPoint.referredControl().right(),innerTop,right,top);
-						if(left < topEndPoint.referredControl().left())
-							glRect(left,innerTop,topEndPoint.referredControl().left(),top);
+						if(right > topControlRight)
+							glRect(topControlRight,innerTop,right,top);
+						if(left < topControlLeft)
+							glRect(left,innerTop,topControlLeft,top);
 
 						// text
 						// TODO: remove this monstrosity!
