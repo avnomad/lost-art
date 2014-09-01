@@ -527,14 +527,42 @@ namespace GUIModel
 			} // end method referredControl
 		}; // end struct ConstraintEndPoint
 
+		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType = std::string>	class Constraint;
+
+		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
+		class ConstraintBase : public
+		graphene::DSEL::FrameStack<
+			RectangleType,
+			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
+			graphene::Frames::Selectable<graphene::DSEL::Omit,Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+			graphene::Frames::Highlightable<graphene::DSEL::Omit,Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+			graphene::Frames::Focusable<graphene::DSEL::Omit,Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+			graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
+			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
+			graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,BorderSize,typename RectangleType::coordinate_type>,
+			graphene::Frames::MultiCharBorderedRectangle<graphene::DSEL::Omit,graphene::FunctionObjects::Textual,graphene::FunctionObjects::GlutStrokeFontEngine,
+				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
+				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
+					  Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,CaretWidth>,
+				const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,const Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,CaretWidth>,
+				typename RectangleType::coordinate_type>
+		>::type{}; // poor man's template alias
+
 		// TODO: decompose Constraint to frames
-		template<typename ControlContainerType, typename CoordinateType, typename LineWidth, typename TextType = std::string>
-		class Constraint : public	graphene::DSEL::FrameStack<
-										geometry::Rectangle<CoordinateType>,
-										graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
-										graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,CoordinateType>,
-										graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,std::ratio<0>,CoordinateType>
-									>::type
+		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
+		class Constraint : public	graphene::Frames::Renderable::Sequential<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+										graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+											graphene::Frames::Renderable::Colorblind::FilledRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+											graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>,
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,std::ratio<0>>,
+												graphene::FunctionObjects::Highlighted>,
+											graphene::FunctionObjects::Selected>,
+										graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+											graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>>>,
+											graphene::Frames::Renderable::Null<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+										graphene::FunctionObjects::Focused>>
 		{
 		public:
 			/*********************
@@ -550,21 +578,31 @@ namespace GUIModel
 				RationalType rhsConstant;
 			}; // end struct ParseResult
 
-			typedef typename graphene::DSEL::FrameStack<
-				geometry::Rectangle<CoordinateType>,
-				graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
-				graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,CoordinateType>,
-				graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,std::ratio<0>,CoordinateType>
-			>::type base_type;
+			typedef graphene::Frames::Renderable::Sequential<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+							graphene::Frames::Renderable::Colorblind::FilledRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+							graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,std::ratio<0>>,
+								graphene::FunctionObjects::Highlighted>,
+							graphene::FunctionObjects::Selected>,
+						graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>>>,
+							graphene::Frames::Renderable::Null<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+						graphene::FunctionObjects::Focused>> base_type;
+			typedef RectangleType rectangle_type;
 			typedef ControlContainerType control_container_type;
-			typedef CoordinateType coordinate_type;
+			typedef typename RectangleType::coordinate_type coordinate_type;
 			typedef TextType text_type;
 			typedef boost::property_tree::ptree property_tree_type;
 			typedef ConstraintEndPoint<ControlContainerType> EndPoint;
 			typedef typename EndPoint::side_type side_type;
 			typedef std::unique_ptr<IShapePart<coordinate_type>> PartType;
 			typedef std::unique_ptr<const IShapePart<coordinate_type>> ConstPartType;
+			typedef BorderSize border_size;
 			typedef LineWidth line_width;
+			typedef CaretWidth caret_width;
 
 		private:
 			/***************
@@ -585,7 +623,8 @@ namespace GUIModel
 
 			/** Construct a Constraint with the specified sides.
 			 */
-			Constraint(const EndPoint &endPoint1, const EndPoint &endPoint2, coordinate_type localSide1, coordinate_type localSide2, TextType text, coordinate_type textHeight)
+			Constraint(const EndPoint &endPoint1, const EndPoint &endPoint2, coordinate_type localSide1, coordinate_type localSide2,
+				TextType text, coordinate_type textHeight, coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0] = endPoint1;
 				endPoints()[1] = endPoint2;
@@ -593,10 +632,14 @@ namespace GUIModel
 				localSides()[1] = std::move(localSide2);
 				this->text() = std::move(text);
 				this->textHeight() = textHeight;
+				this->borderSize() = borderSize;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+				this->focused() = focused;
 			} // end Control constructor
 
-			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, 
-				coordinate_type localSide1, coordinate_type localSide2, TextType text, coordinate_type textHeight)
+			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, coordinate_type localSide1, coordinate_type localSide2, 
+				TextType text, coordinate_type textHeight, coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0].container() = container;
 				endPoints()[0].control = control1;
@@ -608,9 +651,15 @@ namespace GUIModel
 				localSides()[1] = std::move(localSide2);
 				this->text() = std::move(text);
 				this->textHeight() = textHeight;
+				this->borderSize() = borderSize;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+				this->focused() = focused;
 			} // end Control constructor
 
-			Constraint(const property_tree_type &tree, ControlContainerType *container)
+			// TODO: consider deserializing selected and other user interaction states.
+			Constraint(const property_tree_type &tree, ControlContainerType *container, TextType text, coordinate_type textHeight,
+				coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0] = EndPoint(tree.get_child("first-end-point"),container);
 				endPoints()[1] = EndPoint(tree.get_child("second-end-point",container));
@@ -618,6 +667,10 @@ namespace GUIModel
 				localSides()[1] = tree.get<coordinate_type>("second-local-side");
 				this->text() = tree.get<TextType>("text");
 				this->textHeight() = tree.get<coordinate_type>("text-height");
+				this->borderSize() = borderSize;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+				this->focused() = focused;
 			} // end Constraint conversion constructor
 
 			/*************************
@@ -648,6 +701,7 @@ namespace GUIModel
 			*    Methods    *
 			****************/
 			
+			// TODO: consider serializing selected and other user interaction states.
 			operator property_tree_type() const
 			{
 				property_tree_type tree;
@@ -714,7 +768,19 @@ namespace GUIModel
 			{
 				graphene::FunctionObjects::GlutStrokeFontEngine fontEngine;
 
+				base_type::render();
+
+
 				glPushAttrib(GL_POLYGON_BIT|GL_TRANSFORM_BIT);
+					if(selected())
+					{
+						float fgColor[4], bgColor[4];
+						glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+							glGetFloatv(GL_CURRENT_COLOR,fgColor);
+							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
+							glClearColor(fgColor[0],fgColor[1],fgColor[2],bgColor[3]);
+							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
+					} // end if
 					glPolygonMode(GL_FRONT,GL_FILL);
 					glMatrixMode(GL_MODELVIEW);
 					if(isHorizontal())
@@ -840,6 +906,8 @@ namespace GUIModel
 						auto textTop = this->right() - (width() - effectiveTextWidth) / 2;
 						glRect(((2*left + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*left + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),innerTop);
 					} // end else
+					if(selected())
+						glPopAttrib();
 				glPopAttrib();
 			} // end method render
 
@@ -919,7 +987,7 @@ namespace GUIModel
 			typedef typename TextType::value_type char_type;
 
 			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> control_type;
-			typedef Constraint<std::vector<control_type>,CoordinateType,std::ratio<1,2>,TextType> constraint_type;
+			typedef Constraint<geometry::Rectangle<CoordinateType>,std::vector<control_type>,std::ratio<1,2>,std::ratio<1,2>,std::ratio<1>,TextType> constraint_type;
 			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
 			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
 
@@ -947,6 +1015,11 @@ namespace GUIModel
 			typename std::common_type<decltype(controls)>::type::reverse_iterator highlightedControl;
 			typename std::common_type<decltype(controls)>::type::reverse_iterator selectedControl;
 			typename std::common_type<decltype(controls)>::type::reverse_iterator focusedControl;
+
+			typename std::common_type<decltype(constraints)>::type::iterator highlightedConstraint;
+			typename std::common_type<decltype(constraints)>::type::iterator selectedConstraint;
+			typename std::common_type<decltype(constraints)>::type::iterator focusedConstraint;
+
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
 
 			std::unique_ptr<ICaret<CoordinateType,char_type>> caret;
@@ -980,9 +1053,15 @@ namespace GUIModel
 				// initialize pointers and iterators
 				highlightedButton = buttons.end();
 				pressedButton = buttons.end();
+
 				highlightedControl = controls.rend();
 				selectedControl = controls.rend();
 				focusedControl = controls.rend();
+
+				highlightedConstraint = constraints.end();
+				selectedConstraint = constraints.end();
+				focusedConstraint = constraints.end();
+
 				selectedPart = nullptr;
 				caret = nullptr;
 			} // end Model constructor
@@ -999,6 +1078,11 @@ namespace GUIModel
 				highlightedControl = controls.rend();
 				selectedControl = controls.rend();
 				focusedControl = controls.rend();
+
+				highlightedConstraint = constraints.end();
+				selectedControl = constraints.end();
+				focusedConstraint = constraints.end();
+
 				selectedPart = nullptr;
 				caret = nullptr; // TODO: change to only become null if not pointing to text box.
 			} // end method clear
@@ -1163,15 +1247,16 @@ namespace GUIModel
 				for(const auto &control : controls)
 					control.render();
 
+				// render constraints
+				for(const auto &constraint : constraints)
+					constraint.render();
+
 				// render buttons (buttons should be in front)
 				for(const auto &button : buttons)
 					button.first.render();
 
 				// render text boxes (text boxes as well)
 				tbFileName.render();
-
-				for(const auto &constraint : constraints)
-					constraint.render();
 
 				if(selectedPart)
 					selectedPart->render();
@@ -1199,11 +1284,17 @@ namespace GUIModel
 				else if(caret)
 					caret->keyboardAscii(code,down,x,y);
 				else if(down && code == 0x7f) // delete key
-					if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
+					if(selectedConstraint != constraints.end())
 					{
-						controls.erase(selectedControl.base()-1); // TODO: delete constraints pointing to control as well
-						highlightedControl = selectedControl = controls.rend();
-						selectedPart = nullptr;						 
+						constraints.erase(selectedConstraint);
+						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
+						selectedPart = nullptr;
+					}
+					else if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
+					{
+						//controls.erase(selectedControl.base()-1); // TODO: delete constraints pointing to control as well and rebase constraints pointing to controls after it!
+						//highlightedControl = selectedControl = controls.rend();
+						//selectedPart = nullptr;						 
 					} // end if
 			} // end method keyboardAscii
 
@@ -1232,6 +1323,11 @@ namespace GUIModel
 								focusedControl->unfocus();
 								focusedControl = controls.rend();
 							} // end if
+							if(focusedConstraint != constraints.end())
+							{
+								focusedConstraint->unfocus();
+								focusedConstraint = constraints.end();
+							} // end if
 							tbFileName.focus();
 							caret = tbFileName.charUnderPoint(x,y);
 						} // clicking the text box should not deselect either
@@ -1243,13 +1339,14 @@ namespace GUIModel
 								selectedControl->deselect();
 								selectedControl = controls.rend();
 							} // end if
+							if(selectedConstraint != constraints.end())
+							{
+								selectedConstraint->deselect();
+								selectedConstraint = constraints.end();
+							} // end if
 						} // end else
 
-						for(auto &constraint : constraints)
-							if(selectedPart = constraint.partUnderPoint(x,y))
-								break;
-
-						if(!selectedPart && highlightedControl != controls.rend())
+						if(highlightedControl != controls.rend())
 						{
 							// TODO: bring to front
 							highlightedControl->select();
@@ -1267,6 +1364,11 @@ namespace GUIModel
 							else
 							{
 								tbFileName.unfocus();
+								if(focusedConstraint != constraints.end())
+								{
+									focusedConstraint->unfocus();
+									focusedConstraint = constraints.end();
+								} // end if
 								if(focusedControl != controls.rend())
 									focusedControl->unfocus();
 								highlightedControl->focus();
@@ -1275,7 +1377,26 @@ namespace GUIModel
 							} // end else
 						} // end if
 
-						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted() && !selectedPart)
+						if(highlightedConstraint != constraints.end())
+						{
+							highlightedConstraint->select();
+							selectedConstraint = highlightedConstraint;
+							selectedPart = highlightedConstraint->partUnderPoint(x,y);
+
+							tbFileName.unfocus();
+							if(focusedControl != controls.rend())
+							{
+								focusedControl->unfocus();
+								focusedControl = controls.rend();
+							} // end if
+							if(focusedConstraint != constraints.end())
+								focusedConstraint->unfocus();
+							highlightedConstraint->focus();
+							focusedConstraint = highlightedConstraint;
+							caret = highlightedConstraint->charUnderPoint(x,y);
+						} // end if
+
+						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted() && selectedConstraint == constraints.end())
 							createOnMove = true;
 
 						lastX = x;
@@ -1330,6 +1451,7 @@ namespace GUIModel
 						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+7,"0mm",7));
 						constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+7,"0mm",7));
 						constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+7,"0mm",7));
+						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
 					} // end if
 
 					// dehighlight all
@@ -1343,6 +1465,12 @@ namespace GUIModel
 					{
 						highlightedControl->dehighlight();
 						highlightedControl = controls.rend();
+					} // end if
+
+					if(highlightedConstraint != constraints.end())
+					{
+						highlightedConstraint->dehighlight();
+						highlightedConstraint = constraints.end();
 					} // end if
 
 					tbFileName.dehighlight();
@@ -1367,6 +1495,15 @@ namespace GUIModel
 						tbFileName.highlighted() = tbFileName.contains(x,y);
 
 					if(!tbFileName.highlighted())
+						for(auto constraint = constraints.begin() ; constraint < constraints.end() ; ++constraint)
+							if(constraint->contains(x,y))
+							{
+								constraint->highlight();
+								highlightedConstraint = constraint;
+								break;
+							} // end if
+
+					if(highlightedConstraint == constraints.end())
 						for(auto control = controls.rbegin() ; control < controls.rend() ; ++control) // TODO: restore front to back iteration when screen-at-front issue fixed
 							if(control->contains(x,y))
 							{
