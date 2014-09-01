@@ -6,6 +6,16 @@ namespace geometry
 {
 	void runTestSuite()
 	{
+		// test RectangleSide
+		assert(!isHorizontal(RectangleSide::LEFT));
+		assert(isHorizontal(RectangleSide::BOTTOM));
+		assert(!isHorizontal(RectangleSide::RIGHT));
+		assert(isHorizontal(RectangleSide::TOP));
+		assert(isVertical(RectangleSide::LEFT));
+		assert(!isVertical(RectangleSide::BOTTOM));
+		assert(isVertical(RectangleSide::RIGHT));
+		assert(!isVertical(RectangleSide::TOP));
+
 		// test Rectangle
 		Rectangle<int> recti(-2,5,3,8);
 		assert(recti.left() == -2);

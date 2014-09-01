@@ -11,6 +11,18 @@ namespace geometry
 	void runTestSuite();
 
 	enum class RectangleSide:unsigned {LEFT = 0, BOTTOM = 1, RIGHT = 2, TOP = 3};
+
+	// TODO: could be overloaded for other objects like lines, etc.
+	inline bool isHorizontal(RectangleSide side)
+	{
+		return side == RectangleSide::BOTTOM || side == RectangleSide::TOP;
+	} // end function isHorizontal
+
+	inline bool isVertical(RectangleSide side)
+	{
+		return side == RectangleSide::LEFT || side == RectangleSide::RIGHT;
+	} // end function isVertical
+
 } // end namespace geometry
 
 
