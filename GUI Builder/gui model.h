@@ -891,6 +891,7 @@ namespace GUIModel
 		}; // end class Constraint
 
 		// TODO: split button and control handling code and move them into separate classes. ButtonManager?
+		// TODO: split Model class to frames.
 		template<typename CoordinateType, typename TextType = std::string>
 		class Model : public geometry::Rectangle<CoordinateType>
 		{
@@ -908,6 +909,9 @@ namespace GUIModel
 			typedef Constraint<std::vector<control_type>,CoordinateType,std::ratio<1,2>,TextType> constraint_type;
 			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
 			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
+
+			typedef typename constraint_type::EndPoint end_point_type;
+			typedef typename end_point_type::side_type side_type;
 
 		public: // TODO: make private and add methods to manipulate...
 			/***************
@@ -1153,6 +1157,9 @@ namespace GUIModel
 				// render text boxes (text boxes as well)
 				tbFileName.render();
 
+				for(const auto &constraint : constraints)
+					constraint.render();
+
 				if(selectedPart)
 					selectedPart->render();
 
@@ -1225,7 +1232,11 @@ namespace GUIModel
 							} // end if
 						} // end else
 
-						if(highlightedControl != controls.rend())
+						for(auto &constraint : constraints)
+							if(selectedPart = constraint.partUnderPoint(x,y))
+								break;
+
+						if(!selectedPart && highlightedControl != controls.rend())
 						{
 							// TODO: bring to front
 							highlightedControl->select();
@@ -1251,7 +1262,7 @@ namespace GUIModel
 							} // end else
 						} // end if
 
-						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted())
+						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted() && !selectedPart)
 							createOnMove = true;
 
 						lastX = x;
@@ -1300,6 +1311,12 @@ namespace GUIModel
 						selectedPart = selectedControl->partUnderPoint(x,y); // TODO: guarantee this will be a corner
 						focusedControl->focus();
 						caret = focusedControl->charUnderPoint(x,y);
+
+						// add automatic constraints (temporary code)
+						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+7,"0mm",7));
+						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+7,"0mm",7));
+						constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+7,"0mm",7));
+						constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+7,"0mm",7));
 					} // end if
 
 					// dehighlight all
