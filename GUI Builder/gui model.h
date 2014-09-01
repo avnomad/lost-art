@@ -562,8 +562,8 @@ namespace GUIModel
 			typedef boost::property_tree::ptree property_tree_type;
 			typedef ConstraintEndPoint<ControlContainerType> EndPoint;
 			typedef typename EndPoint::side_type side_type;
-			typedef std::unique_ptr<IShapePart<CoordinateType>> PartType;
-			typedef std::unique_ptr<const IShapePart<CoordinateType>> ConstPartType;
+			typedef std::unique_ptr<IShapePart<coordinate_type>> PartType;
+			typedef std::unique_ptr<const IShapePart<coordinate_type>> ConstPartType;
 			typedef LineWidth line_width;
 
 		private:
@@ -572,7 +572,7 @@ namespace GUIModel
 			***************/
 
 			EndPoint iEndPoints[2];
-			CoordinateType iLocalSides[2];
+			coordinate_type iLocalSides[2];
 
 		public:
 			/*********************
@@ -585,7 +585,7 @@ namespace GUIModel
 
 			/** Construct a Constraint with the specified sides.
 			 */
-			Constraint(const EndPoint &endPoint1, const EndPoint &endPoint2, CoordinateType localSide1, CoordinateType localSide2, TextType text, CoordinateType textHeight)
+			Constraint(const EndPoint &endPoint1, const EndPoint &endPoint2, coordinate_type localSide1, coordinate_type localSide2, TextType text, coordinate_type textHeight)
 			{
 				endPoints()[0] = endPoint1;
 				endPoints()[1] = endPoint2;
@@ -596,7 +596,7 @@ namespace GUIModel
 			} // end Control constructor
 
 			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, 
-				CoordinateType localSide1, CoordinateType localSide2, TextType text, CoordinateType textHeight)
+				coordinate_type localSide1, coordinate_type localSide2, TextType text, coordinate_type textHeight)
 			{
 				endPoints()[0].container() = container;
 				endPoints()[0].control = control1;
@@ -614,10 +614,10 @@ namespace GUIModel
 			{
 				endPoints()[0] = EndPoint(tree.get_child("first-end-point"),container);
 				endPoints()[1] = EndPoint(tree.get_child("second-end-point",container));
-				localSides()[0] = tree.get<CoordinateType>("first-local-side");
-				localSides()[1] = tree.get<CoordinateType>("second-local-side");
+				localSides()[0] = tree.get<coordinate_type>("first-local-side");
+				localSides()[1] = tree.get<coordinate_type>("second-local-side");
 				this->text() = tree.get<TextType>("text");
-				this->textHeight() = tree.get<CoordinateType>("text-height");
+				this->textHeight() = tree.get<coordinate_type>("text-height");
 			} // end Constraint conversion constructor
 
 			/*************************
@@ -634,12 +634,12 @@ namespace GUIModel
 				return iEndPoints;
 			} // end method endPoints
 
-			CoordinateType (&localSides())[2]
+			coordinate_type (&localSides())[2]
 			{
 				return iLocalSides;
 			} // end method localSides
 
-			const CoordinateType (&localSides() const)[2]
+			const coordinate_type (&localSides() const)[2]
 			{
 				return iLocalSides;
 			} // end method localSides
@@ -679,7 +679,7 @@ namespace GUIModel
 			 *	the two constraint end points and the two supplementary sides.
 			 *	Supplementary sides should be adjacent to constraint text.
 			 */
-			bool contains(CoordinateType x, CoordinateType y) const
+			bool contains(coordinate_type x, coordinate_type y) const
 			{
 				auto left   = isHorizontal() ? std::min(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::min(iLocalSides[0],iLocalSides[1]);
 				auto bottom = isVertical()   ? std::min(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::min(iLocalSides[0],iLocalSides[1]);
@@ -688,24 +688,24 @@ namespace GUIModel
 				return left <= x && x <= right && bottom <= y && y <= top;
 			} // end method contains
 
-			PartType partUnderPoint(CoordinateType x, CoordinateType y)
+			PartType partUnderPoint(coordinate_type x, coordinate_type y)
 			{
 				if(contains(x,y))
 					if(isHorizontal())
-						return PartType(new ControlPart<CoordinateType,false,true,false,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
+						return PartType(new ControlPart<coordinate_type,false,true,false,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
 					else
-						return PartType(new ControlPart<CoordinateType,true,false,false,true,false,true,false>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
+						return PartType(new ControlPart<coordinate_type,true,false,false,true,false,true,false>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
 				else
 					return nullptr;
 			} // end method partUnderPoint
 
-			ConstPartType partUnderPoint(CoordinateType x, CoordinateType y) const
+			ConstPartType partUnderPoint(coordinate_type x, coordinate_type y) const
 			{
 				if(contains(x,y))
 					if(isHorizontal())
-						return ConstPartType(new const ControlPart<CoordinateType,false,true,true,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
+						return ConstPartType(new const ControlPart<coordinate_type,false,true,true,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
 					else
-						return ConstPartType(new const ControlPart<CoordinateType,true,false,true,true,true,true,true>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
+						return ConstPartType(new const ControlPart<coordinate_type,true,false,true,true,true,true,true>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
 				else
 					return nullptr;
 			} // end method partUnderPoint
@@ -719,27 +719,27 @@ namespace GUIModel
 					glMatrixMode(GL_MODELVIEW);
 					if(isHorizontal())
 					{
-						CoordinateType left   = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-						CoordinateType bottom = std::min(localSides()[0],localSides()[1]);
-						CoordinateType right  = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-						CoordinateType top    = std::max(localSides()[0],localSides()[1]);
+						coordinate_type left   = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						coordinate_type bottom = std::min(localSides()[0],localSides()[1]);
+						coordinate_type right  = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						coordinate_type top    = std::max(localSides()[0],localSides()[1]);
 
 						auto leftEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 						auto rightEndPoint = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 
-						CoordinateType leftControlLeft, leftControlBottom, leftControlRight, leftControlTop, rightControlLeft, rightControlBottom, rightControlRight, rightControlTop;
+						coordinate_type leftControlLeft, leftControlBottom, leftControlRight, leftControlTop, rightControlLeft, rightControlBottom, rightControlRight, rightControlTop;
 						std::tie(leftControlLeft,leftControlRight) = std::minmax(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right());
 						std::tie(leftControlBottom,leftControlTop) = std::minmax(leftEndPoint.referredControl().bottom(),leftEndPoint.referredControl().top());
 						std::tie(rightControlLeft,rightControlRight) = std::minmax(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right());
 						std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
 
 						// render lines consistent with control borders (borders are rendered inside the controls)
-						CoordinateType innerLeft  = leftControlLeft == leftEndPoint.referredSide() ? 
+						coordinate_type innerLeft  = leftControlLeft == leftEndPoint.referredSide() ? 
 														(left *LineWidth::den + LineWidth::num) / LineWidth::den : (left *LineWidth::den - LineWidth::num) / LineWidth::den;
-						CoordinateType innerRight = rightControlLeft == rightEndPoint.referredSide() ? 
+						coordinate_type innerRight = rightControlLeft == rightEndPoint.referredSide() ? 
 														(right*LineWidth::den + LineWidth::num) / LineWidth::den : (right*LineWidth::den - LineWidth::num) / LineWidth::den;
-						std::tie(left,innerLeft) = std::pair<CoordinateType,CoordinateType>(std::minmax(left,innerLeft)); // won't work without creating a copy...
-						std::tie(innerRight,right) = std::pair<CoordinateType,CoordinateType>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
+						std::tie(left,innerLeft) = std::pair<coordinate_type,coordinate_type>(std::minmax(left,innerLeft)); // won't work without creating a copy...
+						std::tie(innerRight,right) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
 
 						// left vertical
 						if(top > leftControlTop)
@@ -755,14 +755,14 @@ namespace GUIModel
 
 						// text
 						// TODO: remove this monstrosity!
-						const_cast<CoordinateType&>(this->left())   = innerLeft;
-						const_cast<CoordinateType&>(this->bottom()) = bottom;
-						const_cast<CoordinateType&>(this->right())  = innerRight;
-						const_cast<CoordinateType&>(this->top())    = top;
-						CoordinateType effectiveTextWidth,effectiveTextHeight;
+						const_cast<coordinate_type&>(this->left())   = innerLeft;
+						const_cast<coordinate_type&>(this->bottom()) = bottom;
+						const_cast<coordinate_type&>(this->right())  = innerRight;
+						const_cast<coordinate_type&>(this->top())    = top;
+						coordinate_type effectiveTextWidth,effectiveTextHeight;
 						std::tie(effectiveTextWidth,effectiveTextHeight) = effectiveTextSize();
-						CoordinateType textLeft = this->left() + (width() - effectiveTextWidth) / 2;
-						CoordinateType textBottom = this->bottom() + (height() - effectiveTextHeight) / 2;
+						coordinate_type textLeft = this->left() + (width() - effectiveTextWidth) / 2;
+						coordinate_type textBottom = this->bottom() + (height() - effectiveTextHeight) / 2;
 
 						glPushMatrix();
 							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
@@ -780,27 +780,27 @@ namespace GUIModel
 					}
 					else
 					{
-						CoordinateType left   = std::min(localSides()[0],localSides()[1]);
-						CoordinateType bottom = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-						CoordinateType right  = std::max(localSides()[0],localSides()[1]);
-						CoordinateType top    = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						coordinate_type left   = std::min(localSides()[0],localSides()[1]);
+						coordinate_type bottom = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+						coordinate_type right  = std::max(localSides()[0],localSides()[1]);
+						coordinate_type top    = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
 
 						auto bottomEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 						auto topEndPoint     = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 
-						CoordinateType bottomControlLeft, bottomControlBottom, bottomControlRight, bottomControlTop, topControlLeft, topControlBottom, topControlRight, topControlTop;
+						coordinate_type bottomControlLeft, bottomControlBottom, bottomControlRight, bottomControlTop, topControlLeft, topControlBottom, topControlRight, topControlTop;
 						std::tie(bottomControlLeft,bottomControlRight) = std::minmax(bottomEndPoint.referredControl().left(),bottomEndPoint.referredControl().right());
 						std::tie(bottomControlBottom,bottomControlTop) = std::minmax(bottomEndPoint.referredControl().bottom(),bottomEndPoint.referredControl().top());
 						std::tie(topControlLeft,topControlRight) = std::minmax(topEndPoint.referredControl().left(),topEndPoint.referredControl().right());
 						std::tie(topControlBottom,topControlTop) = std::minmax(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top());
 
 						// render lines consistent with control borders (borders are rendered inside the controls)
-						CoordinateType innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ? 
+						coordinate_type innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ? 
 														(bottom *LineWidth::den + LineWidth::num) / LineWidth::den : (bottom *LineWidth::den - LineWidth::num) / LineWidth::den;
-						CoordinateType innerTop = topControlBottom == topEndPoint.referredSide() ? 
+						coordinate_type innerTop = topControlBottom == topEndPoint.referredSide() ? 
 														(top*LineWidth::den + LineWidth::num) / LineWidth::den : (top*LineWidth::den - LineWidth::num) / LineWidth::den;
-						std::tie(bottom,innerBottom) = std::pair<CoordinateType,CoordinateType>(std::minmax(bottom,innerBottom)); // won't work without creating a copy...
-						std::tie(innerTop,top) = std::pair<CoordinateType,CoordinateType>(std::minmax(innerTop,top)); // one of the variables will get overriden before used.
+						std::tie(bottom,innerBottom) = std::pair<coordinate_type,coordinate_type>(std::minmax(bottom,innerBottom)); // won't work without creating a copy...
+						std::tie(innerTop,top) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerTop,top)); // one of the variables will get overriden before used.
 
 						// bottom horizontal
 						if(right > bottomControlRight)
@@ -816,14 +816,14 @@ namespace GUIModel
 
 						// text
 						// TODO: remove this monstrosity!
-						const_cast<CoordinateType&>(this->left())   = innerBottom;
-						const_cast<CoordinateType&>(this->bottom()) = left;
-						const_cast<CoordinateType&>(this->right())  = innerTop;
-						const_cast<CoordinateType&>(this->top())    = right;
-						CoordinateType effectiveTextWidth,effectiveTextHeight;
+						const_cast<coordinate_type&>(this->left())   = innerBottom;
+						const_cast<coordinate_type&>(this->bottom()) = left;
+						const_cast<coordinate_type&>(this->right())  = innerTop;
+						const_cast<coordinate_type&>(this->top())    = right;
+						coordinate_type effectiveTextWidth,effectiveTextHeight;
 						std::tie(effectiveTextWidth,effectiveTextHeight) = effectiveTextSize();
-						CoordinateType textLeft = this->bottom() + (height() - effectiveTextHeight) / 2;
-						CoordinateType textBottom = this->left() + (width() - effectiveTextWidth) / 2;
+						coordinate_type textLeft = this->bottom() + (height() - effectiveTextHeight) / 2;
+						coordinate_type textBottom = this->left() + (width() - effectiveTextWidth) / 2;
 
 						glPushMatrix();
 							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
