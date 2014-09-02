@@ -1484,14 +1484,17 @@ namespace GUIModel
 							{
 								endPoint1 = highlightedControl->partUnderPoint(x,y);
 								control1 = highlightedControl.base()-1 - controls.begin();
+								// Currently partUnderPoint returns a 'left' object if (x,y) is really left (where left < right),
+								// not on the LEFT side of the object.
+								// TODO: investigate if this is what we want.
 								if(dynamic_cast<typename control_type::concrete_return_type::left*>(endPoint1.get()))
-									side1 = side_type::LEFT;
+									side1 = highlightedControl->side(side_type::LEFT) == endPoint1->side(side_type::LEFT) ? side_type::LEFT : side_type::RIGHT;
 								else if(dynamic_cast<typename control_type::concrete_return_type::right*>(endPoint1.get()))
-									side1 = side_type::RIGHT;
+									side1 = highlightedControl->side(side_type::RIGHT) == endPoint1->side(side_type::RIGHT) ? side_type::RIGHT : side_type::LEFT;
 								else if(dynamic_cast<typename control_type::concrete_return_type::bottom*>(endPoint1.get()))
-									side1 = side_type::BOTTOM;
+									side1 = highlightedControl->side(side_type::BOTTOM) == endPoint1->side(side_type::BOTTOM) ? side_type::BOTTOM : side_type::TOP;
 								else if(dynamic_cast<typename control_type::concrete_return_type::top*>(endPoint1.get()))
-									side1 = side_type::TOP;
+									side1 = highlightedControl->side(side_type::TOP) == endPoint1->side(side_type::TOP) ? side_type::TOP : side_type::BOTTOM;
 								else
 									endPoint1 = nullptr;
 
