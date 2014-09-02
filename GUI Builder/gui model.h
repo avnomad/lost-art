@@ -1115,6 +1115,8 @@ namespace GUIModel
 
 			std::unique_ptr<IShapePart<CoordinateType>> endPoint1;
 			std::unique_ptr<IShapePart<CoordinateType>> endPoint2;
+			size_t control1;
+			size_t control2;
 			side_type side1;
 			side_type side2;
 
@@ -1372,6 +1374,12 @@ namespace GUIModel
 
 				if(caret)
 					caret->render();
+
+				if(endPoint1)
+					endPoint1->render();
+
+				if(endPoint2)
+					endPoint2->render();
 			} // end method render
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
@@ -1385,6 +1393,9 @@ namespace GUIModel
 						if(focusedControl != controls.rend())
 							focusedControl->unfocus();
 						focusedControl = controls.rend();
+						if(focusedConstraint != constraints.end())
+							focusedConstraint->unfocus();
+						focusedConstraint = constraints.end();
 						tbFileName.unfocus();
 					}
 					else
@@ -1411,7 +1422,15 @@ namespace GUIModel
 
 			void keyboardNonAscii(graphene::Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
 			{
-				if(caret)
+				if(key == graphene::Bases::EventHandling::NonAsciiKey::L_CTRL)
+				{
+					if(!(inConstraintAddMode = down))
+					{
+						endPoint1 = nullptr;
+						endPoint2 = nullptr;
+					} // end else
+				}
+				else if(caret)
 					caret->keyboardNonAscii(key,down,x,y);
 			} // end method keyboardNonAscii
 
@@ -1420,98 +1439,164 @@ namespace GUIModel
 				if(button == 0)
 					if(down)
 					{
-						assert(highlightedButton == buttons.end() || highlightedControl == controls.rend() || !tbFileName.highlighted());
+						if(inConstraintAddMode)
+						{
+							if(highlightedControl != controls.rend())
+							{
+								endPoint1 = highlightedControl->partUnderPoint(x,y);
+								control1 = highlightedControl.base()-1 - controls.begin();
+								if(dynamic_cast<typename control_type::concrete_return_type::left*>(endPoint1.get()))
+									side1 = side_type::LEFT;
+								else if(dynamic_cast<typename control_type::concrete_return_type::right*>(endPoint1.get()))
+									side1 = side_type::RIGHT;
+								else if(dynamic_cast<typename control_type::concrete_return_type::bottom*>(endPoint1.get()))
+									side1 = side_type::BOTTOM;
+								else if(dynamic_cast<typename control_type::concrete_return_type::top*>(endPoint1.get()))
+									side1 = side_type::TOP;
+								else
+									endPoint1 = nullptr;
 
-						if(highlightedButton != buttons.end())
-						{
-							highlightedButton->first.press();
-							pressedButton = highlightedButton;
-						} // pressing a button should not deselect
-						else if(tbFileName.highlighted())
-						{
-							if(focusedControl != controls.rend())
-							{
-								focusedControl->unfocus();
-								focusedControl = controls.rend();
+								if(endPoint1)
+									if(endPoint2 && geometry::isHorizontal(side1) == geometry::isHorizontal(side2))
+									{
+										// create new constraint and focus it
+										tbFileName.unfocus();
+										if(focusedConstraint != constraints.end())
+										{
+											focusedConstraint->unfocus();
+											focusedConstraint = constraints.end();
+										} // end if
+										if(focusedControl != controls.rend())
+										{
+											focusedControl->unfocus();
+											focusedControl = controls.rend();
+										} // end if
+
+										if(selectedControl != controls.rend())
+										{
+											selectedControl->deselect();
+											selectedControl = controls.rend();
+										} // end if
+										if(selectedConstraint != constraints.end())
+										{
+											selectedConstraint->deselect();
+											selectedConstraint = constraints.end();
+										} // end if
+										auto avg = geometry::isHorizontal(side1) ? (endPoint1->left() + endPoint1->right() + endPoint2->left() + endPoint2->right())/4.0
+																				 : (endPoint1->bottom() + endPoint1->top() + endPoint2->bottom() + endPoint2->top())/4.0;
+										constraints.push_back(constraint_type(&controls,control1,side1,control2,side2,avg-0.5*constraintThickness,avg+0.5*constraintThickness,"",constraintTextHeight));
+										highlightedConstraint = constraints.end();
+										selectedConstraint = focusedConstraint = constraints.end()-1; // no constraint was highlighted
+										selectedConstraint->select();
+										focusedConstraint->focus();
+										caret = focusedConstraint->charWithIndex(focusedConstraint->text().size());
+
+										endPoint1 = nullptr;
+										endPoint2 = nullptr;										
+									}
+									else
+									{
+										endPoint2 = std::move(endPoint1); // endPoint1 should become empty
+										control2 = control1;
+										side2 = side1;
+									} // end else
 							} // end if
-							if(focusedConstraint != constraints.end())
-							{
-								focusedConstraint->unfocus();
-								focusedConstraint = constraints.end();
-							} // end if
-							tbFileName.focus();
-							caret = tbFileName.charUnderPoint(x,y);
-						} // clicking the text box should not deselect either
+						}
 						else
 						{
-							// deselect all
-							if(selectedControl != controls.rend())
-							{
-								selectedControl->deselect();
-								selectedControl = controls.rend();
-							} // end if
-							if(selectedConstraint != constraints.end())
-							{
-								selectedConstraint->deselect();
-								selectedConstraint = constraints.end();
-							} // end if
-						} // end else
+							assert(highlightedButton == buttons.end() || highlightedControl == controls.rend() || !tbFileName.highlighted());
 
-						if(highlightedControl != controls.rend())
-						{
-							// TODO: bring to front
-							highlightedControl->select();
-							selectedControl = highlightedControl;
-							selectedPart = highlightedControl->partUnderPoint(x,y);
-
-							// TODO: consider representing screen with a different control type and encapsulate special case in part selection code.
-							if(selectedPart && selectedPart->left() == selectedControl->left() && selectedPart->bottom() == selectedControl->bottom()
-								&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.rend()-1)
-							{ // deselect screen central area (effectively make it transparent to mouse clicks)
-								selectedPart = nullptr;
-								selectedControl->deselect();
-								selectedControl = controls.rend();
-							}
-							else
+							if(highlightedButton != buttons.end())
 							{
-								tbFileName.unfocus();
+								highlightedButton->first.press();
+								pressedButton = highlightedButton;
+							} // pressing a button should not deselect
+							else if(tbFileName.highlighted())
+							{
+								if(focusedControl != controls.rend())
+								{
+									focusedControl->unfocus();
+									focusedControl = controls.rend();
+								} // end if
 								if(focusedConstraint != constraints.end())
 								{
 									focusedConstraint->unfocus();
 									focusedConstraint = constraints.end();
 								} // end if
-								if(focusedControl != controls.rend())
-									focusedControl->unfocus();
-								highlightedControl->focus();
-								focusedControl = highlightedControl;
-								caret = highlightedControl->charUnderPoint(x,y);
-							} // end else
-						} // end if
-
-						if(highlightedConstraint != constraints.end())
-						{
-							highlightedConstraint->select();
-							selectedConstraint = highlightedConstraint;
-							selectedPart = highlightedConstraint->partUnderPoint(x,y);
-
-							tbFileName.unfocus();
-							if(focusedControl != controls.rend())
+								tbFileName.focus();
+								caret = tbFileName.charUnderPoint(x,y);
+							} // clicking the text box should not deselect either
+							else
 							{
-								focusedControl->unfocus();
-								focusedControl = controls.rend();
+								// deselect all
+								if(selectedControl != controls.rend())
+								{
+									selectedControl->deselect();
+									selectedControl = controls.rend();
+								} // end if
+								if(selectedConstraint != constraints.end())
+								{
+									selectedConstraint->deselect();
+									selectedConstraint = constraints.end();
+								} // end if
+							} // end else
+
+							if(highlightedControl != controls.rend())
+							{
+								// TODO: bring to front
+								highlightedControl->select();
+								selectedControl = highlightedControl;
+								selectedPart = highlightedControl->partUnderPoint(x,y);
+
+								// TODO: consider representing screen with a different control type and encapsulate special case in part selection code.
+								if(selectedPart && selectedPart->left() == selectedControl->left() && selectedPart->bottom() == selectedControl->bottom()
+									&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.rend()-1)
+								{ // deselect screen central area (effectively make it transparent to mouse clicks)
+									selectedPart = nullptr;
+									selectedControl->deselect();
+									selectedControl = controls.rend();
+								}
+								else
+								{
+									tbFileName.unfocus();
+									if(focusedConstraint != constraints.end())
+									{
+										focusedConstraint->unfocus();
+										focusedConstraint = constraints.end();
+									} // end if
+									if(focusedControl != controls.rend())
+										focusedControl->unfocus();
+									highlightedControl->focus();
+									focusedControl = highlightedControl;
+									caret = highlightedControl->charUnderPoint(x,y);
+								} // end else
 							} // end if
-							if(focusedConstraint != constraints.end())
-								focusedConstraint->unfocus();
-							highlightedConstraint->focus();
-							focusedConstraint = highlightedConstraint;
-							caret = highlightedConstraint->charUnderPoint(x,y);
-						} // end if
 
-						if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted() && selectedConstraint == constraints.end())
-							createOnMove = true;
+							if(highlightedConstraint != constraints.end())
+							{
+								highlightedConstraint->select();
+								selectedConstraint = highlightedConstraint;
+								selectedPart = highlightedConstraint->partUnderPoint(x,y);
 
-						lastX = x;
-						lastY = y;
+								tbFileName.unfocus();
+								if(focusedControl != controls.rend())
+								{
+									focusedControl->unfocus();
+									focusedControl = controls.rend();
+								} // end if
+								if(focusedConstraint != constraints.end())
+									focusedConstraint->unfocus();
+								highlightedConstraint->focus();
+								focusedConstraint = highlightedConstraint;
+								caret = highlightedConstraint->charUnderPoint(x,y);
+							} // end if
+
+							if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted() && selectedConstraint == constraints.end())
+								createOnMove = true;
+
+							lastX = x;
+							lastY = y;
+						} // end else
 					}
 					else
 					{
@@ -1558,11 +1643,11 @@ namespace GUIModel
 						caret = focusedControl->charUnderPoint(x,y);
 
 						// add automatic constraints (temporary code)
-						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+constraintThickness,"0mm",constraintTextHeight));
-						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+constraintThickness,"0mm",constraintTextHeight));
-						constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+constraintThickness,"0mm",constraintTextHeight));
-						constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+constraintThickness,"0mm",constraintTextHeight));
-						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
+						//constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+constraintThickness,"0mm",constraintTextHeight));
+						//constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+constraintThickness,"0mm",constraintTextHeight));
+						//constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+constraintThickness,"0mm",constraintTextHeight));
+						//constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+constraintThickness,"0mm",constraintTextHeight));
+						//highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
 					} // end if
 
 					// dehighlight all
