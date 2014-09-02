@@ -65,10 +65,10 @@ namespace GUIModel
 									graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
 								graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 									graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
 										graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 									graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
 										graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 									graphene::FunctionObjects::Highlighted>,
 								graphene::FunctionObjects::Pressed>
@@ -83,10 +83,10 @@ namespace GUIModel
 							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
 						graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
 							graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
 								graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 							graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
 								graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 							graphene::FunctionObjects::Highlighted>,
 						graphene::FunctionObjects::Pressed> base_type;
@@ -250,16 +250,16 @@ namespace GUIModel
 												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
 										graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
 											graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
 												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
 											graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
 												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
 											graphene::FunctionObjects::Highlighted>,
 										graphene::FunctionObjects::Selected>,
 									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
 										graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>>>,
+											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>>>,
 										graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
 										graphene::FunctionObjects::Focused>>
 		{
@@ -275,16 +275,16 @@ namespace GUIModel
 									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
 							graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
 								graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
 									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
 								graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
 									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
 								graphene::FunctionObjects::Highlighted>,
 							graphene::FunctionObjects::Selected>,
 						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
 							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>>>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>>>,
 							graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
 							graphene::FunctionObjects::Focused>> base_type;
 			typedef typename Control::coordinate_type coordinate_type;
@@ -382,10 +382,10 @@ namespace GUIModel
 											graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
 									graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
 										graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+											graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
 											graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 										graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+											graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
 											graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 										graphene::FunctionObjects::Highlighted>,
 									graphene::FunctionObjects::Focused>
@@ -401,10 +401,10 @@ namespace GUIModel
 								graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
 						graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
 							graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
 								graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 							graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+								graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
 								graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
 							graphene::FunctionObjects::Highlighted>,
 						graphene::FunctionObjects::Focused> base_type;
@@ -772,7 +772,7 @@ namespace GUIModel
 				{
 					auto caret = base_type::charUnderPoint(y,x);
 					caret.reset(new graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
-						*static_cast<typename base_type::concrete_char_type*>(caret.get()))); // TODO: avoid unsafe static_cast
+						*dynamic_cast<typename base_type::concrete_char_type*>(caret.get()))); // TODO: avoid cast
 					return std::move(caret);
 				} // end else
 			} // end method charUnderPoint
@@ -785,13 +785,14 @@ namespace GUIModel
 				{
 					auto caret = base_type::charUnderPoint(y,x);
 					caret.reset(new const graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::const_concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
-						*static_cast<typename base_type::const_concrete_char_type*>(caret.get()))); // TODO: avoid unsafe static_cast
+						*dynamic_cast<typename base_type::const_concrete_char_type*>(caret.get()))); // TODO: avoid cast
 					return std::move(caret);
 				} // end else
 			} // end method charUnderPoint
 
 			void render() const
 			{
+				// TODO: remove text rendering code and use available frames for same effect.
 				graphene::FunctionObjects::GlutStrokeFontEngine fontEngine;
 
 				if(isHorizontal())
@@ -1035,10 +1036,10 @@ namespace GUIModel
 			typedef TextType text_type;
 			typedef typename TextType::value_type char_type;
 
-			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> control_type;
+			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType> control_type;
 			typedef Constraint<geometry::Rectangle<CoordinateType>,std::vector<control_type>,std::ratio<1,2>,std::ratio<1,2>,std::ratio<1>,TextType> constraint_type;
-			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,TextType> button_type;
-			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
+			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,TextType> button_type;
+			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
 
 			typedef typename constraint_type::EndPoint end_point_type;
 			typedef typename end_point_type::side_type side_type;
@@ -1051,6 +1052,13 @@ namespace GUIModel
 			static const int margin = 10; // in millimeters
 			static const int buttonHeight = 15;  // in millimeters
 			static const int buttonWidth = static_cast<int>(buttonHeight*1.61803)/* golden ration */;  // in millimeters
+
+			static const int borderSize = 2;
+			static const int buttonTextHeight = 10;
+			static const int textBoxTextHeight = buttonTextHeight;
+			static const int controlTextHeight = buttonTextHeight;
+			static const int constraintTextHeight = 7;
+			static const int constraintThickness = 7;
 
 			// TODO: change vector to list for faster operations, updating ConstraintEndPoints.
 			std::vector<control_type> controls;
@@ -1079,6 +1087,12 @@ namespace GUIModel
 
 			bool firstResize; // GLUT workaround (can't do first resize in constructor)
 			bool createOnMove;
+			bool inConstraintAddMode;
+
+			std::unique_ptr<IShapePart<CoordinateType>> endPoint1;
+			std::unique_ptr<IShapePart<CoordinateType>> endPoint2;
+			side_type side1;
+			side_type side2;
 
 		public:
 			/*********************
@@ -1088,16 +1102,16 @@ namespace GUIModel
 			/** Construct an empty Model.
 			 */
 			Model()
-				:firstResize(true),createOnMove(false),controlIndex(0),tbFileName(0,0,0,0,1,"last session.las",10)
+				:firstResize(true),createOnMove(false),inConstraintAddMode(false),controlIndex(0),tbFileName(0,0,0,0,borderSize,"last session.las",textBoxTextHeight)
 			{
 				// initialize buttons
-				buttons.emplace_back(button_type(0,0,0,0,1,"Load",10),[](){std::cout << "Load" << std::endl;});
-				buttons.emplace_back(button_type(0,0,0,0,1,"Save",10),[](){std::cout << "Save" << std::endl;});
-				buttons.emplace_back(button_type(0,0,0,0,1,"Compile",10),[](){std::cout << "Compile" << std::endl;});
-				buttons.emplace_back(button_type(0,0,0,0,1,"Run",10),[](){std::cout << "Run" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Load",buttonTextHeight),[](){std::cout << "Load" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Save",buttonTextHeight),[](){std::cout << "Save" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Compile",buttonTextHeight),[](){std::cout << "Compile" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),[](){std::cout << "Run" << std::endl;});
 				
 				// initialize controls
-				controls.push_back(control_type(0,0,0,0,1,"Screen",10)); // emplace_back can't take 6+ arguments yet...
+				controls.push_back(control_type(0,0,0,0,borderSize,"Screen",controlTextHeight)); // emplace_back can't take 6+ arguments yet...
 
 				// initialize pointers and iterators
 				highlightedButton = buttons.end();
@@ -1513,7 +1527,7 @@ namespace GUIModel
 							focusedControl->unfocus();
 						if(highlightedControl != controls.rend())
 							highlightedControl->dehighlight();
-						controls.push_back(control_type(x,y,x,y,1,"control"+std::to_string(controlIndex++),10)); // emplace_back can't take 6+ arguments yet.
+						controls.push_back(control_type(x,y,x,y,borderSize,"control"+std::to_string(controlIndex++),controlTextHeight)); // emplace_back can't take 6+ arguments yet.
 						focusedControl = highlightedControl = selectedControl = controls.rbegin();
 						highlightedControl->highlight();
 						selectedControl->select();
@@ -1522,10 +1536,10 @@ namespace GUIModel
 						caret = focusedControl->charUnderPoint(x,y);
 
 						// add automatic constraints (temporary code)
-						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+7,"0mm",7));
-						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+7,"0mm",7));
-						constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+7,"0mm",7));
-						constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+7,"0mm",7));
+						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+constraintThickness,"0mm",constraintTextHeight));
+						constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+constraintThickness,"0mm",constraintTextHeight));
+						constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+constraintThickness,"0mm",constraintTextHeight));
+						constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+constraintThickness,"0mm",constraintTextHeight));
 						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
 					} // end if
 

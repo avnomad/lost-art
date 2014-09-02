@@ -1066,7 +1066,6 @@ namespace graphene
 			typedef CoordinateType coordinate_type;
 			// TODO: add template alias for ConcretePartTemplate when implemented
 
-			// TODO: Are concrete return types a good idea? Should they be public?
 			struct concrete_return_type
 			{
 				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true, true,false,false>       bottom_left;
@@ -1088,14 +1087,13 @@ namespace graphene
 				typedef       ConcretePartTemplate<CoordinateType, true, true,false,false,false, true, true>       top_right;
 				typedef const ConcretePartTemplate<CoordinateType, true, true, true,false,false, true, true> const_top_right;
 			}; // end struct concrete_return_type
-			// TODO: use typedefs in partUnderPoint implementation (use ## ?)
 
 			/****************
 			*    Methods    *
 			****************/
 		public:
 			// TODO: does it work in every cases where left() > right() || bottom() > top()?
-#define partUnderPointMacro(PartType,Const,Constant) \
+#define partUnderPointMacro(PartType,Const,const_) \
 			PartType partUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
 				auto &left = this->left() < this->right() ? this->left() : this->right();\
@@ -1109,45 +1107,45 @@ namespace graphene
 					{\
 						if(y <= bottom+borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,false,false>(left,bottom,left+borderSize(),bottom+borderSize()));\
+							return PartType(new concrete_return_type::const_##bottom_left(left,bottom,left+borderSize(),bottom+borderSize()));\
 						}\
 						else if(y < top-borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,true,false,false,false>(left,bottom+borderSize(),left+borderSize(),top-borderSize()));\
+							return PartType(new concrete_return_type::const_##left(left,bottom+borderSize(),left+borderSize(),top-borderSize()));\
 						}\
 						else /* top-borderSize() <= y */\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,false,false,true>(left,top-borderSize(),left+borderSize(),top));\
+							return PartType(new concrete_return_type::const_##top_left(left,top-borderSize(),left+borderSize(),top));\
 						} /* end else */\
 					}\
 					else if(x < right-borderSize())\
 					{\
 						if(y <= bottom+borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,true,false,false>(left+borderSize(),bottom,right-borderSize(),bottom+borderSize()));\
+							return PartType(new concrete_return_type::const_##bottom(left+borderSize(),bottom,right-borderSize(),bottom+borderSize()));\
 						}\
 						else if(y < top-borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,true,true,true,true>(left,bottom,right,top));\
+							return PartType(new concrete_return_type::const_##center(left,bottom,right,top));\
 						}\
 						else /* top-borderSize() <= y */\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,false,true,Constant,false,false,false,true>(left+borderSize(),top-borderSize(),right-borderSize(),top));\
+							return PartType(new concrete_return_type::const_##top(left+borderSize(),top-borderSize(),right-borderSize(),top));\
 						} /* end else */\
 					}\
 					else /* right-borderSize() <= x */\
 					{\
 						if(y <= bottom+borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,true,true,false>(right-borderSize(),bottom,right,bottom+borderSize()));\
+							return PartType(new concrete_return_type::const_##bottom_right(right-borderSize(),bottom,right,bottom+borderSize()));\
 						}\
 						else if(y < top-borderSize())\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,false,Constant,false,false,true,false>(right-borderSize(),bottom+borderSize(),right,top-borderSize()));\
+							return PartType(new concrete_return_type::const_##right(right-borderSize(),bottom+borderSize(),right,top-borderSize()));\
 						}\
 						else /* top-borderSize() <= y */\
 						{\
-							return PartType(new Const ConcretePartTemplate<CoordinateType,true,true,Constant,false,false,true,true>(right-borderSize(),top-borderSize(),right,top));\
+							return PartType(new concrete_return_type::const_##top_right(right-borderSize(),top-borderSize(),right,top));\
 						} /* end else */\
 					} /* end else */\
 				}\
@@ -1155,8 +1153,8 @@ namespace graphene
 					return nullptr;\
 			} // end method partUnderPoint
 
-			partUnderPointMacro(PartType,/* omit */,false)
-			partUnderPointMacro(ConstPartType,const,true)
+			partUnderPointMacro(PartType,/* omit */,/* omit */)
+			partUnderPointMacro(ConstPartType,const,const_)
 #undef partUnderPointMacro
 		}; // end class MultiPartBorderedRectangle
 
