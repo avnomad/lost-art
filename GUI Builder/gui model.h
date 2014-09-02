@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <cstdlib>
 #include <utility>
 #include <fstream>
 #include <cstdlib>
@@ -1359,11 +1360,13 @@ namespace GUIModel
 							if(base(4*i+j,uc) != 0)
 							{
 								if(nonZeroBefore)
-									output << " + ";
+									output << (base(4*i+j,uc).numerator() > 0 ? " + " : " - ");
+								else if(base(4*i+j,uc).numerator() < 0)
+									output << '-';
 								nonZeroBefore = true;
 
-								if(base(4*i+j,uc).numerator() != 1)
-									output << base(4*i+j,uc).numerator() << '*';
+								if(std::abs(base(4*i+j,uc).numerator()) != 1)
+									output << std::abs(base(4*i+j,uc).numerator()) << '*';
 								output << unknownConstants[uc];
 								if(base(4*i+j,uc).denominator() != 1)
 									output << '/' << base(4*i+j,uc).denominator();
@@ -1371,10 +1374,12 @@ namespace GUIModel
 						if(offset(4*i+j) != 0 || !nonZeroBefore)
 						{
 							if(nonZeroBefore)
-								output << " + ";
+								output << (offset(4*i+j).numerator() > 0 ? " + " : " - ");
+							else if(offset(4*i+j).numerator() < 0)
+								output << '-';
 							nonZeroBefore = true;
 
-							output << offset(4*i+j).numerator();
+							output << std::abs(offset(4*i+j).numerator());
 							if(offset(4*i+j).denominator() != 1)
 								output << "/(" << typeid(AppCoordType).name() << ")" << offset(4*i+j).denominator();
 						} // end if

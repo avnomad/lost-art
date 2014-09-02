@@ -21,3 +21,7 @@ TODO:
 5.  Consider adding the 'rebase' protocol to frames for use with the 
     corresponding DSEL. (eases changing BaseType from Omit when non-type and 
     template template parameters are present)
+
+6.  Use control names in output file.
+
+7.  Remember last used file name.
