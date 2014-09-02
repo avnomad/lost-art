@@ -322,7 +322,7 @@ namespace GUIModel
 			} // end Control constructor
 
 			// TODO: consider serializing selected and other user interaction states.
-			Control(const property_tree_type &tree)
+			Control(const property_tree_type &tree, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				this->left() = tree.get<coordinate_type>("sides.left");
 				this->bottom() = tree.get<coordinate_type>("sides.bottom");
@@ -331,9 +331,9 @@ namespace GUIModel
 				this->borderSize() = tree.get<coordinate_type>("borderSize");
 				this->name() = tree.get<TextType>("name");
 				this->nameHeight() = tree.get<coordinate_type>("nameHeight");
-				this->selected() = false;
-				this->highlighted() = false;
-				this->focused() = false;
+				this->selected() = selected;
+				this->highlighted() = highlighted;
+				this->focused() = focused;
 			} // end Control conversion constructor
 
 			/****************
@@ -657,11 +657,10 @@ namespace GUIModel
 			} // end Control constructor
 
 			// TODO: consider deserializing selected and other user interaction states.
-			Constraint(const property_tree_type &tree, ControlContainerType *container, TextType text, coordinate_type textHeight,
-				coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
+			Constraint(const property_tree_type &tree, ControlContainerType *container,	coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0] = EndPoint(tree.get_child("first-end-point"),container);
-				endPoints()[1] = EndPoint(tree.get_child("second-end-point",container));
+				endPoints()[1] = EndPoint(tree.get_child("second-end-point"),container);
 				localSides()[0] = tree.get<coordinate_type>("first-local-side");
 				localSides()[1] = tree.get<coordinate_type>("second-local-side");
 				this->text() = tree.get<TextType>("text");
@@ -706,7 +705,7 @@ namespace GUIModel
 				property_tree_type tree;
 
 				tree.put("text",text());
-				tree.put("text-height",testHeight());
+				tree.put("text-height",textHeight());
 				tree.put_child("first-end-point",endPoints()[0]);
 				tree.put_child("second-end-point",endPoints()[1]);
 				tree.put("first-local-side",localSides()[0]);
@@ -1130,8 +1129,8 @@ namespace GUIModel
 				:firstResize(true),createOnMove(false),inConstraintAddMode(false),controlIndex(0),tbFileName(0,0,0,0,borderSize,"last session.las",textBoxTextHeight)
 			{
 				// initialize buttons
-				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Load",buttonTextHeight),[](){std::cout << "Load" << std::endl;});
-				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Save",buttonTextHeight),[](){std::cout << "Save" << std::endl;});
+				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Load",buttonTextHeight),[this](){load(tbFileName.text());});
+				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Save",buttonTextHeight),[this](){save(tbFileName.text());});
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Compile",buttonTextHeight),[](){std::cout << "Compile" << std::endl;});
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),[](){std::cout << "Run" << std::endl;});
 				
@@ -1142,14 +1141,11 @@ namespace GUIModel
 				highlightedButton = buttons.end();
 				pressedButton = buttons.end();
 
-				highlightedControl = controls.rend();
-				selectedControl = controls.rend();
-				focusedControl = controls.rend();
+				clearControlIterators();
+				clearConstraintIterators();
 
-				highlightedConstraint = constraints.end();
-				selectedConstraint = constraints.end();
-				focusedConstraint = constraints.end();
-
+				endPoint1 = nullptr;
+				endPoint2 = nullptr;
 				selectedPart = nullptr;
 				caret = nullptr;
 			} // end Model constructor
@@ -1158,18 +1154,24 @@ namespace GUIModel
 			*    Methods    *
 			****************/
 		public:
+			// TODO: remove when converted to use std::list
+			void clearControlIterators()
+			{
+				highlightedControl = selectedControl = focusedControl = controls.rend();
+			} // end method clearControlIterators
+
+			void clearConstraintIterators()
+			{
+				highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
+			} // end method clearConstraintIterators
+
 			void clear()
 			{
 				controls.clear();
 				constraints.clear();
 
-				highlightedControl = controls.rend();
-				selectedControl = controls.rend();
-				focusedControl = controls.rend();
-
-				highlightedConstraint = constraints.end();
-				selectedControl = constraints.end();
-				focusedConstraint = constraints.end();
+				clearControlIterators();
+				clearConstraintIterators();
 
 				selectedPart = nullptr;
 				caret = nullptr; // TODO: change to only become null if not pointing to text box.
@@ -1249,20 +1251,23 @@ namespace GUIModel
 				caret = nullptr;
 			} // end method unfocusAll
 
-			// TODO: check that there is at least one control (the screen) and that all contraints refer to 
+			// TODO: check that there is at least one control (the screen) and that all constraints refer to 
 			// existent controls! Also that endpoints are consistent.
 			void load(const std::string &fileName)
 			{
 				clear();
-				property_tree_type tree;
+				property_tree_type tree, emptyTree;
 			
 				boost::property_tree::read_xml(fileName,tree);
 
 				for(const auto &control : tree.get_child("gui-model.controls"))
 					controls.emplace_back(control.second);
 
-				for(const auto &constraint : tree.get_child("gui-model.constraints"))
-					constraints.emplace_back(constraint.second);
+				for(const auto &constraint : tree.get_child("gui-model.constraints",emptyTree))
+					constraints.emplace_back(constraint.second,&controls);
+
+				clearControlIterators();
+				clearConstraintIterators();
 			} // end method load
 
 			void save(const std::string &fileName) const
@@ -1446,14 +1451,14 @@ namespace GUIModel
 					if(selectedConstraint != constraints.end())
 					{
 						eraseConstraint(selectedConstraint);
-						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
+						clearConstraintIterators();
 						selectedPart = nullptr;
 					}
 					else if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
 					{
 						eraseControl(selectedControl.base()-1);
-						highlightedControl = selectedControl = focusedControl = controls.rend();
-						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
+						clearControlIterators();
+						clearConstraintIterators();
 						// assumes more invalidations than actually happen but will fix when I switch to std::list
 						selectedPart = nullptr;						 
 					} // end if
