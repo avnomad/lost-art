@@ -1531,7 +1531,8 @@ namespace GUIModel
 						lastY = y;
 					}
 					else // if dropping an object on another makes sence, then highlighting should be done regardless of selectedPart
-					// highlight only the front-most
+					{
+						// highlight only the front-most
 						for(auto button = buttons.begin() ; button < buttons.end() ; ++button)
 							if(button->first.contains(x,y))
 							{
@@ -1540,26 +1541,27 @@ namespace GUIModel
 								break;
 							} // end if
 
-					if(highlightedButton == buttons.end())
-						tbFileName.highlighted() = tbFileName.contains(x,y);
+						if(highlightedButton == buttons.end())
+							tbFileName.highlighted() = tbFileName.contains(x,y);
 
-					if(!tbFileName.highlighted())
-						for(auto constraint = constraints.begin() ; constraint < constraints.end() ; ++constraint)
-							if(constraint->contains(x,y))
-							{
-								constraint->highlight();
-								highlightedConstraint = constraint;
-								break;
-							} // end if
+						if(!tbFileName.highlighted())
+							for(auto constraint = constraints.begin() ; constraint < constraints.end() ; ++constraint)
+								if(constraint->contains(x,y))
+								{
+									constraint->highlight();
+									highlightedConstraint = constraint;
+									break;
+								} // end if
 
-					if(highlightedConstraint == constraints.end())
-						for(auto control = controls.rbegin() ; control < controls.rend() ; ++control) // TODO: restore front to back iteration when screen-at-front issue fixed
-							if(control->contains(x,y))
-							{
-								control->highlight();
-								highlightedControl = control;
-								break;
-							} // end if
+						if(highlightedConstraint == constraints.end())
+							for(auto control = controls.rbegin() ; control < controls.rend() ; ++control) // TODO: restore front to back iteration when screen-at-front issue fixed
+								if(control->contains(x,y))
+								{
+									control->highlight();
+									highlightedControl = control;
+									break;
+								} // end if
+					} // end else
 				} // end else
 			} // end method mouseMove
 
