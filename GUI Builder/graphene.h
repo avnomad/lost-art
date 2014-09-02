@@ -1847,6 +1847,125 @@ namespace graphene
 				} // end method render
 			}; // end class Sequential
 
+			template<typename BaseType, typename Angle>
+			class Rotated : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef Angle angle;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Rotated(){/* empty body */}
+
+				template<typename OtherType>
+				Rotated(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
+				{
+					// empty body
+				} // end Rotated forwarding constructor (may move/copy/convert)
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void render() const
+				{
+					glPushAttrib(GL_TRANSFORM_BIT);
+						glMatrixMode(GL_MODELVIEW);
+						glPushMatrix();
+							glRotated(static_cast<GLdouble>(angle::num)/angle::den,0,0,1);
+							base_type::render();
+						glPopMatrix();
+					glPopAttrib();
+				} // end method render
+			}; // end class Rotated
+
+			template<typename BaseType, typename XCoeff, typename YCoeff>
+			class Scaled : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef XCoeff x_coeff;
+				typedef YCoeff y_coeff;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Scaled(){/* empty body */}
+
+				template<typename OtherType>
+				Scaled(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
+				{
+					// empty body
+				} // end Scaled forwarding constructor (may move/copy/convert)
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void render() const
+				{
+					glPushAttrib(GL_TRANSFORM_BIT);
+						glMatrixMode(GL_MODELVIEW);
+						glPushMatrix();
+							glScaled(static_cast<GLdouble>(x_coeff::num)/x_coeff::den,static_cast<GLdouble>(y_coeff::num)/y_coeff::den,1);
+							base_type::render();
+						glPopMatrix();
+					glPopAttrib();
+				} // end method render
+			}; // end class Scaled
+
+			template<typename BaseType, typename XOffset, typename YOffset>
+			class Translated : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				typedef BaseType base_type;
+				typedef XOffset x_offset;
+				typedef YOffset y_offset;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Translated(){/* empty body */}
+
+				template<typename OtherType>
+				Translated(OtherType &&other) // this class does not add extra members
+					:BaseType(std::forward<OtherType>(other))
+				{
+					// empty body
+				} // end Translated forwarding constructor (may move/copy/convert)
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void render() const
+				{
+					glPushAttrib(GL_TRANSFORM_BIT);
+						glMatrixMode(GL_MODELVIEW);
+						glPushMatrix();
+							glTranslated(static_cast<GLdouble>(x_offset::num)/x_offset::den,static_cast<GLdouble>(y_offset::num)/y_offset::den,0);
+							base_type::render();
+						glPopMatrix();
+					glPopAttrib();
+				} // end method render
+			}; // end class Translated
+
 			/** A rendering frame that does not actually render anything.
 			 *	Useful when you only want to render something in one clause of
 			 *	the conditional rendering frame.
