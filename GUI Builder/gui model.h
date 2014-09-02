@@ -768,19 +768,18 @@ namespace GUIModel
 			{
 				graphene::FunctionObjects::GlutStrokeFontEngine fontEngine;
 
-				base_type::render();
-
+				if(isHorizontal())
+					base_type::render();
+				else
+				{
+					glPushMatrix();
+						glScaled(-1,1,1);
+						glRotated(90,0,0,1); // 90 degrees
+						base_type::render();
+					glPopMatrix();
+				} // end if
 
 				glPushAttrib(GL_POLYGON_BIT|GL_TRANSFORM_BIT);
-					if(selected())
-					{
-						float fgColor[4], bgColor[4];
-						glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
-							glGetFloatv(GL_CURRENT_COLOR,fgColor);
-							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
-							glClearColor(fgColor[0],fgColor[1],fgColor[2],bgColor[3]);
-							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
-					} // end if
 					glPolygonMode(GL_FRONT,GL_FILL);
 					glMatrixMode(GL_MODELVIEW);
 					if(isHorizontal())
@@ -819,6 +818,16 @@ namespace GUIModel
 						if(bottom < rightControlBottom)
 							glRect(innerRight,bottom,right,rightControlBottom);
 
+						if(selected())
+						{
+							float fgColor[4], bgColor[4];
+							glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+								glGetFloatv(GL_CURRENT_COLOR,fgColor);
+								glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
+								glClearColor(fgColor[0],fgColor[1],fgColor[2],bgColor[3]);
+								glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
+						} // end if
+
 						// text
 						// TODO: remove this monstrosity!
 						const_cast<coordinate_type&>(this->left())   = innerLeft;
@@ -843,6 +852,9 @@ namespace GUIModel
 						// right horizontal
 						auto textRight = this->right() - (width() - effectiveTextWidth) / 2;
 						glRect(textRight,((2*bottom + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerRight,((2*bottom + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+
+						if(selected())
+							glPopAttrib();
 					}
 					else
 					{
@@ -880,6 +892,16 @@ namespace GUIModel
 						if(left < topControlLeft)
 							glRect(left,innerTop,topControlLeft,top);
 
+						if(selected())
+						{
+							float fgColor[4], bgColor[4];
+							glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+								glGetFloatv(GL_CURRENT_COLOR,fgColor);
+								glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
+								glClearColor(fgColor[0],fgColor[1],fgColor[2],bgColor[3]);
+								glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
+						} // end if
+
 						// text
 						// TODO: remove this monstrosity!
 						const_cast<coordinate_type&>(this->left())   = innerBottom;
@@ -905,9 +927,10 @@ namespace GUIModel
 						// top vertical
 						auto textTop = this->right() - (width() - effectiveTextWidth) / 2;
 						glRect(((2*left + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*left + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),innerTop);
+
+						if(selected())
+							glPopAttrib();
 					} // end else
-					if(selected())
-						glPopAttrib();
 				glPopAttrib();
 			} // end method render
 
