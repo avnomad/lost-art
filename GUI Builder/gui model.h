@@ -1136,6 +1136,30 @@ namespace GUIModel
 				caret = nullptr; // TODO: change to only become null if not pointing to text box.
 			} // end method clear
 
+			auto eraseControl(typename std::common_type<decltype(controls)>::type::iterator control)->decltype(controls.erase(control))
+			{
+				size_t index = control - controls.begin();
+				auto result = controls.erase(control);
+				// TODO: replace with STL algorithms
+				for(auto constraint = constraints.begin() ; constraint < constraints.end() ; )
+					if(constraint->endPoints()[0].control == index || constraint->endPoints()[1].control == index)
+						constraint = constraints.erase(constraint);
+					else 
+					{
+						if(constraint->endPoints()[0].control > index)
+							--constraint->endPoints()[0].control;
+						if(constraint->endPoints()[1].control > index)
+							--constraint->endPoints()[1].control;
+						++constraint;
+					} // end else
+				return result;
+			} // end method eraseControl
+
+			auto eraseConstraint(typename std::common_type<decltype(constraints)>::type::iterator constraint)->decltype(constraints.erase(constraint))
+			{
+				return constraints.erase(constraint);
+			} // end method eraseConstraint
+
 			// TODO: check that there is at least one control (the screen) and that all contraints refer to 
 			// existent controls! Also that endpoints are consistent.
 			void load(const std::string &fileName)
@@ -1335,15 +1359,17 @@ namespace GUIModel
 				else if(down && code == 0x7f) // delete key
 					if(selectedConstraint != constraints.end())
 					{
-						constraints.erase(selectedConstraint);
+						eraseConstraint(selectedConstraint);
 						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
 						selectedPart = nullptr;
 					}
 					else if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
 					{
-						//controls.erase(selectedControl.base()-1); // TODO: delete constraints pointing to control as well and rebase constraints pointing to controls after it!
-						//highlightedControl = selectedControl = controls.rend();
-						//selectedPart = nullptr;						 
+						eraseControl(selectedControl.base()-1);
+						highlightedControl = selectedControl = focusedControl = controls.rend();
+						highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
+						// assumes more invalidations than actually happen but will fix when I switch to std::list
+						selectedPart = nullptr;						 
 					} // end if
 			} // end method keyboardAscii
 
