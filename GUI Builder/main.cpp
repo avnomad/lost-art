@@ -1,34 +1,8 @@
-#include <iostream>
-using std::cout;
-using std::cin;
-using std::endl;
-
-#include <numeric>
-using std::numeric_limits;
-
-#include <cmath>
-using std::log;
-
-#include <tuple>
-using std::get;
-
-#include <list>
-using std::list;
-
-#include <memory>
-using std::unique_ptr;
-
 #include <GL/glew.h>
 #include <GL/glut.h>
 
-#include <boost/rational.hpp>
-
-#include "eigen-rational interface code.h"
-using boost::rational;
-using Eigen::Matrix;
-
 #include "linear system solving.h"
-//#include "symbolic computation.h"
+#include "symbolic computation.h"
 #include "symbol table.h"
 #include "geometry.h"
 #include "graphene.h"
@@ -39,7 +13,6 @@ int main(int argc, char **argv)
 	// run test suites
 	LinearSystem::runTestSuite();
 	//Symbolic::runTestSuite();
-	Symbolic::Common::testSymbolTable();
 	geometry::runTestSuite();
 	graphene::runTestSuite();
 	GUIModel::runTestSuite();
