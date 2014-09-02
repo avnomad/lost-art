@@ -25,6 +25,18 @@ namespace graphene
 		class Empty {};
 
 		template<typename BaseType>
+		class Destructible : public BaseType
+		{
+			// Member Types
+		public:
+			typedef BaseType base_type;
+
+			// Methods
+		public:
+			virtual ~Destructible(){}
+		}; // end class Destructible
+
+		template<typename BaseType>
 		class Renderable : public BaseType
 		{
 			// Member Types
@@ -347,7 +359,8 @@ namespace graphene
 		 *	if and only if contains(x,y) returns false.
 		 */
 		// TODO: perhaps find a better name to disambiguate with char?
-		template<typename BaseType, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type, typename CoordinateType = typename BaseType::coordinate_type>
+		template<typename BaseType, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type, 
+			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiChar : public BaseType
 		{
 			// Member Types
@@ -355,12 +368,15 @@ namespace graphene
 			typedef BaseType base_type;
 			typedef CharType char_type;
 			typedef ConstCharType const_char_type;
+			typedef IndexType index_type;
 			typedef CoordinateType coordinate_type;
 
 			// Methods
 		public:
 			virtual CharType charUnderPoint(CoordinateType x, CoordinateType y) = 0;
 			virtual ConstCharType charUnderPoint(CoordinateType x, CoordinateType y) const = 0;
+			virtual CharType charWithIndex(IndexType i) = 0;
+			virtual ConstCharType charWithIndex(IndexType i) const = 0;
 		}; // end class MultiChar
 
 		template<typename BaseType, typename CharType = typename BaseType::char_type>
@@ -1165,7 +1181,7 @@ namespace graphene
 		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type,
 			typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
 			typename ConcreteCharType = typename BaseType::concrete_char_type, typename ConstConcreteCharType = typename BaseType::const_concrete_char_type, 
-			typename CoordinateType = typename BaseType::coordinate_type>
+			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiCharBorderedRectangle : public BaseType
 		{
 			/*********************
@@ -1178,6 +1194,7 @@ namespace graphene
 			typedef ConstCharType const_char_type;
 			typedef ConcreteCharType concrete_char_type;
 			typedef ConstConcreteCharType const_concrete_char_type;
+			typedef IndexType index_type;
 			typedef CoordinateType coordinate_type;
 			// TODO: add template alias for ConcreteCharTemplate when implemented
 
@@ -1213,8 +1230,29 @@ namespace graphene
 			} // end method charUnderPoint
 
 			charUnderPointMacro(     CharType,     ConcreteCharType,/* omit */)
-			charUnderPointMacro(ConstCharType,ConstConcreteCharType,const)
+			charUnderPointMacro(ConstCharType,ConstConcreteCharType,const     )
 #undef charUnderPointMacro
+
+			/** IndexType is expected to be numeric and i should take values in [0,text().size()]
+			 */
+#define charWithIndexMacro(CharType,ConcreteCharType,Const) \
+			CharType charWithIndex(IndexType i) Const\
+			{\
+				TextConceptMap textConceptMap;\
+				FontEngineType fontEngine;\
+				\
+				if(i > textConceptMap.text(*this).size())\
+					throw std::out_of_range("charWithIndex called with i outside the valid range of [0,text().size()].");\
+				\
+				coordinate_type fontCharLeft = 0;\
+				for(IndexType c = 0 ; c < i ; ++c)\
+					fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[c]);\
+				return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointed_to_type*>(this),i,fontCharLeft));\
+			} // end method charWithIndex
+
+			charWithIndexMacro(     CharType,     ConcreteCharType,/* omit */)
+			charWithIndexMacro(ConstCharType,ConstConcreteCharType,const     )
+#undef charWithIndexMacro
 		}; // end class MultiCharBorderedRectangle
 
 		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type, typename CharType = typename BaseType::char_type>
@@ -2497,6 +2535,16 @@ namespace graphene
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7> type;};
 
+		// base + 8 args
+		template<class BaseType, template<class BaseType, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7,P8>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8> type;};
+
+		// base + 9 args
+		template<class BaseType, template<class BaseType, class, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
+		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7,P8,P9>>
+		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8,P9> type;};
+
 		// FrameStack specializations
 		template<class BaseType = Omit, class FrameType = Omit,  
 													class T3 = Omit,  class T4 = Omit,  class T5 = Omit,
@@ -2592,6 +2640,7 @@ namespace graphene
 		template<typename CoordinateType>
 		class IShapePart : public DSEL::FrameStack<
 			Bases::Empty,
+			Bases::Destructible<DSEL::Omit>,
 			Bases::Movable<DSEL::Omit,CoordinateType>,
 			Bases::Containing<DSEL::Omit,CoordinateType>,
 			Bases::Renderable<DSEL::Omit>			
@@ -2647,6 +2696,7 @@ namespace graphene
 		template<typename CoordinateType, typename TextType = std::string> 
 		class IControl : public DSEL::FrameStack<
 			Bases::Empty,
+			Bases::Destructible<DSEL::Omit>,
 			Bases::Rectangular<DSEL::Omit,CoordinateType>,
 			Bases::Containing<DSEL::Omit,CoordinateType>,
 			Bases::Movable<DSEL::Omit,CoordinateType>,

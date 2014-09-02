@@ -117,6 +117,7 @@ namespace GUIModel
 		template<typename CoordinateType>
 		class IShapePart : public graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
+			graphene::Bases::Destructible<graphene::DSEL::Omit>,
 			graphene::Bases::Movable<graphene::DSEL::Omit,CoordinateType>,
 			graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>, // TODO: move rectangular back to concrete control when the screen special case is handled
 			graphene::Bases::Containing<graphene::DSEL::Omit,CoordinateType>,
@@ -170,6 +171,7 @@ namespace GUIModel
 		template<typename CoordinateType, typename CharType>
 		class ICaret : public graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
+			graphene::Bases::Destructible<graphene::DSEL::Omit>,
 			graphene::Bases::CaretLike<graphene::DSEL::Omit,CharType>,
 			graphene::Bases::EventHandling::KeyboardAndMouse<graphene::DSEL::Omit,CoordinateType>, // TODO: handle in parent
 			graphene::Bases::Renderable<graphene::DSEL::Omit>			
@@ -238,7 +240,7 @@ namespace GUIModel
 					std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
 						  Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Named,typename TextType::value_type,      Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 					const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Named,typename TextType::value_type,const Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
-					typename RectangleType::coordinate_type>
+					size_t,typename RectangleType::coordinate_type>
 			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
@@ -371,7 +373,7 @@ namespace GUIModel
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
 				      Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,const TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
-				typename RectangleType::coordinate_type>
+				size_t,typename RectangleType::coordinate_type>
 		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
@@ -545,7 +547,7 @@ namespace GUIModel
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type,typename TextType::value_type>>,
 					  Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,const Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,CaretWidth>,
-				typename RectangleType::coordinate_type>
+				size_t,typename RectangleType::coordinate_type>
 		>::type{}; // poor man's template alias
 
 		// TODO: decompose Constraint to frames
@@ -564,11 +566,10 @@ namespace GUIModel
 											graphene::Frames::Renderable::Null<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
 										graphene::FunctionObjects::Focused>>
 		{
-		public:
 			/*********************
 			*    Member Types    *
 			*********************/
-
+		public:
 			template<typename IDType, typename RationalType>
 			struct ParseResult
 			{
@@ -604,19 +605,17 @@ namespace GUIModel
 			typedef LineWidth line_width;
 			typedef CaretWidth caret_width;
 
-		private:
 			/***************
 			*    Fields    *
 			***************/
-
+		private:
 			EndPoint iEndPoints[2];
 			coordinate_type iLocalSides[2];
 
-		public:
 			/*********************
 			*    Constructors    *
 			*********************/
-
+		public:
 			/** Construct an uninitialized Constraint.
 			 */
 			Constraint(){/* emtpy body */}
@@ -676,7 +675,7 @@ namespace GUIModel
 			/*************************
 			*    Accessor Methods    *
 			*************************/
-
+		public:
 			EndPoint (&endPoints())[2]
 			{
 				return iEndPoints;
@@ -700,7 +699,7 @@ namespace GUIModel
 			/****************
 			*    Methods    *
 			****************/
-			
+		public:
 			// TODO: consider serializing selected and other user interaction states.
 			operator property_tree_type() const
 			{
@@ -789,6 +788,32 @@ namespace GUIModel
 					return std::move(caret);
 				} // end else
 			} // end method charUnderPoint
+
+			typename base_type::char_type charWithIndex(typename base_type::index_type i)
+			{
+				if(isHorizontal())
+					return base_type::charWithIndex(i);
+				else
+				{
+					auto caret = base_type::charWithIndex(i);
+					caret.reset(new graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
+						*dynamic_cast<typename base_type::concrete_char_type*>(caret.get()))); // TODO: avoid cast
+					return std::move(caret);
+				} // end else
+			} // end method charWithIndex
+
+			typename base_type::const_char_type charWithIndex(typename base_type::index_type i) const
+			{
+				if(isHorizontal())
+					return base_type::charWithIndex(i);
+				else
+				{
+					auto caret = base_type::charWithIndex(i);
+					caret.reset(new const graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::const_concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
+						*dynamic_cast<typename base_type::const_concrete_char_type*>(caret.get()))); // TODO: avoid cast
+					return std::move(caret);
+				} // end else
+			} // end method charWithIndex
 
 			void render() const
 			{
@@ -1026,11 +1051,10 @@ namespace GUIModel
 		template<typename CoordinateType, typename TextType = std::string>
 		class Model : public geometry::Rectangle<CoordinateType>
 		{
-		public:
 			/*********************
 			*    Member Types    *
 			*********************/
-
+		public:
 			typedef boost::property_tree::ptree property_tree_type;
 			typedef CoordinateType coordinate_type;
 			typedef TextType text_type;
@@ -1044,10 +1068,10 @@ namespace GUIModel
 			typedef typename constraint_type::EndPoint end_point_type;
 			typedef typename end_point_type::side_type side_type;
 
-		public: // TODO: make private and add methods to manipulate...
 			/***************
 			*    Fields    *
 			***************/
+		public: // TODO: make private and add methods to manipulate...
 
 			static const int margin = 10; // in millimeters
 			static const int buttonHeight = 15;  // in millimeters
@@ -1094,11 +1118,10 @@ namespace GUIModel
 			side_type side1;
 			side_type side2;
 
-		public:
 			/*********************
 			*    Constructors    *
 			*********************/
-
+		public:
 			/** Construct an empty Model.
 			 */
 			Model()
@@ -1132,7 +1155,7 @@ namespace GUIModel
 			/****************
 			*    Methods    *
 			****************/
-
+		public:
 			void clear()
 			{
 				controls.clear();
@@ -1189,7 +1212,6 @@ namespace GUIModel
 				for(const auto &constraint : tree.get_child("gui-model.constraints"))
 					constraints.emplace_back(constraint.second);
 			} // end method load
-
 
 			void save(const std::string &fileName) const
 			{
