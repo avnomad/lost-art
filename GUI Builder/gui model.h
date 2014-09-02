@@ -1022,7 +1022,7 @@ namespace GUIModel
 					static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
 						std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
 					{
-						if(symbol == "cm")
+						if(symbol == "mm")
 							result.rhsConstant -= coeff;
 						else if(symbol == "px")
 							result.pxSizeCoeff += coeff;
@@ -1347,6 +1347,7 @@ namespace GUIModel
 					   << typeid(AppCoordType).name() << " pixelWidth, " << typeid(AppCoordType).name() << " pixelHeight)\n";
 				output << "{\n";
 
+				assert(base.cols() == 4); // for now...
 				std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
 				for(size_t i = 0 ; i < controls.size()-1 ; ++i)
 				{
@@ -1375,7 +1376,7 @@ namespace GUIModel
 
 							output << offset(4*i+j).numerator();
 							if(offset(4*i+j).denominator() != 1)
-								output << "/(float)" << offset(4*i+j).denominator();
+								output << "/(" << typeid(AppCoordType).name() << ")" << offset(4*i+j).denominator();
 						} // end if
 						output << ";\n";
 					} // end for
