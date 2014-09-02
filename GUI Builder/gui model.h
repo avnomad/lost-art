@@ -764,6 +764,32 @@ namespace GUIModel
 					return nullptr;
 			} // end method partUnderPoint
 
+			typename base_type::char_type charUnderPoint(coordinate_type x, coordinate_type y)
+			{
+				if(isHorizontal())
+					return base_type::charUnderPoint(x,y);
+				else
+				{
+					auto caret = base_type::charUnderPoint(y,x);
+					caret.reset(new graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
+						*static_cast<typename base_type::concrete_char_type*>(caret.get()))); // TODO: avoid unsafe static_cast
+					return std::move(caret);
+				} // end else
+			} // end method charUnderPoint
+
+			typename base_type::const_char_type charUnderPoint(coordinate_type x, coordinate_type y) const
+			{
+				if(isHorizontal())
+					return base_type::charUnderPoint(x,y);
+				else
+				{
+					auto caret = base_type::charUnderPoint(y,x);
+					caret.reset(new const graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::const_concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
+						*static_cast<typename base_type::const_concrete_char_type*>(caret.get()))); // TODO: avoid unsafe static_cast
+					return std::move(caret);
+				} // end else
+			} // end method charUnderPoint
+
 			void render() const
 			{
 				graphene::FunctionObjects::GlutStrokeFontEngine fontEngine;

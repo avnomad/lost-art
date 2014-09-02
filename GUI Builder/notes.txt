@@ -15,3 +15,6 @@ Issues:
 2.  GLUT functions return character width as an int effectively discarding at 
     least 2 digits after decimal point. I can probably fix that by getting the 
 	length of a string of 100 instances of the same character and dividing.
+
+3.  Currently highlights and other user feedback related to constraints is based
+    on calculations done in the previous frame.
