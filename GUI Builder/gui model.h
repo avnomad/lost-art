@@ -1348,7 +1348,6 @@ namespace GUIModel
 					   << typeid(AppCoordType).name() << " pixelWidth, " << typeid(AppCoordType).name() << " pixelHeight)\n";
 				output << "{\n";
 
-				assert(base.cols() == 4); // for now...
 				std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
 				for(size_t i = 0 ; i < controls.size()-1 ; ++i)
 				{
