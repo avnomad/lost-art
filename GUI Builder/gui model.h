@@ -10,6 +10,7 @@
 #include <utility>
 #include <fstream>
 #include <cstdlib>
+#include <iostream>
 #include <algorithm>
 #include <stdexcept>
 
@@ -1401,13 +1402,26 @@ namespace GUIModel
 				auto base = std::get<0>(solution);
 				auto offset = std::get<1>(solution);
 
-				// assume unique solution for now...
-				std::ofstream output(headerName);
-				outputCppApp<RationalType,AppCoordType>(base,offset,output);
-				output.close();
+				// temporary code for outputing errors and warnings.
+				if(investigation.nIndependentEquations < investigation.nEquations)
+					std::cout << "Warning: " << investigation.nEquations - investigation.nIndependentEquations << " constraint(s) are redundant!" << std::endl;
+				if(investigation.isImpossible)
+					std::cout << "Error: The specified constraint system is impossible!" << std::endl;
+				if(!investigation.boundUnknownConstants.empty())
+					std::cout << "Error: " << investigation.boundUnknownConstants.size() << " unknown constant(s) have been bound!" << std::endl;
+				if(!investigation.freeVariables.empty())
+					std::cout << "Error: " << investigation.freeVariables.size() << " variable(s) have unspecified value! Consider adding more constraints." << std::endl;
+				std::cout << std::endl;
 
-				std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
-				std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
+				if(investigation.hasUniqueSolution && investigation.boundUnknownConstants.empty())
+				{
+					std::ofstream output(headerName);
+					outputCppApp<RationalType,AppCoordType>(base,offset,output);
+					output.close();
+
+					std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
+					std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
+				} // end if
 			} // end method compile
 
 			void run(const std::string &executableName) const
