@@ -1139,7 +1139,7 @@ namespace GUIModel
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Compile",buttonTextHeight),
 					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.h");}); // TODO: allow different output name
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),
-					[this](){run("start \"Generated Application\" \"..\\Debug\\Win32\\Generated Application.exe\"");}); // TODO: allow different executable name
+					[this](){run("./Generated\\ Application &");}); // TODO: allow different executable name
 				
 				// initialize controls
 				controls.push_back(control_type(0,0,0,0,borderSize,"Screen",controlTextHeight)); // emplace_back can't take 6+ arguments yet...
@@ -1420,8 +1420,8 @@ namespace GUIModel
 					outputCppApp<RationalType,AppCoordType>(base,offset,output);
 					output.close();
 
-					std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
-					std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
+					std::system("rm -f Generater\\ Application");
+					std::system("g++ -std=c++11 -L/usr/lib/nvidia-331 application\\ template.cpp -lGL -lGLU -lGLEW -lglut -o Generated\\ Application");
 				} // end if
 			} // end method compile
 
