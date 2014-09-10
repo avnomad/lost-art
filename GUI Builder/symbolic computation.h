@@ -221,8 +221,7 @@ namespace Symbolic
 			}; // end struct Extends
 
 			typedef std::vector<Extends> extends_container; // I would like to make that a template parameter...
-			static const char quotientSymbol = '\304'; // probably should change to something more portable...
-				// '_' is too low and '-' creates ambiguities with minus which must be resolved with extra parenthesis...
+			static const char quotientSymbol;
 
 			struct AbstractNode
 			{
@@ -645,7 +644,8 @@ namespace Symbolic
 					for(NameType &row : temporaryStorage)
 						row.resize(rootExtends.width,' ');
 
-					expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,extends.crbegin(),OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT);
+					auto iterator = extends.crbegin();
+					expressionTree->print2D(temporaryStorage,0,0,*symbols,fullyParenthesized,iterator,OpTags::OpTraits('+',OpTags::noParenPriority,OpTags::Associativity::RIGHT),OpTags::Child::RIGHT);
 
 					std::copy(temporaryStorage.begin(),temporaryStorage.end(),std::ostream_iterator<NameType>(out,"\n"));
 				} // end if
@@ -733,8 +733,8 @@ namespace Symbolic
 				{
 					AdditiveOperator()
 					{
-						add("+",binaryCombine<OpTags::plus>)
-						   ("-",binaryCombine<OpTags::minus>);
+						this->add("+",binaryCombine<OpTags::plus>)
+								 ("-",binaryCombine<OpTags::minus>);
 					} // end AdditiveOperator constructor
 				} additiveOperator; // end struct AdditiveOperator
 
@@ -742,8 +742,8 @@ namespace Symbolic
 				{
 					MultiplicativeOperator()
 					{
-						add("*",binaryCombine<OpTags::multiplies>)
-						   ("/",binaryCombine<OpTags::divides>);
+						this->add("*",binaryCombine<OpTags::multiplies>)
+								 ("/",binaryCombine<OpTags::divides>);
 					} // end MultiplicativeOperator constructor
 				} multiplicativeOperator; // end struct MultiplicativeOperator
 
@@ -751,7 +751,7 @@ namespace Symbolic
 				{
 					ExponentiationOperator()
 					{
-						add("^",binaryCombine<OpTags::bit_xor>);
+						this->add("^",binaryCombine<OpTags::bit_xor>);
 					} // end ExponentiationOperator constructor
 				} exponentiationOperator; // end struct ExponentiationOperator
 
@@ -759,8 +759,8 @@ namespace Symbolic
 				{
 					PrefixOperator()
 					{
-						add("+",unaryCombine<OpTags::unary_plus>)
-						   ("-",unaryCombine<OpTags::negate>);
+						this->add("+",unaryCombine<OpTags::unary_plus>)
+								 ("-",unaryCombine<OpTags::negate>);
 					} // end PrefixOperator constructor
 				} prefixOperator; // end struct PrefixOperator
 
@@ -866,7 +866,11 @@ namespace Symbolic
 			}; // end struct Syntax
 
 		}; // end class Expression
-
+		
+		// out-of-class initializations
+		template<typename UIntType, typename NameType, typename IDType>
+		const char Expression<UIntType,NameType,IDType>::quotientSymbol = '\304'; // probably should change to something more portable...
+				// '_' is too low and '-' creates ambiguities with minus which must be resolved with extra parenthesis...
 
 		class Relation;
 		class RelationSystem;
@@ -926,7 +930,7 @@ namespace Symbolic
 		template<typename UIntType, typename NameType, typename IDType> \
 		inline FreeForms::Expression<UIntType,NameType,IDType> operator op (FreeForms::Expression<UIntType,NameType,IDType> subExpression) \
 		{\
-			return FreeForms::Expression<UIntType,NameType,IDType>::unaryCombine<tag>(std::move(subExpression));\
+			return FreeForms::Expression<UIntType,NameType,IDType>::template unaryCombine<tag>(std::move(subExpression));\
 		} // end function operator op
 
 		UNARY_EXPRESSION(+,FreeForms::OpTags::unary_plus);
@@ -935,24 +939,24 @@ namespace Symbolic
 
 #define BINARY_EXPRESSION(op,tag) \
 		template<typename UIntType, typename NameType, typename IDType> \
-		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, decltype(leftSubExpression) rightSubExpression)->decltype(leftSubExpression) \
+		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression)->decltype(leftSubExpression) \
 		{\
-			return FreeForms::Expression<UIntType,NameType,IDType>::\
+			return FreeForms::Expression<UIntType,NameType,IDType>::template \
 				binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
 		} /* end function operator op*/\
 		\
 		template<typename UIntType, typename NameType, typename IDType, typename OtherOpType> \
-		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, const OtherOpType &rightSubExpression)->decltype(leftSubExpression) \
+		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, OtherOpType &&rightSubExpression)->decltype(leftSubExpression) \
 		{\
-			return FreeForms::Expression<UIntType,NameType,IDType>::\
-				binaryCombine<tag>(std::move(leftSubExpression),decltype(leftSubExpression)(rightSubExpression));\
+			return FreeForms::Expression<UIntType,NameType,IDType>::template \
+				binaryCombine<tag>(std::move(leftSubExpression),decltype(leftSubExpression)(std::forward<OtherOpType>(rightSubExpression)));\
 		} /* end function operator op*/\
 		\
 		template<typename UIntType, typename NameType, typename IDType, typename OtherOpType> \
-		inline auto operator op(const OtherOpType &leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
+		inline auto operator op(OtherOpType &&leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
 		{\
-			return FreeForms::Expression<UIntType,NameType,IDType>::\
-				binaryCombine<tag>(decltype(rightSubExpression)(leftSubExpression),std::move(rightSubExpression));\
+			return FreeForms::Expression<UIntType,NameType,IDType>::template \
+				binaryCombine<tag>(decltype(rightSubExpression)(std::forward<OtherOpType>(leftSubExpression)),std::move(rightSubExpression));\
 		} /* end function operator op*/
 
 		BINARY_EXPRESSION(+,FreeForms::OpTags::plus);

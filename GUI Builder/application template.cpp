@@ -1,8 +1,8 @@
 #include <vector>
 #include <cstdlib>
 
-#include <gl/glew.h>
-#include <gl/glut.h>
+#include <GL/glew.h>
+#include <GL/glut.h>
 
 #include "geometry.h"
 

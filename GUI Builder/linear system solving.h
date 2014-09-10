@@ -26,7 +26,7 @@ namespace LinearSystem
 	Eigen::MatrixBase<Derived> &numericReducedRowEchelonFormNoPivot(Eigen::MatrixBase<Derived> &input)
 	{
 		typedef Eigen::MatrixBase<Derived> MatrixType;
-		typedef MatrixType::Index IndexType;
+		typedef typename MatrixType::Index IndexType;
 
 		for(IndexType row = 0, col = 0 ; col < input.cols() ; ++col)
 		{

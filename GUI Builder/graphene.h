@@ -454,10 +454,10 @@ namespace graphene
 			public:
 				void move(CoordinateType xOffset, CoordinateType yOffset)
 				{
-					left() += xOffset;
-					bottom() += yOffset;
-					right() += xOffset;
-					top() += yOffset;
+					this->left() += xOffset;
+					this->bottom() += yOffset;
+					this->right() += xOffset;
+					this->top() += yOffset;
 				} // end method move
 			}; // end class Rectangular
 
@@ -878,19 +878,19 @@ namespace graphene
 			CoordinateType textWidth() const
 			{
 				FontEngineType fontEngine;
-				return fontEngine.stringWidth(text()) * textHeight() / fontEngine.fontHeight();
+				return fontEngine.stringWidth(this->text()) * textHeight() / fontEngine.fontHeight();
 			} // end method textWidth
 
 			CoordinateType textCharWidth(size_t index) const
 			{
 				FontEngineType fontEngine;
-				return fontEngine.charWidth(text().at(index)) * textHeight() / fontEngine.fontHeight();
+				return fontEngine.charWidth(this->text().at(index)) * textHeight() / fontEngine.fontHeight();
 			} // end method textCharWidth
 
 			void setTextWidth(const CoordinateType &value) // deprecated
 			{
 				FontEngineType fontEngine;
-				textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(text());
+				textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(this->text());
 			} // end method setTextWidth
 		}; // end class SizedText
 
@@ -917,11 +917,11 @@ namespace graphene
 				font_engine_type fontEngine;
 
 				// scale text down to fit in rectangle:
-				CoordinateType effectiveTextHeight = std::min(textHeight(),(height()*margin::den - 2*margin::num) / margin::den);
-				CoordinateType effectiveTextWidth = std::min(effectiveTextHeight * fontEngine.stringWidth(text()) / fontEngine.fontHeight(),(width()*margin::den - 2*margin::num) / margin::den);
-				if(text().empty())
+				CoordinateType effectiveTextHeight = std::min(this->textHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
+				CoordinateType effectiveTextWidth = std::min(effectiveTextHeight * fontEngine.stringWidth(this->text()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
+				if(this->text().empty())
 					return std::make_pair(static_cast<CoordinateType>(0),effectiveTextHeight); // avoid divition by zero
-				effectiveTextHeight = std::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(text()));
+				effectiveTextHeight = std::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->text()));
 
 				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
 			} // end method effectiveTextSize
@@ -931,7 +931,7 @@ namespace graphene
 			{
 				font_engine_type fontEngine;
 				auto result = effectiveTextSize();
-				result.first = fontEngine.charWidth(text().at(index)) * result.second / fontEngine.fontHeight();
+				result.first = fontEngine.charWidth(this->text().at(index)) * result.second / fontEngine.fontHeight();
 
 				return  result;
 			} // end method textCharWidth
@@ -1006,19 +1006,19 @@ namespace graphene
 			CoordinateType nameWidth() const
 			{
 				FontEngineType fontEngine;
-				return fontEngine.stringWidth(name()) * nameHeight() / fontEngine.fontHeight();
+				return fontEngine.stringWidth(this->name()) * nameHeight() / fontEngine.fontHeight();
 			} // end method nameWidth
 
 			CoordinateType nameCharWidth(size_t index) const
 			{
 				FontEngineType fontEngine;
-				return fontEngine.charWidth(name().at(index)) * nameHeight() / fontEngine.fontHeight();
+				return fontEngine.charWidth(this->name().at(index)) * nameHeight() / fontEngine.fontHeight();
 			} // end method nameCharWidth
 
 			void setNameWidth(const CoordinateType &value) // deprecated
 			{
 				FontEngineType fontEngine;
-				nameHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(name());
+				nameHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(this->name());
 			} // end method setNameWidth
 		}; // end class SizedName
 
@@ -1045,11 +1045,11 @@ namespace graphene
 				font_engine_type fontEngine;
 
 				// scale name down to fit in rectangle:
-				CoordinateType effectiveNameHeight = std::min(nameHeight(),(height()*margin::den - 2*margin::num) / margin::den);
-				CoordinateType effectiveNameWidth = std::min(effectiveNameHeight * fontEngine.stringWidth(name()) / fontEngine.fontHeight(),(width()*margin::den - 2*margin::num) / margin::den);
-				if(name().empty())
+				CoordinateType effectiveNameHeight = std::min(this->nameHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
+				CoordinateType effectiveNameWidth = std::min(effectiveNameHeight * fontEngine.stringWidth(this->name()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
+				if(this->name().empty())
 					return std::make_pair(static_cast<CoordinateType>(0),effectiveNameHeight); // avoid divition by zero
-				effectiveNameHeight = std::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(name()));
+				effectiveNameHeight = std::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->name()));
 
 				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
 			} // end method effectiveNameSize
@@ -1059,7 +1059,7 @@ namespace graphene
 			{
 				font_engine_type fontEngine;
 				auto result = effectiveNameSize();
-				result.first = fontEngine.charWidth(name().at(index)) * result.second / fontEngine.fontHeight();
+				result.first = fontEngine.charWidth(this->name().at(index)) * result.second / fontEngine.fontHeight();
 
 				return  result;
 			} // end method nameCharWidth
@@ -1116,52 +1116,53 @@ namespace graphene
 				auto &bottom = this->bottom() < this->top() ? this->bottom() : this->top();\
 				auto &right = this->left() >= this->right() ? this->left() : this->right();\
 				auto &top = this->bottom() >= this->top() ? this->bottom() : this->top();\
+				auto borderSize = this->borderSize();\
 				\
 				if(left <= x && x <= right && bottom <= y && y <= top)\
 				{\
-					if(x <= left+borderSize())\
+					if(x <= left+borderSize)\
 					{\
-						if(y <= bottom+borderSize())\
+						if(y <= bottom+borderSize)\
 						{\
-							return PartType(new concrete_return_type::const_##bottom_left(left,bottom,left+borderSize(),bottom+borderSize()));\
+							return PartType(new typename concrete_return_type::const_##bottom_left(left,bottom,left+borderSize,bottom+borderSize));\
 						}\
-						else if(y < top-borderSize())\
+						else if(y < top-borderSize)\
 						{\
-							return PartType(new concrete_return_type::const_##left(left,bottom+borderSize(),left+borderSize(),top-borderSize()));\
+							return PartType(new typename concrete_return_type::const_##left(left,bottom+borderSize,left+borderSize,top-borderSize));\
 						}\
-						else /* top-borderSize() <= y */\
+						else /* top-borderSize <= y */\
 						{\
-							return PartType(new concrete_return_type::const_##top_left(left,top-borderSize(),left+borderSize(),top));\
+							return PartType(new typename concrete_return_type::const_##top_left(left,top-borderSize,left+borderSize,top));\
 						} /* end else */\
 					}\
-					else if(x < right-borderSize())\
+					else if(x < right-borderSize)\
 					{\
-						if(y <= bottom+borderSize())\
+						if(y <= bottom+borderSize)\
 						{\
-							return PartType(new concrete_return_type::const_##bottom(left+borderSize(),bottom,right-borderSize(),bottom+borderSize()));\
+							return PartType(new typename concrete_return_type::const_##bottom(left+borderSize,bottom,right-borderSize,bottom+borderSize));\
 						}\
-						else if(y < top-borderSize())\
+						else if(y < top-borderSize)\
 						{\
-							return PartType(new concrete_return_type::const_##center(left,bottom,right,top));\
+							return PartType(new typename concrete_return_type::const_##center(left,bottom,right,top));\
 						}\
-						else /* top-borderSize() <= y */\
+						else /* top-borderSize <= y */\
 						{\
-							return PartType(new concrete_return_type::const_##top(left+borderSize(),top-borderSize(),right-borderSize(),top));\
+							return PartType(new typename concrete_return_type::const_##top(left+borderSize,top-borderSize,right-borderSize,top));\
 						} /* end else */\
 					}\
-					else /* right-borderSize() <= x */\
+					else /* right-borderSize <= x */\
 					{\
-						if(y <= bottom+borderSize())\
+						if(y <= bottom+borderSize)\
 						{\
-							return PartType(new concrete_return_type::const_##bottom_right(right-borderSize(),bottom,right,bottom+borderSize()));\
+							return PartType(new typename concrete_return_type::const_##bottom_right(right-borderSize,bottom,right,bottom+borderSize));\
 						}\
-						else if(y < top-borderSize())\
+						else if(y < top-borderSize)\
 						{\
-							return PartType(new concrete_return_type::const_##right(right-borderSize(),bottom+borderSize(),right,top-borderSize()));\
+							return PartType(new typename concrete_return_type::const_##right(right-borderSize,bottom+borderSize,right,top-borderSize));\
 						}\
-						else /* top-borderSize() <= y */\
+						else /* top-borderSize <= y */\
 						{\
-							return PartType(new concrete_return_type::const_##top_right(right-borderSize(),top-borderSize(),right,top));\
+							return PartType(new typename concrete_return_type::const_##top_right(right-borderSize,top-borderSize,right,top));\
 						} /* end else */\
 					} /* end else */\
 				}\
@@ -1213,7 +1214,7 @@ namespace graphene
 				auto right  = std::max(this->left(),this->right());\
 				auto top    = std::max(this->bottom(),this->top());\
 				\
-				if(contains(x,y))\
+				if(this->contains(x,y))\
 				{\
 					size_t i = 0;\
 					coordinate_type sceneTextLeft = left + (this->width() - textConceptMap.effectiveTextSize(*this).first)/2;\
@@ -1281,42 +1282,42 @@ namespace graphene
 			// TODO: consider arguments like wraparround:bool
 			void nextPosition()
 			{
-				if(index() < iTextConceptMap.text(*pointer()).size())
+				if(this->index() < iTextConceptMap.text(*this->pointer()).size())
 				{
-					xOffset() += iFontEngine.charWidth(iTextConceptMap.text(*pointer())[index()]);
-					++index();
+					this->xOffset() += iFontEngine.charWidth(iTextConceptMap.text(*this->pointer())[this->index()]);
+					++this->index();
 				} // end if
 			} // end method nextPosition
 
 			void prevPosition()
 			{
-				if(index() > 0)
+				if(this->index() > 0)
 				{
-					--index();
-					xOffset() -= iFontEngine.charWidth(iTextConceptMap.text(*pointer())[index()]);
+					--this->index();
+					this->xOffset() -= iFontEngine.charWidth(iTextConceptMap.text(*this->pointer())[this->index()]);
 				} // end if
 			} // end method prevPosition
 
 			void firstPosition()
 			{
-				index() = 0;
-				xOffset() = 0;
+				this->index() = 0;
+				this->xOffset() = 0;
 			} // end method firstPosition
 
 			void lastPosition()
 			{
-				index() = iTextConceptMap.text(*pointer()).size();
-				xOffset() = iFontEngine.stringWidth(iTextConceptMap.text(*pointer()));
+				this->index() = iTextConceptMap.text(*this->pointer()).size();
+				this->xOffset() = iFontEngine.stringWidth(iTextConceptMap.text(*this->pointer()));
 			} // end method lastPosition
 
 			void eraseNext()
 			{
-				iTextConceptMap.text(*pointer()).erase(index(),1);
+				iTextConceptMap.text(*this->pointer()).erase(this->index(),1);
 			} // end method eraseNext
 
 			void erasePrev()
 			{
-				if(index() > 0)
+				if(this->index() > 0)
 				{
 					prevPosition();
 					eraseNext();
@@ -1325,7 +1326,7 @@ namespace graphene
 
 			void insert(CharType character)
 			{
-				iTextConceptMap.text(*pointer()).insert(index(),1,character);
+				iTextConceptMap.text(*this->pointer()).insert(this->index(),1,character);
 				nextPosition();
 			} // end method insert
 		}; // end class IndirectCaretLike
@@ -1454,7 +1455,7 @@ namespace graphene
 					{
 						glPushAttrib(GL_POLYGON_BIT);
 							glPolygonMode(GL_FRONT,GL_FILL);
-							glRect(std::min(left(),right()),std::min(bottom(),top()),std::max(left(),right()),std::max(bottom(),top()));
+							glRect(std::min(this->left(),this->right()),std::min(this->bottom(),this->top()),std::max(this->left(),this->right()),std::max(this->bottom(),this->top()));
 						glPopAttrib();
 					} // end method render
 				}; // end class FilledRectangle
@@ -1490,11 +1491,11 @@ namespace graphene
 					{
 						glPushAttrib(GL_POLYGON_BIT);
 							glPolygonMode(GL_FRONT,GL_FILL);
-							auto bSize = (CTRational::den * borderSize() + CTRational::num) / CTRational::den;
-							auto minX = std::min(left(),right());
-							auto maxX = std::max(left(),right());
-							auto minY = std::min(bottom(),top());
-							auto maxY = std::max(bottom(),top());
+							auto bSize = (CTRational::den * this->borderSize() + CTRational::num) / CTRational::den;
+							auto minX = std::min(this->left(),this->right());
+							auto maxX = std::max(this->left(),this->right());
+							auto minY = std::min(this->bottom(),this->top());
+							auto maxY = std::max(this->bottom(),this->top());
 							glRect(minX,minY,minX+bSize,maxY-bSize);
 							glRect(minX,maxY-bSize,maxX-bSize,maxY);
 							glRect(maxX-bSize,minY+bSize,maxX,maxY);
@@ -1546,8 +1547,8 @@ namespace graphene
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
-								glTranslated((((width() - effectiveTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(left(),right())*Margin::den + Margin::num) / Margin::den,
-											 (((height() - effectiveTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(bottom(),top())*Margin::den + Margin::num) / Margin::den,
+								glTranslated((((this->width() - effectiveTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(this->left(),this->right())*Margin::den + Margin::num) / Margin::den,
+											 (((this->height() - effectiveTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(this->bottom(),this->top())*Margin::den + Margin::num) / Margin::den,
 											 0); // center text in inner rectangle
 								glScaled(effectiveTextWidth / fontEngine.stringWidth(TextConceptMap().text(*this)) , effectiveTextHeight / fontEngine.fontHeight() , 1);
 								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
@@ -1599,10 +1600,10 @@ namespace graphene
 					{
 						// TODO: add scaling support. nlgn algorithm based on binary search?
 						typename BaseType::font_engine_type fontEngine;
-						auto innerLeft   = (std::min(left(),right())*Margin::den + Margin::num)/Margin::den;
-						auto innerBottom = (std::min(bottom(),top())*Margin::den + Margin::num)/Margin::den;
-						auto innerRight  = (std::max(left(),right())*Margin::den - Margin::num)/Margin::den;
-						auto innerTop    = (std::max(bottom(),top())*Margin::den - Margin::num)/Margin::den;
+						auto innerLeft   = (std::min(this->left(),this->right())*Margin::den + Margin::num)/Margin::den;
+						auto innerBottom = (std::min(this->bottom(),this->top())*Margin::den + Margin::num)/Margin::den;
+						auto innerRight  = (std::max(this->left(),this->right())*Margin::den - Margin::num)/Margin::den;
+						auto innerTop    = (std::max(this->bottom(),this->top())*Margin::den - Margin::num)/Margin::den;
 						typename BaseType::text_type currentLine;
 						auto lineHeight = TextConceptMap().textHeight(*this); // change later...
 
@@ -1709,14 +1710,14 @@ namespace graphene
 				public:
 					void render() const
 					{
-						auto left   = std::min(pointer()->left(),pointer()->right());
-						auto bottom = std::min(pointer()->bottom(),pointer()->top());
-						auto right  = std::max(pointer()->left(),pointer()->right());
-						auto top    = std::max(pointer()->bottom(),pointer()->top());
+						auto left   = std::min(this->pointer()->left(),this->pointer()->right());
+						auto bottom = std::min(this->pointer()->bottom(),this->pointer()->top());
+						auto right  = std::max(this->pointer()->left(),this->pointer()->right());
+						auto top    = std::max(this->pointer()->bottom(),this->pointer()->top());
 
-						auto textLeft = left + (pointer()->width() - TextConceptMap().effectiveTextSize(*pointer()).first)/2;
-						auto caretMiddle = textLeft + (TextConceptMap().text(*pointer()).empty() ? 0 : 
-							xOffset()*TextConceptMap().effectiveTextSize(*pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*pointer())));
+						auto textLeft = left + (this->pointer()->width() - TextConceptMap().effectiveTextSize(*this->pointer()).first)/2;
+						auto caretMiddle = textLeft + (TextConceptMap().text(*this->pointer()).empty() ? 0 : 
+							this->xOffset()*TextConceptMap().effectiveTextSize(*this->pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*this->pointer())));
 
 						float fgColor[4], bgColor[4];
 						glPushAttrib(GL_CURRENT_BIT);
@@ -1724,11 +1725,11 @@ namespace graphene
 							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
 							
 							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
-							glRect((caretMiddle*2*width::den - width::num)/(2*width::den),bottom+pointer()->borderSize(),
-									(caretMiddle*2*width::den + width::num)/(2*width::den),top-pointer()->borderSize());
+							glRect((caretMiddle*2*width::den - width::num)/(2*width::den),bottom+this->pointer()->borderSize(),
+									(caretMiddle*2*width::den + width::num)/(2*width::den),top-this->pointer()->borderSize());
 							glColor4fv(fgColor);
-							glRect((caretMiddle*6*width::den - width::num)/(6*width::den),((bottom+pointer()->borderSize())*3*width::den + width::num)/(3*width::den),
-									(caretMiddle*6*width::den + width::num)/(6*width::den),((top-pointer()->borderSize())*3*width::den - width::num)/(3*width::den));
+							glRect((caretMiddle*6*width::den - width::num)/(6*width::den),((bottom+this->pointer()->borderSize())*3*width::den + width::num)/(3*width::den),
+									(caretMiddle*6*width::den + width::num)/(6*width::den),((top-this->pointer()->borderSize())*3*width::den - width::num)/(3*width::den));
 						glPopAttrib();
 					} // end method render
 				}; // end class IndirectCaret
@@ -2112,13 +2113,13 @@ namespace graphene
 				{
 					if(button == 0)
 					{
-						pressed() = down;
+						this->pressed() = down;
 						if(down)
 							target = this;
 						else
 						{
 							target = nullptr;
-							highlighted() = contains(x,y);
+							this->highlighted() = contains(x,y);
 						} // end else
 					} // end if
 				} // end method mouseButton
@@ -2131,9 +2132,9 @@ namespace graphene
 				void mouseEnter(CoordinateType x, CoordinateType y)
 				{
 					if(target == nullptr)
-						highlight();
+						this->highlight();
 					else if(target == this)
-						press();
+						this->press();
 				} // end method mouseEnter
 
 				void mouseMove(CoordinateType x, CoordinateType y)
@@ -2144,9 +2145,9 @@ namespace graphene
 				void mouseExit(CoordinateType x, CoordinateType y)
 				{
 					if(target == nullptr)
-						dehighlight();
+						this->dehighlight();
 					else if(target == this)
-						depress();
+						this->depress();
 				} // end method mouseExit
 			}; // end class TwoStagePressable
 
@@ -2173,13 +2174,13 @@ namespace graphene
 						switch(code)
 						{
 						case 0x7f: // delete key
-							eraseNext();
+							this->eraseNext();
 							return;
 						case '\b': // backspace key
-							erasePrev();
+							this->erasePrev();
 							return;
 						default:
-							insert(code);
+							this->insert(code);
 							return;
 						} // end switch
 					} // end if
@@ -2194,16 +2195,16 @@ namespace graphene
 						switch(key)
 						{
 						case NonAsciiKey::LEFT:
-							prevPosition();
+							this->prevPosition();
 							return;
 						case NonAsciiKey::RIGHT:
-							nextPosition();
+							this->nextPosition();
 							return;
 						case NonAsciiKey::HOME:
-							firstPosition();
+							this->firstPosition();
 							return;
 						case NonAsciiKey::END:
-							lastPosition();
+							this->lastPosition();
 							return;
 						default:
 							// do nothing
@@ -2444,104 +2445,104 @@ namespace graphene
 		template<class BaseType, class FrameType> struct Substitute;
 
 		// base + 0 args
-		template<class BaseType, template<class BaseType> class FrameType>
+		template<class BaseType, template<class TBaseType> class FrameType>
 		struct Substitute<BaseType, FrameType<Omit>>
 		{typedef FrameType<BaseType> type;};
 
 		// base + 1 args
-		template<class BaseType, template<class BaseType, class> class FrameType, class P1>
+		template<class BaseType, template<class TBaseType, class> class FrameType, class P1>
 		struct Substitute<BaseType, FrameType<Omit,P1>>
 		{typedef FrameType<BaseType,P1> type;};
 
-		template<class BaseType, template<class BaseType, bool> class FrameType, bool P1>
+		template<class BaseType, template<class TBaseType, bool> class FrameType, bool P1>
 		struct Substitute<BaseType, FrameType<Omit,P1>>
 		{typedef FrameType<BaseType,P1> type;};
 
 		// base + 2 args
-		template<class BaseType, template<class BaseType, class, class> class FrameType, class P1, class P2>
+		template<class BaseType, template<class TBaseType, class, class> class FrameType, class P1, class P2>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
 		{typedef FrameType<BaseType,P1,P2> type;};
 
-		template<class BaseType, template<class BaseType, bool, class> class FrameType, bool P1, class P2>
+		template<class BaseType, template<class TBaseType, bool, class> class FrameType, bool P1, class P2>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
 		{typedef FrameType<BaseType,P1,P2> type;};
 
-		template<class BaseType, template<class BaseType, class, bool> class FrameType, class P1, bool P2>
+		template<class BaseType, template<class TBaseType, class, bool> class FrameType, class P1, bool P2>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
 		{typedef FrameType<BaseType,P1,P2> type;};
 
-		template<class BaseType, template<class BaseType, bool, bool> class FrameType, bool P1, bool P2>
+		template<class BaseType, template<class TBaseType, bool, bool> class FrameType, bool P1, bool P2>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
 		{typedef FrameType<BaseType,P1,P2> type;};
 
 		// base + 3 args
-		template<class BaseType, template<class BaseType, class, class, class> class FrameType, class P1, class P2, class P3>
+		template<class BaseType, template<class TBaseType, class, class, class> class FrameType, class P1, class P2, class P3>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
 		{typedef FrameType<BaseType,P1,P2,P3> type;};
 
-		template<class BaseType, template<class BaseType, bool, class, class> class FrameType, bool P1, class P2, class P3>
+		template<class BaseType, template<class TBaseType, bool, class, class> class FrameType, bool P1, class P2, class P3>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
 		{typedef FrameType<BaseType,P1,P2,P3> type;};
 
-		template<class BaseType, template<class BaseType, class, bool, class> class FrameType, class P1, bool P2, class P3>
+		template<class BaseType, template<class TBaseType, class, bool, class> class FrameType, class P1, bool P2, class P3>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
 		{typedef FrameType<BaseType,P1,P2,P3> type;};
 
-		template<class BaseType, template<class BaseType, bool, bool, class> class FrameType, bool P1, bool P2, class P3>
+		template<class BaseType, template<class TBaseType, bool, bool, class> class FrameType, bool P1, bool P2, class P3>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
 		{typedef FrameType<BaseType,P1,P2,P3> type;};
 
 		// base + 4 args
-		template<class BaseType, template<class BaseType, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4>
+		template<class BaseType, template<class TBaseType, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
 
-		template<class BaseType, template<class BaseType, bool, class, class, class> class FrameType, bool P1, class P2, class P3, class P4>
+		template<class BaseType, template<class TBaseType, bool, class, class, class> class FrameType, bool P1, class P2, class P3, class P4>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
 
-		template<class BaseType, template<class BaseType, class, bool, class, class> class FrameType, class P1, bool P2, class P3, class P4>
+		template<class BaseType, template<class TBaseType, class, bool, class, class> class FrameType, class P1, bool P2, class P3, class P4>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
 
-		template<class BaseType, template<class BaseType, bool, bool, class, class> class FrameType, bool P1, bool P2, class P3, class P4>
+		template<class BaseType, template<class TBaseType, bool, bool, class, class> class FrameType, bool P1, bool P2, class P3, class P4>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
 
 		// base + 5 args
-		template<class BaseType, template<class BaseType, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5>
+		template<class BaseType, template<class TBaseType, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
 
-		template<class BaseType, template<class BaseType, bool, class, class, class, class> class FrameType, bool P1, class P2, class P3, class P4, class P5>
+		template<class BaseType, template<class TBaseType, bool, class, class, class, class> class FrameType, bool P1, class P2, class P3, class P4, class P5>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
 
-		template<class BaseType, template<class BaseType, class, bool, class, class, class> class FrameType, class P1, bool P2, class P3, class P4, class P5>
+		template<class BaseType, template<class TBaseType, class, bool, class, class, class> class FrameType, class P1, bool P2, class P3, class P4, class P5>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
 
-		template<class BaseType, template<class BaseType, bool, bool, class, class, class> class FrameType, bool P1, bool P2, class P3, class P4, class P5>
+		template<class BaseType, template<class TBaseType, bool, bool, class, class, class> class FrameType, bool P1, bool P2, class P3, class P4, class P5>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
 
 		// base + 6 args
-		template<class BaseType, template<class BaseType, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6>
+		template<class BaseType, template<class TBaseType, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6> type;};
 
 		// base + 7 args
-		template<class BaseType, template<class BaseType, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
+		template<class BaseType, template<class TBaseType, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7> type;};
 
 		// base + 8 args
-		template<class BaseType, template<class BaseType, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
+		template<class BaseType, template<class TBaseType, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7,P8>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8> type;};
 
 		// base + 9 args
-		template<class BaseType, template<class BaseType, class, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
+		template<class BaseType, template<class TBaseType, class, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
 		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7,P8,P9>>
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8,P9> type;};
 

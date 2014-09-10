@@ -29,6 +29,7 @@
 #include "geometry.h"
 #include "graphene.h"
 #include "symbol table.h"
+#include "portable type names.h"
 #include "linear system solving.h"
 
 namespace GUIModel
@@ -349,13 +350,13 @@ namespace GUIModel
 			{
 				property_tree_type tree;
 
-				tree.put("sides.left",left());
-				tree.put("sides.bottom",bottom());
-				tree.put("sides.right",right());
-				tree.put("sides.top",top());
-				tree.put("borderSize",borderSize());
-				tree.put("name",name());
-				tree.put("nameHeight",nameHeight());
+				tree.put("sides.left",this->left());
+				tree.put("sides.bottom",this->bottom());
+				tree.put("sides.right",this->right());
+				tree.put("sides.top",this->top());
+				tree.put("borderSize",this->borderSize());
+				tree.put("name",this->name());
+				tree.put("nameHeight",this->nameHeight());
 				return tree;
 			} // end method operator property_tree_type
 		}; // end class Control
@@ -708,8 +709,8 @@ namespace GUIModel
 			{
 				property_tree_type tree;
 
-				tree.put("text",text());
-				tree.put("text-height",textHeight());
+				tree.put("text",this->text());
+				tree.put("text-height",this->textHeight());
 				tree.put_child("first-end-point",endPoints()[0]);
 				tree.put_child("second-end-point",endPoints()[1]);
 				tree.put("first-local-side",localSides()[0]);
@@ -873,7 +874,7 @@ namespace GUIModel
 						if(bottom < rightControlBottom)
 							glRect(innerRight,bottom,right,rightControlBottom);
 
-						if(selected())
+						if(this->selected())
 						{
 							float fgColor[4], bgColor[4];
 							glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
@@ -890,25 +891,25 @@ namespace GUIModel
 						const_cast<coordinate_type&>(this->right())  = innerRight;
 						const_cast<coordinate_type&>(this->top())    = top;
 						coordinate_type effectiveTextWidth,effectiveTextHeight;
-						std::tie(effectiveTextWidth,effectiveTextHeight) = effectiveTextSize();
-						coordinate_type textLeft = this->left() + (width() - effectiveTextWidth) / 2;
-						coordinate_type textBottom = this->bottom() + (height() - effectiveTextHeight) / 2;
+						std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
+						coordinate_type textLeft = this->left() + (this->width() - effectiveTextWidth) / 2;
+						coordinate_type textBottom = this->bottom() + (this->height() - effectiveTextHeight) / 2;
 
 						glPushMatrix();
 							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
-							glScaled(effectiveTextWidth / fontEngine.stringWidth(text()) , effectiveTextHeight / fontEngine.fontHeight() , 1);
+							glScaled(effectiveTextWidth / fontEngine.stringWidth(this->text()) , effectiveTextHeight / fontEngine.fontHeight() , 1);
 							glTranslated(0,fontEngine.fontBelowBaseLine(),0);
-							fontEngine.render(text());
+							fontEngine.render(this->text());
 						glPopMatrix();
 
 						// left horizontal
-						glRect(innerLeft,((2*bottom + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textLeft,((2*bottom + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+						glRect(innerLeft,((2*bottom + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textLeft,((2*bottom + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
 
 						// right horizontal
-						auto textRight = this->right() - (width() - effectiveTextWidth) / 2;
-						glRect(textRight,((2*bottom + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerRight,((2*bottom + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+						auto textRight = this->right() - (this->width() - effectiveTextWidth) / 2;
+						glRect(textRight,((2*bottom + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerRight,((2*bottom + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
 
-						if(selected())
+						if(this->selected())
 							glPopAttrib();
 					}
 					else
@@ -947,7 +948,7 @@ namespace GUIModel
 						if(left < topControlLeft)
 							glRect(left,innerTop,topControlLeft,top);
 
-						if(selected())
+						if(this->selected())
 						{
 							float fgColor[4], bgColor[4];
 							glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
@@ -964,26 +965,26 @@ namespace GUIModel
 						const_cast<coordinate_type&>(this->right())  = innerTop;
 						const_cast<coordinate_type&>(this->top())    = right;
 						coordinate_type effectiveTextWidth,effectiveTextHeight;
-						std::tie(effectiveTextWidth,effectiveTextHeight) = effectiveTextSize();
-						coordinate_type textLeft = this->bottom() + (height() - effectiveTextHeight) / 2;
-						coordinate_type textBottom = this->left() + (width() - effectiveTextWidth) / 2;
+						std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
+						coordinate_type textLeft = this->bottom() + (this->height() - effectiveTextHeight) / 2;
+						coordinate_type textBottom = this->left() + (this->width() - effectiveTextWidth) / 2;
 
 						glPushMatrix();
 							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
-							glScaled(effectiveTextHeight / fontEngine.fontHeight() , effectiveTextWidth / fontEngine.stringWidth(text()) , 1);
+							glScaled(effectiveTextHeight / fontEngine.fontHeight() , effectiveTextWidth / fontEngine.stringWidth(this->text()) , 1);
 							glRotated(90,0,0,1); // rotate by 90 degrees
 							glTranslated(0,-fontEngine.fontAboveBaseLine(),0);
-							fontEngine.render(text());
+							fontEngine.render(this->text());
 						glPopMatrix();
 
 						// bottom vertical
-						glRect(((2*left + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerBottom,((2*left + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),textBottom);
+						glRect(((2*left + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerBottom,((2*left + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),textBottom);
 
 						// top vertical
-						auto textTop = this->right() - (width() - effectiveTextWidth) / 2;
-						glRect(((2*left + height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*left + height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),innerTop);
+						auto textTop = this->right() - (this->width() - effectiveTextWidth) / 2;
+						glRect(((2*left + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*left + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),innerTop);
 
-						if(selected())
+						if(this->selected())
 							glPopAttrib();
 					} // end else
 				glPopAttrib();
@@ -1033,13 +1034,13 @@ namespace GUIModel
 					} // end function populate
 				}; // end local struct Workaround
 
-				rule<TextType::const_iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
-				rule<TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
+				rule<typename TextType::const_iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
+				rule<typename TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
 						-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
-				rule<TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
+				rule<typename TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
 
-				auto begin = text().begin();
-				auto end = text().end();
+				auto begin = this->text().begin();
+				auto end = this->text().end();
 
 				bool success = phrase_parse(begin,end,constraint,space);
 				if(!success || begin != end)
@@ -1294,10 +1295,10 @@ namespace GUIModel
 			Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> generateSystemMatrix() const
 			{
 				auto symbols = std::make_shared<Symbolic::Common::SymbolTable<NameType,IDType>>();
-				std::vector<constraint_type::template ParseResult<IDType,RationalType>> parseResults;
+				std::vector<typename constraint_type::template ParseResult<IDType,RationalType>> parseResults;
 
 				for(const auto &constraint : constraints)
-					parseResults.push_back(constraint.parse<RationalType,IDType,NameType>(symbols));
+					parseResults.push_back(constraint.template parse<RationalType,IDType,NameType>(symbols));
 				// TODO: optimize to not include unknown constants that are not present.
 
 				Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> result; 
@@ -1344,9 +1345,9 @@ namespace GUIModel
 			void outputCppApp(const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &base, const Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> &offset, std::ostream &output) const
 			{
 				output << "// NO INCLUDE GUARD!!!\n\n";
-				output << "std::vector<geometry::Rectangle<" << typeid(AppCoordType).name() << ">> controls(" << controls.size()-1 << ");\n\n";
-				output << "void updateCoordinates(" << typeid(AppCoordType).name() << " screenWidth, " << typeid(AppCoordType).name() << " screenHeight, " 
-					   << typeid(AppCoordType).name() << " pixelWidth, " << typeid(AppCoordType).name() << " pixelHeight)\n";
+				output << "std::vector<geometry::Rectangle<" << name<AppCoordType>() << ">> controls(" << controls.size()-1 << ");\n\n";
+				output << "void updateCoordinates(" << name<AppCoordType>() << " screenWidth, " << name<AppCoordType>() << " screenHeight, " 
+					   << name<AppCoordType>() << " pixelWidth, " << name<AppCoordType>() << " pixelHeight)\n";
 				output << "{\n";
 
 				std::string unknownConstants[4] = {"screenWidth","screenHeight","pixelWidth","pixelHeight"};
@@ -1381,7 +1382,7 @@ namespace GUIModel
 
 							output << std::abs(offset(4*i+j).numerator());
 							if(offset(4*i+j).denominator() != 1)
-								output << "/(" << typeid(AppCoordType).name() << ")" << offset(4*i+j).denominator();
+								output << "/(" << name<AppCoordType>() << ")" << offset(4*i+j).denominator();
 						} // end if
 						output << ";\n";
 					} // end for

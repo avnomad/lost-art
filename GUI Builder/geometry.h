@@ -174,7 +174,7 @@ namespace geometry
 		typedef RectangleSide Side;
 		typedef CoordinateType coordinate_type;
 		typedef typename std::conditional<constant,typename std::add_const<coordinate_type>::type,coordinate_type>::type effective_coordinate_type;
-		typedef typename std::add_reference<effective_coordinate_type>::type effective_coordinate_reference_type;
+		typedef typename std::add_lvalue_reference<effective_coordinate_type>::type effective_coordinate_reference_type;
 		typedef typename std::conditional<leftRef,effective_coordinate_reference_type,effective_coordinate_type>::type left_type;
 		typedef typename std::conditional<bottomRef,effective_coordinate_reference_type,effective_coordinate_type>::type bottom_type;
 		typedef typename std::conditional<rightRef,effective_coordinate_reference_type,effective_coordinate_type>::type right_type;
