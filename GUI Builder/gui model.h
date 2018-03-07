@@ -1139,7 +1139,7 @@ namespace GUIModel
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Compile",buttonTextHeight),
 					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.h");}); // TODO: allow different output name
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),
-					[this](){run("start \"Generated Application\" \"..\\Debug\\Win32\\Generated Application.exe\"");}); // TODO: allow different executable name
+					[this](){run("start \"Generated Application\" \"..\\Debug\\Generated Application.exe\"");}); // TODO: allow different executable name
 				
 				// initialize controls
 				controls.push_back(control_type(0,0,0,0,borderSize,"Screen",controlTextHeight)); // emplace_back can't take 6+ arguments yet...
@@ -1438,27 +1438,33 @@ namespace GUIModel
 					control.render();
 
 				// render constraints
-				for(const auto &constraint : constraints)
-					constraint.render();
+				glPushAttrib(GL_CURRENT_BIT);
+					glColor3f(0.0,0.5,0.0); // Dark Green
+					for(const auto &constraint : constraints)
+						constraint.render();
+				glPopAttrib();
 
 				// render buttons (buttons should be in front)
-				for(const auto &button : buttons)
-					button.first.render();
+				glPushAttrib(GL_CURRENT_BIT);
+					glColor3f(0.94,0.9,0.55); // Khaki
+					for(const auto &button : buttons)
+						button.first.render();
 
-				// render text boxes (text boxes as well)
-				tbFileName.render();
+					// render text boxes (text boxes as well)
+					tbFileName.render();
 
-				if(selectedPart)
-					selectedPart->render();
+					if(selectedPart)
+						selectedPart->render();
 
-				if(caret)
-					caret->render();
+					if(caret)
+						caret->render();
 
-				if(endPoint1)
-					endPoint1->render();
+					if(endPoint1)
+						endPoint1->render();
 
-				if(endPoint2)
-					endPoint2->render();
+					if(endPoint2)
+						endPoint2->render();
+				glPopAttrib();
 			} // end method render
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
