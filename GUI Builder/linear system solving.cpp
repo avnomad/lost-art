@@ -333,7 +333,7 @@ namespace LinearSystem
 			assert(get<2>(semiSymbolicSolve(rowEchelon_r,semiSymNUnknowns[i])) == semiSymConstBase_r[i]);
 			assert(get<3>(semiSymbolicSolve(rowEchelon_r,semiSymNUnknowns[i])) == semiSymConstOffset_r[i]);
 
-			// should fix comparison with zero in numericReducedRowEchelonFormNoPivot before 
+			// should fix comparison with zero in numericReducedRowEchelonFormNoPivot before
 			// running these test cases on doubles because they produce different results.
 
 			//Matrix<double,Dynamic,Dynamic> rowEchelon_d = semiSymIn_r[i].cast<double>();

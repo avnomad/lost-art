@@ -52,7 +52,7 @@ namespace GUIModel
 	{
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		class ButtonBase : public graphene::DSEL::FrameStack<
 			RectangleType,
 			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -104,7 +104,7 @@ namespace GUIModel
 		public:
 			Button(){/* empty body */}
 
-			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
 			{
 				this->left() = left;
@@ -126,7 +126,7 @@ namespace GUIModel
 			graphene::Bases::Movable<graphene::DSEL::Omit,CoordinateType>,
 			graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>, // TODO: move rectangular back to concrete control when the screen special case is handled
 			graphene::Bases::Containing<graphene::DSEL::Omit,CoordinateType>,
-			graphene::Bases::Renderable<graphene::DSEL::Omit>			
+			graphene::Bases::Renderable<graphene::DSEL::Omit>
 		>::type{}; // poor man's template alias
 
 		/** Const instances should be constant and non-const instances should be non constant
@@ -156,7 +156,7 @@ namespace GUIModel
 				graphene::Frames::Adapting::Rectangular<graphene::DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
 			>::type base_type;
 			typedef typename ControlPart::rectangle_type rectangle_type;
-			
+
 			/*********************
 			*    Constructors    *
 			*********************/
@@ -179,7 +179,7 @@ namespace GUIModel
 			graphene::Bases::Destructible<graphene::DSEL::Omit>,
 			graphene::Bases::CaretLike<graphene::DSEL::Omit,CharType>,
 			graphene::Bases::EventHandling::KeyboardAndMouse<graphene::DSEL::Omit,CoordinateType>, // TODO: handle in parent
-			graphene::Bases::Renderable<graphene::DSEL::Omit>			
+			graphene::Bases::Renderable<graphene::DSEL::Omit>
 		>::type{}; // poor man's template alias
 
 		template<typename CoordinateType, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
@@ -210,7 +210,7 @@ namespace GUIModel
 			>::type base_type;
 			typedef PointedToType pointed_to_type;
 			typedef Width width;
-			
+
 			/*********************
 			*    Constructors    *
 			*********************/
@@ -228,8 +228,8 @@ namespace GUIModel
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string>	class Control;
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType> 
-		class ControlBase : public 
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
+		class ControlBase : public
 			graphene::Frames::MultiPartBorderedRectangle<typename graphene::DSEL::FrameStack<
 				RectangleType,
 				graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -311,7 +311,7 @@ namespace GUIModel
 
 			/** Construct a Control with the specified properties.
 			 */
-			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType name, coordinate_type nameHeight, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				this->left() = left;
@@ -363,7 +363,7 @@ namespace GUIModel
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string> class TextBox;
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType> 
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
 		class TextBoxBase : public graphene::DSEL::FrameStack<
 			RectangleType,
 			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -428,7 +428,7 @@ namespace GUIModel
 
 			/** Construct a TextBox with the specified properties.
 			 */
-			TextBox(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+			TextBox(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool focused = false, bool highlighted = false)
 			{
 				this->left() = left;
@@ -642,7 +642,7 @@ namespace GUIModel
 				this->focused() = focused;
 			} // end Control constructor
 
-			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, coordinate_type localSide1, coordinate_type localSide2, 
+			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, coordinate_type localSide1, coordinate_type localSide2,
 				TextType text, coordinate_type textHeight, coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0].container() = container;
@@ -732,7 +732,7 @@ namespace GUIModel
 				return geometry::isVertical(iEndPoints[0].side);
 			} // end method isHorizontal
 
-			/** Returns whether the point (x,y) is inside the rectangle defined by 
+			/** Returns whether the point (x,y) is inside the rectangle defined by
 			 *	the two constraint end points and the two supplementary sides.
 			 *	Supplementary sides should be adjacent to constraint text.
 			 */
@@ -855,9 +855,9 @@ namespace GUIModel
 						std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
 
 						// render lines consistent with control borders (borders are rendered inside the controls)
-						coordinate_type innerLeft  = leftControlLeft == leftEndPoint.referredSide() ? 
+						coordinate_type innerLeft  = leftControlLeft == leftEndPoint.referredSide() ?
 														(left *LineWidth::den + LineWidth::num) / LineWidth::den : (left *LineWidth::den - LineWidth::num) / LineWidth::den;
-						coordinate_type innerRight = rightControlLeft == rightEndPoint.referredSide() ? 
+						coordinate_type innerRight = rightControlLeft == rightEndPoint.referredSide() ?
 														(right*LineWidth::den + LineWidth::num) / LineWidth::den : (right*LineWidth::den - LineWidth::num) / LineWidth::den;
 						std::tie(left,innerLeft) = std::pair<coordinate_type,coordinate_type>(std::minmax(left,innerLeft)); // won't work without creating a copy...
 						std::tie(innerRight,right) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
@@ -929,9 +929,9 @@ namespace GUIModel
 						std::tie(topControlBottom,topControlTop) = std::minmax(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top());
 
 						// render lines consistent with control borders (borders are rendered inside the controls)
-						coordinate_type innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ? 
+						coordinate_type innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ?
 														(bottom *LineWidth::den + LineWidth::num) / LineWidth::den : (bottom *LineWidth::den - LineWidth::num) / LineWidth::den;
-						coordinate_type innerTop = topControlBottom == topEndPoint.referredSide() ? 
+						coordinate_type innerTop = topControlBottom == topEndPoint.referredSide() ?
 														(top*LineWidth::den + LineWidth::num) / LineWidth::den : (top*LineWidth::den - LineWidth::num) / LineWidth::den;
 						std::tie(bottom,innerBottom) = std::pair<coordinate_type,coordinate_type>(std::minmax(bottom,innerBottom)); // won't work without creating a copy...
 						std::tie(innerTop,top) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerTop,top)); // one of the variables will get overriden before used.
@@ -1018,11 +1018,11 @@ namespace GUIModel
 							n += c - '0';
 							d *= 10;
 						} // end foreach
-						
+
 						return r + RationalType(n,d);
 					} // end function decimalPoint
 
-					static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result, 
+					static void populate(const RationalType &coeff, const NameType &symbol, ParseResult<IDType,RationalType> &result,
 						std::shared_ptr<Symbolic::Common::SymbolTable<NameType,IDType>> symbols)
 					{
 						if(symbol == "mm")
@@ -1035,7 +1035,7 @@ namespace GUIModel
 				}; // end local struct Workaround
 
 				rule<typename TextType::const_iterator,NameType()> identifier = (alpha | char_('_')) > *(alnum | char_('_'));
-				rule<typename TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) > 
+				rule<typename TextType::const_iterator,RationalType()> coefficient = (char_('-')[_val = -1] | eps[_val = 1]) >
 						-(ulong_long[_val *= _1] > -('/' > ulong_long[_val /= _1] | '.' > (*digit)[_val = px::bind(Workaround::decimalPoint,_val,_1)]));
 				rule<typename TextType::const_iterator,space_type> constraint = (coefficient > identifier)[px::bind(Workaround::populate,_1,_2,px::ref(result),px::ref(symbols))] % '+';
 
@@ -1140,7 +1140,7 @@ namespace GUIModel
 					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.h");}); // TODO: allow different output name
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),
 					[this](){run("start \"Generated Application\" \"..\\Debug\\Win32\\Generated Application.exe\"");}); // TODO: allow different executable name
-				
+
 				// initialize controls
 				controls.push_back(control_type(0,0,0,0,borderSize,"Screen",controlTextHeight)); // emplace_back can't take 6+ arguments yet...
 
@@ -1192,7 +1192,7 @@ namespace GUIModel
 				for(auto constraint = constraints.begin() ; constraint < constraints.end() ; )
 					if(constraint->endPoints()[0].control == index || constraint->endPoints()[1].control == index)
 						constraint = constraints.erase(constraint);
-					else 
+					else
 					{
 						if(constraint->endPoints()[0].control > index)
 							--constraint->endPoints()[0].control;
@@ -1226,7 +1226,7 @@ namespace GUIModel
 					highlightedConstraint = constraints.end();
 				} // end if
 			} // end method dehighlightAll
-			
+
 			void deselectAll()
 			{
 				if(selectedConstraint != constraints.end())
@@ -1258,13 +1258,13 @@ namespace GUIModel
 				caret = nullptr;
 			} // end method unfocusAll
 
-			// TODO: check that there is at least one control (the screen) and that all constraints refer to 
+			// TODO: check that there is at least one control (the screen) and that all constraints refer to
 			// existent controls! Also that endpoints are consistent.
 			void load(const std::string &fileName)
 			{
 				clear();
 				property_tree_type tree, emptyTree;
-			
+
 				boost::property_tree::read_xml(fileName,tree);
 
 				for(const auto &control : tree.get_child("gui-model.controls"))
@@ -1301,7 +1301,7 @@ namespace GUIModel
 					parseResults.push_back(constraint.template parse<RationalType,IDType,NameType>(symbols));
 				// TODO: optimize to not include unknown constants that are not present.
 
-				Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> result; 
+				Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> result;
 				result.setZero(constraints.size(),4*controls.size() + symbols->size() + 1); // 4*(nControls-1) + nSymbols + 4 + 1
 				// the layout is control sides, then named variables, then unknown constants then known constant.
 
@@ -1336,9 +1336,9 @@ namespace GUIModel
 			} // end method generateSystemMatrix
 
 
-			/** Takes the solution of a linear system (in the form of a vector space base and point space offset 
-			 *	generating the solutions) describing a GUI and generates C++ code for an application 
-			 *	that implements that GUI. The output code is intended to be saved in a file and #included be a 
+			/** Takes the solution of a linear system (in the form of a vector space base and point space offset
+			 *	generating the solutions) describing a GUI and generates C++ code for an application
+			 *	that implements that GUI. The output code is intended to be saved in a file and #included be a
 			 *	suitable application-template .cpp file. Generated code is not tied to a specific GUI toolkit.
 			 */
 			template<typename RationalType, typename AppCoordType>
@@ -1346,7 +1346,7 @@ namespace GUIModel
 			{
 				output << "// NO INCLUDE GUARD!!!\n\n";
 				output << "std::vector<geometry::Rectangle<" << name<AppCoordType>() << ">> controls(" << controls.size()-1 << ");\n\n";
-				output << "void updateCoordinates(" << name<AppCoordType>() << " screenWidth, " << name<AppCoordType>() << " screenHeight, " 
+				output << "void updateCoordinates(" << name<AppCoordType>() << " screenWidth, " << name<AppCoordType>() << " screenHeight, "
 					   << name<AppCoordType>() << " pixelWidth, " << name<AppCoordType>() << " pixelHeight)\n";
 				output << "{\n";
 
@@ -1484,7 +1484,7 @@ namespace GUIModel
 						clearControlIterators();
 						clearConstraintIterators();
 						// assumes more invalidations than actually happen but will fix when I switch to std::list
-						selectedPart = nullptr;						 
+						selectedPart = nullptr;
 					} // end if
 			} // end method keyboardAscii
 
@@ -1541,7 +1541,7 @@ namespace GUIModel
 										caret = focusedConstraint->charWithIndex(focusedConstraint->text().size());
 
 										endPoint1 = nullptr;
-										endPoint2 = nullptr;										
+										endPoint2 = nullptr;
 									}
 									else
 									{

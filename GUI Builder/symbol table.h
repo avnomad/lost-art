@@ -13,12 +13,12 @@ namespace Symbolic
 		void testSymbolTable();
 
 		/** Single-scope symbol table for mathematical expressions.
-		 *	For efficiency, string names are mapped to integer IDs 
+		 *	For efficiency, string names are mapped to integer IDs
 		 *	that are used internally.
-		 *	The implementation can be improved by using radix trees 
+		 *	The implementation can be improved by using radix trees
 		 *	and/or storing IDs implicitly.
 		 *	IDType should be usable as an index to std::vector and
-		 *	it is assumed sizeof(IDType) <= sizeof(IDType *) in 
+		 *	it is assumed sizeof(IDType) <= sizeof(IDType *) in
 		 *	efficiency considerations.
 		 */
 		template<typename NameType = std::string, typename IDType = int>

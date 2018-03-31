@@ -2,24 +2,24 @@
 
 TODO:
 
-1.  Add support for static and dynamic coordinate systems to graphene and 
+1.  Add support for static and dynamic coordinate systems to graphene and
     redesign frames to use them. That should allow a single movable frame.
 
-2.  Define an interface for controls to report whether they can have a specific 
-    (dynamic) type of object to be dropped onto them and what action this will 
+2.  Define an interface for controls to report whether they can have a specific
+    (dynamic) type of object to be dropped onto them and what action this will
 	result into. Perhaps along the lines of MultiPart with the returned object
 	encapsulating the action and nullptr reporting unsupported types.
 
-3.  Rethink concrete MultiPart frame: perhaps 9 distinct part types is the way 
+3.  Rethink concrete MultiPart frame: perhaps 9 distinct part types is the way
     to go (instead of a template template parameter).
 
-4.  Factor out common parts from {Pressable, Highlightable, Selectable, 
-    Focusable} and {Textual, Named} using function-like macros, but wait till 
-    code is further	stabilized before doing so as macros make bug-hunting 
+4.  Factor out common parts from {Pressable, Highlightable, Selectable,
+    Focusable} and {Textual, Named} using function-like macros, but wait till
+    code is further	stabilized before doing so as macros make bug-hunting
     harder.
 
-5.  Consider adding the 'rebase' protocol to frames for use with the 
-    corresponding DSEL. (eases changing BaseType from Omit when non-type and 
+5.  Consider adding the 'rebase' protocol to frames for use with the
+    corresponding DSEL. (eases changing BaseType from Omit when non-type and
     template template parameters are present)
 
 6.  Use control names in output file.

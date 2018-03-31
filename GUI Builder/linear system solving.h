@@ -1,4 +1,4 @@
-﻿#ifndef LINEAR_SYSTEM_SOLVING_H
+#ifndef LINEAR_SYSTEM_SOLVING_H
 #define LINEAR_SYSTEM_SOLVING_H
 
 #include <utility>
@@ -15,11 +15,11 @@ namespace LinearSystem
 {
 	void runTestSuite();
 
-	/** Transforms the input matrix to its reduced row echelon form, without 
-	 *	doing any pivoting. The operations are done numerically as opposed to 
-	 *	symbolic operations. The current version will work best with matrices 
-	 *	comprising elements supporting exact operations (like rational numbers), 
-	 *	but should also work with floating point numbers as well (albeit the 
+	/** Transforms the input matrix to its reduced row echelon form, without
+	 *	doing any pivoting. The operations are done numerically as opposed to
+	 *	symbolic operations. The current version will work best with matrices
+	 *	comprising elements supporting exact operations (like rational numbers),
+	 *	but should also work with floating point numbers as well (albeit the
 	 *	lack of pivoting may cause numerical instability).
 	 */
 	template<typename Derived>	// should optimize later... e.g. set to 0s and 1s instead of computing them and swap whole rows if that's faster in eigen.
@@ -51,7 +51,7 @@ namespace LinearSystem
 
 
 	/** Struct for describing the properties of a linear system. It can be used for systems with
-	 *	unknown constant terms as well. Variable indices in freeVariables and boundUnknownConstants 
+	 *	unknown constant terms as well. Variable indices in freeVariables and boundUnknownConstants
 	 *	are in ascending order.
 	 */
 	struct Properties
@@ -65,10 +65,10 @@ namespace LinearSystem
 		std::vector<size_t> boundUnknownConstants;
 		bool isImpossible;
 		bool hasUniqueSolution;
-	
+
 		// constructors
 		Properties(){/* empty body */}
-	
+
 		Properties(size_t nEquations, size_t nVariables, size_t nIndependentEquations,
 			bool isImpossible, bool hasUniqueSolution, size_t nUnknownConstants = 0,
 			std::vector<size_t> freeVariables = std::vector<size_t>(), std::vector<size_t> boundUnknownConstants = std::vector<size_t>())
@@ -82,16 +82,16 @@ namespace LinearSystem
 		// operators
 		bool operator==(const Properties &other)
 		{
-			return this->nEquations == other.nEquations && this->nVariables == other.nVariables 
-				&& this->nIndependentEquations == other.nIndependentEquations && this->nUnknownConstants == other.nUnknownConstants 
-				&& this->freeVariables == other.freeVariables && this->boundUnknownConstants == other.boundUnknownConstants 
+			return this->nEquations == other.nEquations && this->nVariables == other.nVariables
+				&& this->nIndependentEquations == other.nIndependentEquations && this->nUnknownConstants == other.nUnknownConstants
+				&& this->freeVariables == other.freeVariables && this->boundUnknownConstants == other.boundUnknownConstants
 				&& this->isImpossible == other.isImpossible && this->hasUniqueSolution == other.hasUniqueSolution;
 		} // end function operator==
 
 	}; // end struct Properties
 
 
-	/** Takes the augmented matrix A|b of a linear system of equations in reduced 
+	/** Takes the augmented matrix A|b of a linear system of equations in reduced
 	 *	row echelon form and returns a structure describing the system.
 	 */
 	template<typename Derived>
@@ -127,10 +127,10 @@ namespace LinearSystem
 	} // end function numericInvestigate
 
 
-	/** Takes the augmented matrix A|B|b of a linear system of equations that may have a number of unknown constant terms in 
-	 *	addition to the known ones. The matrix encodes the variable coefficients in the left columns and the known constant 
-	 *	terms in the right column as usual, but has also columns encoding the coefficients of the unknown constants between 
-	 *	them. The unknown constants are assumed to be in the left hand side of the equations (that directly relates to the 
+	/** Takes the augmented matrix A|B|b of a linear system of equations that may have a number of unknown constant terms in
+	 *	addition to the known ones. The matrix encodes the variable coefficients in the left columns and the known constant
+	 *	terms in the right column as usual, but has also columns encoding the coefficients of the unknown constants between
+	 *	them. The unknown constants are assumed to be in the left hand side of the equations (that directly relates to the
 	 *	signs of the coefficients) and are otherwise encoded like variables. The matrix must be in reduced row echelon form.
 	 *	It returns a structure describing the system.
 	 */
@@ -157,9 +157,9 @@ namespace LinearSystem
 	} // end function semiSymbolicInvestigate
 
 
-	/** Takes the augmented matrix A|b of a linear system of equations in reduced 
+	/** Takes the augmented matrix A|b of a linear system of equations in reduced
 	 *	row echelon form and returns a pair (C,d) such as for each column vector x
-	 *	with as many rows as C has columns it holds that A*(C*x+d)==b. In other 
+	 *	with as many rows as C has columns it holds that A*(C*x+d)==b. In other
 	 *	words, C*x+d is a solution of the system.
 	 */
 	template<typename Derived>
@@ -207,10 +207,10 @@ namespace LinearSystem
 	} // end function numericSolve
 
 
-	/** Takes the augmented matrix A|B|b of a linear system of equations that may have a number of unknown constant terms in 
-	 *	addition to the known ones. The matrix encodes the variable coefficients in the left columns and the known constant 
-	 *	terms in the right column as usual, but has also columns encoding the coefficients of the unknown constants between 
-	 *	them. The unknown constants are assumed to be in the left hand side of the equations (that directly relates to the 
+	/** Takes the augmented matrix A|B|b of a linear system of equations that may have a number of unknown constant terms in
+	 *	addition to the known ones. The matrix encodes the variable coefficients in the left columns and the known constant
+	 *	terms in the right column as usual, but has also columns encoding the coefficients of the unknown constants between
+	 *	them. The unknown constants are assumed to be in the left hand side of the equations (that directly relates to the
 	 *	signs of the coefficients) and are otherwise encoded like variables. The matrix must be in reduced row echelon form.
 	 *	It returns a tuple of 4 matrices encoding the solution to the system. The first two generate the solutions to the system
 	 *	given a vector of values for the free variables and unknown constants (like in the numeric counterpart of the function)
@@ -229,8 +229,8 @@ namespace LinearSystem
 
 		Properties properties = semiSymbolicInvestigate(system,nUnknownConstants);
 		auto numSolution = numericSolve(system);
-	
-		MatrixType constBase = properties.isImpossible ? MatrixType(properties.nUnknownConstants,0) 
+
+		MatrixType constBase = properties.isImpossible ? MatrixType(properties.nUnknownConstants,0)
 			: properties.nUnknownConstants-properties.boundUnknownConstants.size() == 0 ? MatrixType::Zero(properties.nUnknownConstants,1)
 			: numSolution.first.bottomRightCorner(properties.nUnknownConstants,properties.nUnknownConstants-properties.boundUnknownConstants.size()).eval();
 

@@ -146,7 +146,7 @@ namespace geometry
 			return std::max(left(),right()) - std::min(left(),right());
 		} // end method height
 
-		/** Returns whether the point (x,y) is inside the rectangle with 
+		/** Returns whether the point (x,y) is inside the rectangle with
 		 *	points on the border considered to be inside.
 		 */
 		bool contains(CoordinateType x, CoordinateType y) const
@@ -200,7 +200,7 @@ namespace geometry
 		RefRectangle(){/* emtpy body */}
 
 		/** Construct a rectangle with the specified sides.
-		 *	Depending on the template parameters some arguments may be captured by reference! 
+		 *	Depending on the template parameters some arguments may be captured by reference!
 		 */
 		RefRectangle(left_type left, bottom_type bottom, right_type right, top_type top)
 			:iLeft(left),iBottom(bottom),iRight(right),iTop(top)
@@ -282,7 +282,7 @@ namespace geometry
 			return std::max(left(),right()) - std::min(left(),right());
 		} // end method height
 
-		/** Returns whether the point (x,y) is inside the rectangle with 
+		/** Returns whether the point (x,y) is inside the rectangle with
 		 *	points on the border considered to be inside.
 		 */
 		bool contains(CoordinateType x, CoordinateType y) const

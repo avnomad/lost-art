@@ -1347,7 +1347,7 @@ namespace Symbolic
 			                                                                                                                             "(x     )      \n"        }, // ^
 		}; // end tests initializer
 
-		// assert no two different test cases have the same result 
+		// assert no two different test cases have the same result
 		// (otherwise there would be an ambiguity which is a specification error)
 		set<string> prints[4];
 		for(size_t i = 0 ; i < nTests ; ++i)

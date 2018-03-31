@@ -1,4 +1,4 @@
-﻿#ifndef SYMBOLIC_COMPUTATION_H
+#ifndef SYMBOLIC_COMPUTATION_H
 #define SYMBOLIC_COMPUTATION_H
 
 #include <limits>
@@ -95,7 +95,7 @@ namespace Symbolic
 
 			inline bool needsParenthesis(OpTags::OpTraits parentTraits, OpTags::OpTraits thisTraits, Child thisChild)
 			{
-				return parentTraits.priority > thisTraits.priority || parentTraits.priority == thisTraits.priority 
+				return parentTraits.priority > thisTraits.priority || parentTraits.priority == thisTraits.priority
 					&& (parentTraits.associativity != thisTraits.associativity || thisTraits.associativity == OpTags::Associativity::LEFT
 					&& thisChild == Child::RIGHT || thisTraits.associativity == OpTags::Associativity::RIGHT && thisChild == Child::LEFT);
 			} // end function needsParenthesis
@@ -190,7 +190,7 @@ namespace Symbolic
 			*    Consept Check    *
 			**********************/
 
-			static_assert(std::numeric_limits<UIntType>::is_integer && !std::numeric_limits<UIntType>::is_signed, 
+			static_assert(std::numeric_limits<UIntType>::is_integer && !std::numeric_limits<UIntType>::is_signed,
 				"Expression can only be instantiated with unsigned integral types!");
 
 			/*********************
@@ -227,15 +227,15 @@ namespace Symbolic
 			{
 			public:
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
-				/** Stores the extends of the rectangle an expression subtree will occupy when 
-				 *	printed in 2D in the vector extends in right postorder (right subtree before 
+				/** Stores the extends of the rectangle an expression subtree will occupy when
+				 *	printed in 2D in the vector extends in right postorder (right subtree before
 				 *	left subtree). Returns the extends of the subtree it's called on.
 				 */
 				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				// uses the property rev(preorder(t) == postorder(reflect(t)) to cache the node attributes outside the nodes!
 				// Should probably cache the serialized literal nodes as well...
 				// TODO: change top to bottom and have (0,0) be in the bottom-left corner to somewhat simplify code.
-				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
+				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized,
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
 				virtual ~AbstractNode(){/* empty body */}
@@ -276,7 +276,7 @@ namespace Symbolic
 					return result;
 				} // end method getPrint2DExtends
 
-				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
+				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized,
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					std::ostringstream sstrout;
@@ -330,7 +330,7 @@ namespace Symbolic
 					return result;
 				} // end method getPrint2DExtends
 
-				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
+				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized,
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					if(fullyParenthesized)
@@ -387,7 +387,7 @@ namespace Symbolic
 					return result;
 				} // end method getPrint2DExtends
 
-				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
+				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized,
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
@@ -449,13 +449,13 @@ namespace Symbolic
 					Extends rightExtends = rightChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::RIGHT); // must be the right first!
 					if(traits.symbol == '^')
 						traits.priority = Operator<UIntType>::traits().priority; // restore priority for left child.
-					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::LEFT); 
+					Extends leftExtends = leftChild->getPrint2DExtends(symbols,extends,fullyParenthesized,traits,OpTags::Child::LEFT);
 					Extends result;
 
 					if(Operator<UIntType>::traits().symbol == '/')
 					{
 						// size of fraction bar disambiguates instead of parenthesis!
-						result.width = std::max(rightExtends.width+((typeid(*rightChild) == typeid(BinaryNode<OpTags::divides>) && !fullyParenthesized)<<1) , 
+						result.width = std::max(rightExtends.width+((typeid(*rightChild) == typeid(BinaryNode<OpTags::divides>) && !fullyParenthesized)<<1) ,
 												leftExtends.width+((typeid(*leftChild) == typeid(BinaryNode<OpTags::divides>) && !fullyParenthesized)<<1)) + (fullyParenthesized<<1);
 						result.aboveBaseLine = leftExtends.aboveBaseLine + leftExtends.belowBaseLine + 1;
 						result.belowBaseLine = rightExtends.aboveBaseLine + rightExtends.belowBaseLine + 1;
@@ -477,7 +477,7 @@ namespace Symbolic
 					return result;
 				} // end method getPrint2DExtends
 
-				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized, 
+				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized,
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
 				{
 					bool needsParenthesis = fullyParenthesized || OpTags::needsParenthesis(parentTraits,Operator<UIntType>::traits(),thisChild);
@@ -583,7 +583,7 @@ namespace Symbolic
 			} // end Expression constructor
 
 			/** Construct an expression object from a sequence of characters.
-			 *	The constructor parses the sequence as if it was a string and 
+			 *	The constructor parses the sequence as if it was a string and
 			 *	creates an expression object representing the string.
 			 *
 			 *	Spirit does not support unique_ptrs so this may leak in case exceptions are thrown...
@@ -704,7 +704,7 @@ namespace Symbolic
 				lex::token_def<NameType> illegalCharacter;
 
 				// Regular Expressions
-				/** A Grammar object should not outlive the std::ostream 
+				/** A Grammar object should not outlive the std::ostream
 				 *	one given as argument to its constructor.
 				 */
 				Grammar(std::ostream &errorStream)
@@ -773,7 +773,7 @@ namespace Symbolic
 				rule<ForwardIterator,attribute_signature> primary;
 
 				// Rules
-				/** A Syntax object should not outlive the std::ostream and 
+				/** A Syntax object should not outlive the std::ostream and
 				 *	Grammar ones given as arguments to its constructor.
 				 */
 				template<typename Lexer>
@@ -866,7 +866,7 @@ namespace Symbolic
 			}; // end struct Syntax
 
 		}; // end class Expression
-		
+
 		// out-of-class initializations
 		template<typename UIntType, typename NameType, typename IDType>
 		const char Expression<UIntType,NameType,IDType>::quotientSymbol = '\304'; // probably should change to something more portable...
@@ -903,7 +903,7 @@ namespace Symbolic
 			typedef IDType id_type;
 			typedef FreeForms::Expression<UIntType,NameType,IDType> expression_type;
 			typedef typename expression_type::symbol_table_type symbol_table_type;
-	
+
 			// Fields
 		public:
 			static const Primitive build_primitive = primitive;

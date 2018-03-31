@@ -261,7 +261,7 @@ namespace graphene
 			// and add prefered width, height read-only properties.
 		}; // end class SizedText
 
-		/** This frame is intended for used in frame stacks that use textHeight/textWidth as a 
+		/** This frame is intended for used in frame stacks that use textHeight/textWidth as a
 		 *	"preferred" size and need another method to return the actual text height/width.
 		 *	The first pair member is the width and the second the height.
 		 */
@@ -318,7 +318,7 @@ namespace graphene
 			// and add prefered width, height read-only properties.
 		}; // end class SizedName
 
-		/** This frame is intended for used in frame stacks that use nameHeight/nameWidth as a 
+		/** This frame is intended for used in frame stacks that use nameHeight/nameWidth as a
 		 *	"preferred" size and need another method to return the actual name height/width.
 		 *	The first pair member is the width and the second the height.
 		 */
@@ -359,7 +359,7 @@ namespace graphene
 		 *	if and only if contains(x,y) returns false.
 		 */
 		// TODO: perhaps find a better name to disambiguate with char?
-		template<typename BaseType, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type, 
+		template<typename BaseType, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
 			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiChar : public BaseType
 		{
@@ -1181,7 +1181,7 @@ namespace graphene
 		 */
 		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type,
 			typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
-			typename ConcreteCharType = typename BaseType::concrete_char_type, typename ConstConcreteCharType = typename BaseType::const_concrete_char_type, 
+			typename ConcreteCharType = typename BaseType::concrete_char_type, typename ConstConcreteCharType = typename BaseType::const_concrete_char_type,
 			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiCharBorderedRectangle : public BaseType
 		{
@@ -1504,7 +1504,7 @@ namespace graphene
 					} // end method render
 				}; // end class BorderedRectangle
 
-				/** BaseType should be Rectangular and expose text traits via the supplied TextConceptMap. 
+				/** BaseType should be Rectangular and expose text traits via the supplied TextConceptMap.
 				 *	Margin should be a compile-time rational type representing the margin reserved between the rectangle sides and the text.
 				 *	If the text cannot fit in the rectangle, it is silently scaled down for rendering. This does not affect
 				 *	the size returned by the object methods.
@@ -1559,9 +1559,9 @@ namespace graphene
 				}; // end class BoxedText
 
 				/** BaseType should be Rectangular, Textual, SizedText. Margin and LineSpacing should be compile-time rational types
-				 *	representing the margin reserved between the rectangle sides and the paragraph text and the empty space left 
+				 *	representing the margin reserved between the rectangle sides and the paragraph text and the empty space left
 				 *	between lines respectively.
-				 *	Newline characters in the text are respected, but new ones may be added as text is wrapper to fit 
+				 *	Newline characters in the text are respected, but new ones may be added as text is wrapper to fit
 				 *	in the rectangle.
 				 *	If the text cannot fit in the rectangle, it is silently scaled down for rendering. This does not affect
 				 *	the size returned by the object methods.
@@ -1716,14 +1716,14 @@ namespace graphene
 						auto top    = std::max(this->pointer()->bottom(),this->pointer()->top());
 
 						auto textLeft = left + (this->pointer()->width() - TextConceptMap().effectiveTextSize(*this->pointer()).first)/2;
-						auto caretMiddle = textLeft + (TextConceptMap().text(*this->pointer()).empty() ? 0 : 
+						auto caretMiddle = textLeft + (TextConceptMap().text(*this->pointer()).empty() ? 0 :
 							this->xOffset()*TextConceptMap().effectiveTextSize(*this->pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*this->pointer())));
 
 						float fgColor[4], bgColor[4];
 						glPushAttrib(GL_CURRENT_BIT);
 							glGetFloatv(GL_CURRENT_COLOR,fgColor);
 							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
-							
+
 							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
 							glRect((caretMiddle*2*width::den - width::num)/(2*width::den),bottom+this->pointer()->borderSize(),
 									(caretMiddle*2*width::den + width::num)/(2*width::den),top-this->pointer()->borderSize());
@@ -2352,8 +2352,8 @@ namespace graphene
 			} // end method effectiveTextSize
 		}; // end struct Named
 
-		/** Font engines encapsulate low level font metric and rendering functions, to present 
-		 *	them in a uniform manner. They should be constructible from a font and default 
+		/** Font engines encapsulate low level font metric and rendering functions, to present
+		 *	them in a uniform manner. They should be constructible from a font and default
 		 *	constructible (that should give font a default value).
 		 *	The actual method signatures depend on what the underlying toolkit supports.
 		 */
@@ -2547,7 +2547,7 @@ namespace graphene
 		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8,P9> type;};
 
 		// FrameStack specializations
-		template<class BaseType = Omit, class FrameType = Omit,  
+		template<class BaseType = Omit, class FrameType = Omit,
 													class T3 = Omit,  class T4 = Omit,  class T5 = Omit,
 				class T6 = Omit,  class T7 = Omit,  class T8 = Omit,  class T9 = Omit,  class T10 = Omit,
 				class T11 = Omit, class T12 = Omit, class T13 = Omit, class T14 = Omit, class T15 = Omit,
@@ -2562,14 +2562,14 @@ namespace graphene
 
 	/** The intention is to let the client easily combine frames to create controls as needed.
 	 *	But my compiler does not support inheriting constructors, so the created controls would only
-	 *	be default constructible. To workaround that in the common case, I specialize common control 
+	 *	be default constructible. To workaround that in the common case, I specialize common control
 	 *	types and add constructors to them.
 	 */
 	namespace Controls
 	{
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		class ButtonBase : public DSEL::FrameStack<
 			RectangleType,
 			Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -2622,7 +2622,7 @@ namespace graphene
 		public:
 			Button(){/* empty body */}
 
-			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
 			{
 				this->left() = left;
@@ -2644,7 +2644,7 @@ namespace graphene
 			Bases::Destructible<DSEL::Omit>,
 			Bases::Movable<DSEL::Omit,CoordinateType>,
 			Bases::Containing<DSEL::Omit,CoordinateType>,
-			Bases::Renderable<DSEL::Omit>			
+			Bases::Renderable<DSEL::Omit>
 		>::type{}; // poor man's template alias
 
 		/** Const instances should be constant and non-const instances should be non constant
@@ -2676,7 +2676,7 @@ namespace graphene
 				Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
 			>::type base_type;
 			typedef typename ControlPart::rectangle_type rectangle_type;
-			
+
 			/*********************
 			*    Constructors    *
 			*********************/
@@ -2694,7 +2694,7 @@ namespace graphene
 
 		}; // end class ControlPart
 
-		template<typename CoordinateType, typename TextType = std::string> 
+		template<typename CoordinateType, typename TextType = std::string>
 		class IControl : public DSEL::FrameStack<
 			Bases::Empty,
 			Bases::Destructible<DSEL::Omit>,
@@ -2709,9 +2709,9 @@ namespace graphene
 			Bases::MultiPart<DSEL::Omit,std::unique_ptr<IShapePart<CoordinateType>>,std::unique_ptr<const IShapePart<CoordinateType>>,CoordinateType>,
 			Bases::Renderable<DSEL::Omit>
 		>::type{}; // poor man's template alias
-																	
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType> 
-		class ControlBase : public 
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class ControlBase : public
 			Frames::MultiPartBorderedRectangle<typename DSEL::FrameStack<
 				IControl<typename RectangleType::coordinate_type,TextType>,
 				Frames::Adapting::Rectangular<DSEL::Omit,RectangleType>,
@@ -2765,7 +2765,7 @@ namespace graphene
 		public:
 			Control(){/* empty body */}
 
-			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
 			{
 				this->left() = left;
@@ -2821,7 +2821,7 @@ namespace graphene
 		public:
 			Paragraph(){/* empty body */}
 
-			Paragraph(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize, 
+			Paragraph(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
 			{
 				this->left() = left;
@@ -2836,7 +2836,7 @@ namespace graphene
 			} // end Paragraph constructor
 		}; // end class Paragraph
 
-		template<typename RectangleType, typename Margin, typename TextType> 
+		template<typename RectangleType, typename Margin, typename TextType>
 		class LabelBase : public DSEL::FrameStack<
 			RectangleType,
 			Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -2929,7 +2929,7 @@ namespace graphene
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				rootControl.render();
-				
+
 				glutSwapBuffers();
 			} // end function display
 
