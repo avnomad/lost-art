@@ -1,4 +1,4 @@
-	Copyright (C) 2014 Vaptistis Anogeianakis <nomad@cornercase.gr>
+	Copyright (C) 2014, 2018 Vaptistis Anogeianakis <nomad@cornercase.gr>
 
 TODO:
 
