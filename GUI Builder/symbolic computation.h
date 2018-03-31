@@ -181,13 +181,13 @@ namespace Symbolic
 		/** A class to represent free-form mathematical expressions.
 		 *  Unsigned integral (natural) numbers are represented internally as UIntType.
 		 *	Signed, rational and fixed point real numbers are represented using negation,
-		 *	divition and natural numbers.
+		 *	division and natural numbers.
 		 */
 		template<typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = int>
 		class Expression
 		{
 			/**********************
-			*    Consept Check    *
+			*    Concept Check    *
 			**********************/
 
 			static_assert(std::numeric_limits<UIntType>::is_integer && !std::numeric_limits<UIntType>::is_signed,
@@ -227,8 +227,8 @@ namespace Symbolic
 			{
 			public:
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
-				/** Stores the extends of the rectangle an expression subtree will occupy when
-				 *	printed in 2D in the vector extends in right postorder (right subtree before
+				/** Stores the extends of the rectangle, an expression subtree will occupy when
+				 *	printed in 2D, in the vector extends in right postorder (right subtree before
 				 *	left subtree). Returns the extends of the subtree it's called on.
 				 */
 				virtual Extends getPrint2DExtends(const symbol_table_type &symbols, extends_container &extends, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
@@ -800,12 +800,12 @@ namespace Symbolic
 					(
 						expression, errorStream << val("Parse error: \"") << construct<std::string>(_1, _2) << "\"!\n"
 												<< val("Here:         ") << construct<std::string>(bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
-												<< "Exprected a " << _4 << ".\n"
+												<< "Expected a " << _4 << ".\n"
 					);
 				} // end Syntax constructor
 
 			private:
-				// Boost::Spirit and Boost::Phoenix work-arrounds:
+				// Boost::Spirit and Boost::Phoenix workarounds:
 				template<template<class> class Operator>
 				static AbstractNode *unaryCombine(AbstractNode *subExpression)
 				{

@@ -257,11 +257,11 @@ namespace graphene
 			virtual CoordinateType textWidth() const = 0;
 			virtual CoordinateType textCharWidth(size_t index) const = 0;
 			virtual void setTextWidth(const CoordinateType &value) = 0; // deprecated
-			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
-			// and add prefered width, height read-only properties.
+			// TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio
+			// and add preferred width, height read-only properties.
 		}; // end class SizedText
 
-		/** This frame is intended for used in frame stacks that use textHeight/textWidth as a
+		/** This frame is intended for use in frame stacks that use textHeight/textWidth as a
 		 *	"preferred" size and need another method to return the actual text height/width.
 		 *	The first pair member is the width and the second the height.
 		 */
@@ -314,11 +314,11 @@ namespace graphene
 			virtual CoordinateType nameWidth() const = 0;
 			virtual CoordinateType nameCharWidth(size_t index) const = 0;
 			virtual void setNameWidth(const CoordinateType &value) = 0; // deprecated
-			// TODO: allow arbitrary writable height, width combinations, add a prefered aspect ratio
-			// and add prefered width, height read-only properties.
+			// TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio
+			// and add preferred width, height read-only properties.
 		}; // end class SizedName
 
-		/** This frame is intended for used in frame stacks that use nameHeight/nameWidth as a
+		/** This frame is intended for use in frame stacks that use nameHeight/nameWidth as a
 		 *	"preferred" size and need another method to return the actual name height/width.
 		 *	The first pair member is the width and the second the height.
 		 */
@@ -390,7 +390,7 @@ namespace graphene
 			// Methods
 		public:
 			// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
-			// TODO: consider arguments like wraparround:bool
+			// TODO: consider arguments like wraparound:bool
 			virtual void nextPosition() = 0;
 			virtual void prevPosition() = 0;
 			virtual void firstPosition() = 0;
@@ -405,7 +405,7 @@ namespace graphene
 			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,
 				HOME,END,LEFT,RIGHT,UP,DOWN,INSERT,L_SHIFT,R_SHIFT,L_ALT,R_ALT,L_CTRL,R_CTRL,NUM_LOCK};
 
-			/** Controls implementing this interface should document whether they expect to recieve all
+			/** Controls implementing this interface should document whether they expect to receive all
 			 *	mouse events or only the ones that happen above them.
 			 */
 			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
@@ -616,13 +616,13 @@ namespace graphene
 			FrameStackType &select()
 			{
 				iSelected = true;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method select
 
 			FrameStackType &deselect()
 			{
 				iSelected = false;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method deselect
 
 			bool &selected()
@@ -664,13 +664,13 @@ namespace graphene
 			FrameStackType &press()
 			{
 				iPressed = true;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method press
 
 			FrameStackType &depress()
 			{
 				iPressed = false;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method depress
 
 			bool &pressed()
@@ -711,13 +711,13 @@ namespace graphene
 			FrameStackType &highlight()
 			{
 				iHighlighted = true;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method highlight
 
 			FrameStackType &dehighlight()
 			{
 				iHighlighted = false;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method dehighlight
 
 			bool &highlighted()
@@ -758,13 +758,13 @@ namespace graphene
 			FrameStackType &focus()
 			{
 				iFocused = true;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method focus
 
 			FrameStackType &unfocus()
 			{
 				iFocused = false;
-				return *static_cast<FrameStackType *>(this); // can be dengerous without check...
+				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
 			} // end method unfocus
 
 			bool &focused()
@@ -920,7 +920,7 @@ namespace graphene
 				CoordinateType effectiveTextHeight = std::min(this->textHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
 				CoordinateType effectiveTextWidth = std::min(effectiveTextHeight * fontEngine.stringWidth(this->text()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
 				if(this->text().empty())
-					return std::make_pair(static_cast<CoordinateType>(0),effectiveTextHeight); // avoid divition by zero
+					return std::make_pair(static_cast<CoordinateType>(0),effectiveTextHeight); // avoid division by zero
 				effectiveTextHeight = std::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->text()));
 
 				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
@@ -934,8 +934,8 @@ namespace graphene
 				result.first = fontEngine.charWidth(this->text().at(index)) * result.second / fontEngine.fontHeight();
 
 				return  result;
-			} // end method textCharWidth
-		}; // end class effectiveTextCharSize
+			} // end method effectiveTextCharSize
+		}; // end class BoxedAdaptableSizeText
 
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
 		class Named : public BaseType
@@ -1048,7 +1048,7 @@ namespace graphene
 				CoordinateType effectiveNameHeight = std::min(this->nameHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
 				CoordinateType effectiveNameWidth = std::min(effectiveNameHeight * fontEngine.stringWidth(this->name()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
 				if(this->name().empty())
-					return std::make_pair(static_cast<CoordinateType>(0),effectiveNameHeight); // avoid divition by zero
+					return std::make_pair(static_cast<CoordinateType>(0),effectiveNameHeight); // avoid division by zero
 				effectiveNameHeight = std::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->name()));
 
 				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
@@ -1108,7 +1108,7 @@ namespace graphene
 			*    Methods    *
 			****************/
 		public:
-			// TODO: does it work in every cases where left() > right() || bottom() > top()?
+			// TODO: does it work in every case where left() > right() || bottom() > top()?
 #define partUnderPointMacro(PartType,Const,const_) \
 			PartType partUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
@@ -1203,7 +1203,7 @@ namespace graphene
 			*    Methods    *
 			****************/
 		public:
-			// TODO: does it work in every cases where left() > right() || bottom() > top()?
+			// TODO: does it work in every case where left() > right() || bottom() > top()?
 #define charUnderPointMacro(CharType,ConcreteCharType,Const) \
 			CharType charUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
@@ -1279,7 +1279,7 @@ namespace graphene
 			****************/
 		public:
 			// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
-			// TODO: consider arguments like wraparround:bool
+			// TODO: consider arguments like wraparound:bool
 			void nextPosition()
 			{
 				if(this->index() < iTextConceptMap.text(*this->pointer()).size())
@@ -1360,7 +1360,7 @@ namespace graphene
 			public:
 				/** Default constructs the underlying RectangularType
 				 */
-				Rectangular(){/* emtpy body */}
+				Rectangular(){/* empty body */}
 
 				/** Forwards arguments to the underlying RectangularType constructor
 				 */
@@ -1561,7 +1561,7 @@ namespace graphene
 				/** BaseType should be Rectangular, Textual, SizedText. Margin and LineSpacing should be compile-time rational types
 				 *	representing the margin reserved between the rectangle sides and the paragraph text and the empty space left
 				 *	between lines respectively.
-				 *	Newline characters in the text are respected, but new ones may be added as text is wrapper to fit
+				 *	Newline characters in the text are respected, but new ones may be added as text is wrapped to fit
 				 *	in the rectangle.
 				 *	If the text cannot fit in the rectangle, it is silently scaled down for rendering. This does not affect
 				 *	the size returned by the object methods.
@@ -2080,7 +2080,7 @@ namespace graphene
 
 			/** This frame is intended for the implementation of buttons. It requires the BaseType to be
 			 *	pressable and highlightable and expects to receive only mouse events than happen over it,
-			 *	except when it is has the focus in which case it expects all.
+			 *	except when it has the focus, in which case it expects all.
 			 *	It ignores keyboard and wheel events for now.
 			 */
 			// TODO: formally define behaviour using a state machine.
@@ -2151,7 +2151,7 @@ namespace graphene
 				} // end method mouseExit
 			}; // end class TwoStagePressable
 
-			/** BaseType must be conform to the CaretLike interface.
+			/** BaseType must conform to the CaretLike interface.
 			 */
 			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 			class CaretLike : public BaseType
@@ -2429,7 +2429,7 @@ namespace graphene
 
 	/** This is a DSEL for composing frames to create frame stacks.
 	 *	The syntax is far from ideal due to limitations of the C++ language and current implementations,
-	 *	but should be a noticable improvement compared to composing them by hand.
+	 *	but should be a noticeable improvement compared to composing them by hand.
 	 */
 	namespace DSEL
 	{
@@ -2899,7 +2899,7 @@ namespace graphene
 			***************/
 		private:
 			static RootControlType rootControl;
-			static coordinate_type pixelWidth, pixelHeight; // in milimetres
+			static coordinate_type pixelWidth, pixelHeight; // in millimetres
 			static bool wasInside;
 
 			/****************
@@ -2953,7 +2953,7 @@ namespace graphene
 			{
 				using Bases::EventHandling::NonAsciiKey;
 
-				// TODO: add more keys if the appear in GLUT the documentation
+				// TODO: add more keys if they appear in GLUT's documentation
 				switch(glutKey)
 				{
 				case GLUT_KEY_F1: return NonAsciiKey::F1;
@@ -3060,9 +3060,9 @@ namespace graphene
 		template<typename RootControlType>
 		RootControlType GLUT<RootControlType>::rootControl;
 		template<typename RootControlType>
-		typename GLUT<RootControlType>::coordinate_type GLUT<RootControlType>::pixelWidth;  // in milimetres
+		typename GLUT<RootControlType>::coordinate_type GLUT<RootControlType>::pixelWidth;  // in millimetres
 		template<typename RootControlType>
-		typename GLUT<RootControlType>::coordinate_type GLUT<RootControlType>::pixelHeight; // in milimetres
+		typename GLUT<RootControlType>::coordinate_type GLUT<RootControlType>::pixelHeight; // in millimetres
 		template<typename RootControlType>
 		bool GLUT<RootControlType>::wasInside;
 

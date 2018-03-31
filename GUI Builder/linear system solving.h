@@ -19,7 +19,7 @@ namespace LinearSystem
 	 *	doing any pivoting. The operations are done numerically as opposed to
 	 *	symbolic operations. The current version will work best with matrices
 	 *	comprising elements supporting exact operations (like rational numbers),
-	 *	but should also work with floating point numbers as well (albeit the
+	 *	but should also work with floating point numbers (albeit the
 	 *	lack of pivoting may cause numerical instability).
 	 */
 	template<typename Derived>	// should optimize later... e.g. set to 0s and 1s instead of computing them and swap whole rows if that's faster in eigen.
@@ -158,7 +158,7 @@ namespace LinearSystem
 
 
 	/** Takes the augmented matrix A|b of a linear system of equations in reduced
-	 *	row echelon form and returns a pair (C,d) such as for each column vector x
+	 *	row echelon form and returns a pair (C,d) such that for each column vector x
 	 *	with as many rows as C has columns it holds that A*(C*x+d)==b. In other
 	 *	words, C*x+d is a solution of the system.
 	 */

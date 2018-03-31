@@ -129,7 +129,7 @@ namespace GUIModel
 			graphene::Bases::Renderable<graphene::DSEL::Omit>
 		>::type{}; // poor man's template alias
 
-		/** Const instances should be constant and non-const instances should be non constant
+		/** Const instances should be constant and non-const instances should be non-constant
 		 */
 		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 		class ControlPart : public graphene::DSEL::FrameStack<
@@ -623,7 +623,7 @@ namespace GUIModel
 		public:
 			/** Construct an uninitialized Constraint.
 			 */
-			Constraint(){/* emtpy body */}
+			Constraint(){/* empty body */}
 
 			/** Construct a Constraint with the specified sides.
 			 */
@@ -1051,7 +1051,7 @@ namespace GUIModel
 		}; // end class Constraint
 
 		// TODO: split button and control handling code and move them into separate classes. ButtonManager?
-		// TODO: split Model class to frames.
+		// TODO: split Model class into frames.
 		template<typename CoordinateType, typename TextType = std::string>
 		class Model : public geometry::Rectangle<CoordinateType>
 		{
@@ -1079,7 +1079,7 @@ namespace GUIModel
 
 			static const int margin = 10; // in millimeters
 			static const int buttonHeight = 15;  // in millimeters
-			static const int buttonWidth = static_cast<int>(buttonHeight*1.61803)/* golden ration */;  // in millimeters
+			static const int buttonWidth = static_cast<int>(buttonHeight*1.61803)/* golden ratio */;  // in millimeters
 
 			static const int borderSize = 2;
 			static const int buttonTextHeight = 10;
@@ -1403,7 +1403,7 @@ namespace GUIModel
 				auto base = std::get<0>(solution);
 				auto offset = std::get<1>(solution);
 
-				// temporary code for outputing errors and warnings.
+				// temporary code for outputting errors and warnings.
 				if(investigation.nIndependentEquations < investigation.nEquations)
 					std::cout << "Warning: " << investigation.nEquations - investigation.nIndependentEquations << " constraint(s) are redundant!" << std::endl;
 				if(investigation.isImpossible)

@@ -9,7 +9,7 @@
 
 #include "application customization.h"
 
-float pixelWidth, pixelHeight; // in milimetres
+float pixelWidth, pixelHeight; // in millimetres
 
 
 void display()

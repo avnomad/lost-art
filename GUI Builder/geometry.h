@@ -79,7 +79,7 @@ namespace geometry
 
 		/** Construct an uninitialized Rectangle.
 		 */
-		Rectangle(){/* emtpy body */}
+		Rectangle(){/* empty body */}
 
 		/** Construct a rectangle with the specified sides.
 		 */
@@ -159,7 +159,7 @@ namespace geometry
 
 	// TODO: consider changing the interface in order to enforce left <= right && bottom <= top.
 	// Use properties?
-	/** This rectangled type can capture a designated subset of its coordinate by reference.
+	/** This rectangled type can capture a designated subset of its coordinates by reference.
 	 *	In which case, it should not outlive the objects it refers to.
 	 *	Note: there does not seem to be a way to implement transitive constness in C++ so const instances
 	 *	should have constant == true while non-const instances should have constant == false.
@@ -197,7 +197,7 @@ namespace geometry
 
 		/** Construct an uninitialized RefRectangle.
 		 */
-		RefRectangle(){/* emtpy body */}
+		RefRectangle(){/* empty body */}
 
 		/** Construct a rectangle with the specified sides.
 		 *	Depending on the template parameters some arguments may be captured by reference!
