@@ -1117,16 +1117,16 @@ namespace GUIModel
 			std::vector<std::pair<button_type,std::function<void()>>> buttons;
 			text_box_type tbFileName;
 
-			typename std::common_type<decltype(buttons)>::type::iterator highlightedButton; // workaround for decltype not working alone
-			typename std::common_type<decltype(buttons)>::type::iterator pressedButton;
+			typename decltype(buttons)::iterator highlightedButton;
+			typename decltype(buttons)::iterator pressedButton;
 
-			typename std::common_type<decltype(controls)>::type::reverse_iterator highlightedControl;
-			typename std::common_type<decltype(controls)>::type::reverse_iterator selectedControl;
-			typename std::common_type<decltype(controls)>::type::reverse_iterator focusedControl;
+			typename decltype(controls)::reverse_iterator highlightedControl;
+			typename decltype(controls)::reverse_iterator selectedControl;
+			typename decltype(controls)::reverse_iterator focusedControl;
 
-			typename std::common_type<decltype(constraints)>::type::iterator highlightedConstraint;
-			typename std::common_type<decltype(constraints)>::type::iterator selectedConstraint;
-			typename std::common_type<decltype(constraints)>::type::iterator focusedConstraint;
+			typename decltype(constraints)::iterator highlightedConstraint;
+			typename decltype(constraints)::iterator selectedConstraint;
+			typename decltype(constraints)::iterator focusedConstraint;
 
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
 
@@ -1208,7 +1208,7 @@ namespace GUIModel
 				caret = nullptr; // TODO: change to only become null if not pointing to text box.
 			} // end method clear
 
-			auto eraseControl(typename std::common_type<decltype(controls)>::type::iterator control)
+			auto eraseControl(typename decltype(controls)::iterator control)
 			{
 				size_t index = control - controls.begin();
 				auto result = controls.erase(control);
@@ -1227,7 +1227,7 @@ namespace GUIModel
 				return result;
 			} // end method eraseControl
 
-			auto eraseConstraint(typename std::common_type<decltype(constraints)>::type::iterator constraint)
+			auto eraseConstraint(typename decltype(constraints)::iterator constraint)
 			{
 				return constraints.erase(constraint);
 			} // end method eraseConstraint
