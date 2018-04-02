@@ -955,21 +955,21 @@ namespace Symbolic
 
 #define BINARY_EXPRESSION(op,tag) \
 		template<typename UIntType, typename NameType, typename IDType> \
-		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression)->decltype(leftSubExpression) \
+		inline decltype(auto) operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression) \
 		{\
 			return FreeForms::Expression<UIntType,NameType,IDType>::template \
 				binaryCombine<tag>(std::move(leftSubExpression),std::move(rightSubExpression));\
 		} /* end function operator op*/\
 		\
 		template<typename UIntType, typename NameType, typename IDType, typename OtherOpType> \
-		inline auto operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, OtherOpType &&rightSubExpression)->decltype(leftSubExpression) \
+		inline decltype(auto) operator op(FreeForms::Expression<UIntType,NameType,IDType> leftSubExpression, OtherOpType &&rightSubExpression) \
 		{\
 			return FreeForms::Expression<UIntType,NameType,IDType>::template \
 				binaryCombine<tag>(std::move(leftSubExpression),decltype(leftSubExpression)(std::forward<OtherOpType>(rightSubExpression)));\
 		} /* end function operator op*/\
 		\
 		template<typename UIntType, typename NameType, typename IDType, typename OtherOpType> \
-		inline auto operator op(OtherOpType &&leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression)->decltype(rightSubExpression) \
+		inline decltype(auto) operator op(OtherOpType &&leftSubExpression, FreeForms::Expression<UIntType,NameType,IDType> rightSubExpression) \
 		{\
 			return FreeForms::Expression<UIntType,NameType,IDType>::template \
 				binaryCombine<tag>(decltype(rightSubExpression)(std::forward<OtherOpType>(leftSubExpression)),std::move(rightSubExpression));\

@@ -531,22 +531,22 @@ namespace GUIModel
 				return tree;
 			} // end method operator property_tree_type
 
-			auto referredSide()->decltype((*iContainer)[control].side(side))
+			decltype(auto) referredSide()
 			{
 				return (*iContainer)[control].side(side);
 			} // end method referredSide
 
-			auto referredSide() const->decltype((*iContainer)[control].side(side))
+			decltype(auto) referredSide() const
 			{
 				return (*iContainer)[control].side(side);
 			} // end method referredSide
 
-			auto referredControl()->decltype((*iContainer)[control])
+			decltype(auto) referredControl()
 			{
 				return (*iContainer)[control];
 			} // end method referredControl
 
-			auto referredControl() const->decltype((*iContainer)[control])
+			decltype(auto) referredControl() const
 			{
 				return (*iContainer)[control];
 			} // end method referredControl
@@ -1208,7 +1208,7 @@ namespace GUIModel
 				caret = nullptr; // TODO: change to only become null if not pointing to text box.
 			} // end method clear
 
-			auto eraseControl(typename std::common_type<decltype(controls)>::type::iterator control)->decltype(controls.erase(control))
+			auto eraseControl(typename std::common_type<decltype(controls)>::type::iterator control)
 			{
 				size_t index = control - controls.begin();
 				auto result = controls.erase(control);
@@ -1227,7 +1227,7 @@ namespace GUIModel
 				return result;
 			} // end method eraseControl
 
-			auto eraseConstraint(typename std::common_type<decltype(constraints)>::type::iterator constraint)->decltype(constraints.erase(constraint))
+			auto eraseConstraint(typename std::common_type<decltype(constraints)>::type::iterator constraint)
 			{
 				return constraints.erase(constraint);
 			} // end method eraseConstraint

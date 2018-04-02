@@ -2276,25 +2276,25 @@ namespace graphene
 		struct Textual
 		{
 			template<typename TextualType>
-			auto text(TextualType &&textual) const->decltype(textual.text())
+			decltype(auto) text(TextualType &&textual) const
 			{
 				return textual.text();
 			} // end method text
 
 			template<typename TextualType>
-			auto textHeight(TextualType &&textual) const->decltype(textual.textHeight())
+			decltype(auto) textHeight(TextualType &&textual) const
 			{
 				return textual.textHeight();
 			} // end method textHeight
 
 			template<typename TextualType>
-			auto textWidth(TextualType &&textual) const->decltype(textual.textWidth())
+			decltype(auto) textWidth(TextualType &&textual) const
 			{
 				return textual.textWidth();
 			} // end method textWidth
 
 			template<typename TextualType>
-			auto textCharWidth(TextualType &&textual, size_t index) const->decltype(textual.textCharWidth(index))
+			decltype(auto) textCharWidth(TextualType &&textual, size_t index) const
 			{
 				return textual.textCharWidth(index);
 			} // end method textCharWidth
@@ -2307,14 +2307,14 @@ namespace graphene
 
 			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveTextSize is not available.
 			template<typename TextualType>
-			auto effectiveTextSize(TextualType &&textual) const->decltype(textual.effectiveTextSize())
+			decltype(auto) effectiveTextSize(TextualType &&textual) const
 			{
 				return textual.effectiveTextSize();
 			} // end method effectiveTextSize
 
 			// TODO: use SFINAE to fallback to (textCharWidth,textHeight) if effectiveTextCharSize is not available.
 			template<typename TextualType>
-			auto effectiveTextCharSize(TextualType &&textual, size_t index) const->decltype(textual.effectiveTextCharSize(index))
+			decltype(auto) effectiveTextCharSize(TextualType &&textual, size_t index) const
 			{
 				return textual.effectiveTextCharSize(index);
 			} // end method effectiveTextCharSize
@@ -2324,25 +2324,25 @@ namespace graphene
 		struct Named
 		{
 			template<typename NamedType>
-			auto text(NamedType &&named) const->decltype(named.name())
+			decltype(auto) text(NamedType &&named) const
 			{
 				return named.name();
 			} // end method text
 
 			template<typename NamedType>
-			auto textHeight(NamedType &&named) const->decltype(named.nameHeight())
+			decltype(auto) textHeight(NamedType &&named) const
 			{
 				return named.nameHeight();
 			} // end method textHeight
 
 			template<typename NamedType>
-			auto textWidth(NamedType &&named) const->decltype(named.nameWidth())
+			decltype(auto) textWidth(NamedType &&named) const
 			{
 				return named.nameWidth();
 			} // end method textWidth
 
 			template<typename NamedType>
-			auto textCharWidth(NamedType &&named, size_t index) const->decltype(named.nameCharWidth(index))
+			decltype(auto) textCharWidth(NamedType &&named, size_t index) const
 			{
 				return named.nameCharWidth(index);
 			} // end method textCharWidth
@@ -2355,14 +2355,14 @@ namespace graphene
 
 			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveNameSize is not available.
 			template<typename NamedType>
-			auto effectiveTextSize(NamedType &&named) const->decltype(named.effectiveNameSize())
+			decltype(auto) effectiveTextSize(NamedType &&named) const
 			{
 				return named.effectiveNameSize();
 			} // end method effectiveTextSize
 
 			// TODO: use SFINAE to fallback to (nameWidth,nameHeight) if effectiveNameCharSize is not available.
 			template<typename NamedType>
-			auto effectiveTextCharSize(NamedType &&named, size_t index) const->decltype(named.effectiveNameCharSize(index))
+			decltype(auto) effectiveTextCharSize(NamedType &&named, size_t index) const
 			{
 				return named.effectiveNameCharSize(index);
 			} // end method effectiveTextSize
