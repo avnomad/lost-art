@@ -16,7 +16,7 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "symbolic computation.h"
+#include "symbolic computation.hpp"
 
 #include <string>
 using std::string;

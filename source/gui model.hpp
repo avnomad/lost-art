@@ -44,11 +44,11 @@
 
 #include <Eigen/Dense>
 
-#include "geometry.h"
-#include "graphene.h"
-#include "symbol table.h"
-#include "portable type names.h"
-#include "linear system solving.h"
+#include "geometry.hpp"
+#include "graphene.hpp"
+#include "symbol table.hpp"
+#include "portable type names.hpp"
+#include "linear system solving.hpp"
 
 namespace GUIModel
 {

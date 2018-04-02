@@ -34,7 +34,7 @@
 #include <boost/spirit/include/lex_lexertl.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
-#include "symbol table.h"
+#include "symbol table.hpp"
 
 namespace Symbolic
 {

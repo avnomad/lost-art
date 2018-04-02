@@ -28,9 +28,9 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-#include "opengl overloads.h"
+#include "opengl overloads.hpp"
 
-#include "geometry.h"
+#include "geometry.hpp"
 
 namespace graphene
 {

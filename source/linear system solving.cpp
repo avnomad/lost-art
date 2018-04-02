@@ -16,7 +16,7 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "linear system solving.h"
+#include "linear system solving.hpp"
 
 #include <vector>
 using std::vector;
@@ -29,7 +29,7 @@ using std::max;
 
 #include <cassert>
 
-#include "eigen-rational interface code.h"
+#include "eigen-rational interface code.hpp"
 using namespace boost;
 using namespace Eigen;
 

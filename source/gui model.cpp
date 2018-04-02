@@ -16,7 +16,7 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gui model.h"
+#include "gui model.hpp"
 
 #include <vector>
 using std::vector;

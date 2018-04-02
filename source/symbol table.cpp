@@ -16,7 +16,7 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "symbol table.h"
+#include "symbol table.hpp"
 
 #include <string>
 using std::string;

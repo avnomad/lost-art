@@ -16,7 +16,7 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "graphene.h"
+#include "graphene.hpp"
 
 #include <cassert>
 
