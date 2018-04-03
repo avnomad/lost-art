@@ -1418,7 +1418,7 @@ namespace GUIModel
 				output << "} // end function updateCoordinates\n";
 			} // end method outputOpenGLCppApp
 
-			template<typename RationalType, typename AppCoordType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
+			template<typename RationalType, typename AppCoordType, typename IDType = int, typename NameType = std::string>
 			void compile(const std::string &headerName, const std::string &buildDirectoryName) const
 			{
 				auto systemMatrix = generateSystemMatrix<RationalType,IDType,NameType>();

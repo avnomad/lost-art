@@ -563,7 +563,7 @@ namespace Symbolic
 		public:
 			/** Construct an empty Expression
 			 */
-			Expression(std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type())) // make_shared doesn't work for some reason...
+			Expression(std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
 				:symbols(std::move(symbolTable))
 			{
 				// empty body
