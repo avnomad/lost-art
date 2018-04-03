@@ -464,6 +464,12 @@ namespace graphene
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
 
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				using BaseType::BaseType;
+
 				/****************
 				*    Methods    *
 				****************/
@@ -488,6 +494,12 @@ namespace graphene
 			public:
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -924,6 +936,12 @@ namespace graphene
 			typedef FontEngineType font_engine_type;
 			typedef Margin margin;
 
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			using BaseType::BaseType;
+
 			/****************
 			*    Methods    *
 			****************/
@@ -1044,6 +1062,12 @@ namespace graphene
 		class BoxedAdaptableSizeName : public BaseType
 		{
 			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			using BaseType::BaseType;
+
+			/*********************
 			*    Member Types    *
 			*********************/
 		public:
@@ -1088,6 +1112,12 @@ namespace graphene
 			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			using BaseType::BaseType;
+
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -1201,6 +1231,12 @@ namespace graphene
 			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiCharBorderedRectangle : public BaseType
 		{
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			using BaseType::BaseType;
+
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -1457,11 +1493,13 @@ namespace graphene
 					FilledRectangle() = default;
 
 					template<typename OtherType>
-					FilledRectangle(OtherType &&other) // this class does not add extra members
+					FilledRectangle(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
 					} // end FilledRectangle forwarding constructor (may move/copy/convert)
+
+					using BaseType::BaseType;
 
 					/****************
 					*    Methods    *
@@ -1493,11 +1531,13 @@ namespace graphene
 					BorderedRectangle() = default;
 
 					template<typename OtherType>
-					BorderedRectangle(OtherType &&other) // this class does not add extra members
+					BorderedRectangle(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
 					} // end BorderedRectangle forwarding constructor (may move/copy/convert)
+
+					using BaseType::BaseType;
 
 					/****************
 					*    Methods    *
@@ -1543,11 +1583,13 @@ namespace graphene
 					BoxedText() = default;
 
 					template<typename OtherType>
-					BoxedText(OtherType &&other) // this class does not add extra members
+					BoxedText(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
 					} // end BoxedText forwarding constructor (may move/copy/convert)
+
+					using BaseType::BaseType;
 
 					/****************
 					*    Methods    *
@@ -1602,11 +1644,13 @@ namespace graphene
 					BoxedParagraph() = default;
 
 					template<typename OtherType>
-					BoxedParagraph(OtherType &&other) // this class does not add extra members
+					BoxedParagraph(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
 					} // end BoxedParagraph forwarding constructor (may move/copy/convert)
+
+					using BaseType::BaseType;
 
 					/****************
 					*    Methods    *
@@ -1670,11 +1714,13 @@ namespace graphene
 					InversedColor() = default;
 
 					template<typename OtherType>
-					InversedColor(OtherType &&other) // this class does not add extra members
+					InversedColor(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
 					} // end InversedColor forwarding constructor (may move/copy/convert)
+
+					using BaseType::BaseType;
 
 					/****************
 					*    Methods    *
@@ -1714,11 +1760,13 @@ namespace graphene
 					IndirectCaret() = default;
 
 					template<typename OtherType>
-					IndirectCaret(OtherType &&other) // this class does not add extra members
+					IndirectCaret(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
 					} // end IndirectCaret forwarding constructor (may move/copy/convert)
+
+					using BaseType::BaseType;
 
 					/****************
 					*    Methods    *
@@ -1773,11 +1821,13 @@ namespace graphene
 				Stippled() = default;
 
 				template<typename OtherType>
-				Stippled(OtherType &&other) // this class does not add extra members
+				Stippled(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Stippled forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -1846,11 +1896,13 @@ namespace graphene
 				Conditional() = default;
 
 				template<typename OtherType>
-				Conditional(OtherType &&other) // this class does not add extra members
+				Conditional(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Conditional forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -1883,11 +1935,13 @@ namespace graphene
 				Sequential() = default;
 
 				template<typename OtherType>
-				Sequential(OtherType &&other) // this class does not add extra members
+				Sequential(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Sequential forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -1917,11 +1971,13 @@ namespace graphene
 				Rotated() = default;
 
 				template<typename OtherType>
-				Rotated(OtherType &&other) // this class does not add extra members
+				Rotated(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Rotated forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -1957,11 +2013,13 @@ namespace graphene
 				Scaled() = default;
 
 				template<typename OtherType>
-				Scaled(OtherType &&other) // this class does not add extra members
+				Scaled(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Scaled forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -1997,11 +2055,13 @@ namespace graphene
 				Translated() = default;
 
 				template<typename OtherType>
-				Translated(OtherType &&other) // this class does not add extra members
+				Translated(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Translated forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -2039,11 +2099,13 @@ namespace graphene
 				Null() = default;
 
 				template<typename OtherType>
-				Null(OtherType &&other) // this class does not add extra members
+				Null(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
 				} // end Null forwarding constructor (may move/copy/convert)
+
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -2070,6 +2132,12 @@ namespace graphene
 			public:
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -2110,6 +2178,12 @@ namespace graphene
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
 				typedef Focus<TwoStagePressable<Bases::Empty,void>> focus_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
@@ -2178,6 +2252,12 @@ namespace graphene
 			public:
 				typedef BaseType base_type;
 				typedef CoordinateType coordinate_type;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				using BaseType::BaseType;
 
 				/****************
 				*    Methods    *
