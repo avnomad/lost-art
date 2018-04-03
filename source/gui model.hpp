@@ -1167,7 +1167,7 @@ namespace GUIModel
 					[this](){run("build");});
 
 				// initialize controls
-				controls.push_back(control_type(0,0,0,0,borderSize,"Screen",controlTextHeight)); // emplace_back can't take 6+ arguments yet...
+				controls.emplace_back(0,0,0,0,borderSize,"Screen",controlTextHeight);
 
 				// initialize pointers and iterators
 				highlightedButton = buttons.end();
@@ -1579,7 +1579,7 @@ namespace GUIModel
 										deselectAll();
 										auto avg = geometry::isHorizontal(side1) ? (endPoint1->left() + endPoint1->right() + endPoint2->left() + endPoint2->right())/4.0
 																				 : (endPoint1->bottom() + endPoint1->top() + endPoint2->bottom() + endPoint2->top())/4.0;
-										constraints.push_back(constraint_type(&controls,control1,side1,control2,side2,avg-0.5*constraintThickness,avg+0.5*constraintThickness,"",constraintTextHeight));
+										constraints.emplace_back(&controls,control1,side1,control2,side2,avg-0.5*constraintThickness,avg+0.5*constraintThickness,"",constraintTextHeight);
 										highlightedConstraint = constraints.end();
 										(selectedConstraint = focusedConstraint = constraints.end()-1)->select().focus(); // no constraint was highlighted
 										caret = focusedConstraint->charWithIndex(focusedConstraint->text().size());
@@ -1684,16 +1684,16 @@ namespace GUIModel
 						unfocusAll();
 						if(highlightedControl != controls.rend())
 							highlightedControl->dehighlight();
-						controls.push_back(control_type(x,y,x,y,borderSize,"control"+std::to_string(controlIndex++),controlTextHeight)); // emplace_back can't take 6+ arguments yet.
+						controls.emplace_back(x,y,x,y,borderSize,"control"+std::to_string(controlIndex++),controlTextHeight);
 						(focusedControl = highlightedControl = selectedControl = controls.rbegin())->highlight().select().focus();
 						selectedPart = selectedControl->partUnderPoint(x,y); // TODO: guarantee this will be a corner
 						caret = focusedControl->charUnderPoint(x,y);
 
 						// add automatic constraints (temporary code)
-						//constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+constraintThickness,"0mm",constraintTextHeight));
-						//constraints.push_back(constraint_type(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+constraintThickness,"0mm",constraintTextHeight));
-						//constraints.push_back(constraint_type(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+constraintThickness,"0mm",constraintTextHeight));
-						//constraints.push_back(constraint_type(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+constraintThickness,"0mm",constraintTextHeight));
+						//constraints.emplace_back(&controls,controls.size()-1,side_type::LEFT,controls.size()-1,side_type::RIGHT,y,y+constraintThickness,"0mm",constraintTextHeight);
+						//constraints.emplace_back(&controls,controls.size()-1,side_type::BOTTOM,controls.size()-1,side_type::TOP,x,x+constraintThickness,"0mm",constraintTextHeight);
+						//constraints.emplace_back(&controls,0,side_type::LEFT,controls.size()-1,side_type::LEFT,y,y+constraintThickness,"0mm",constraintTextHeight);
+						//constraints.emplace_back(&controls,0,side_type::BOTTOM,controls.size()-1,side_type::BOTTOM,x,x+constraintThickness,"0mm",constraintTextHeight);
 						//highlightedConstraint = selectedConstraint = focusedConstraint = constraints.end();
 					} // end if
 
@@ -1788,6 +1788,13 @@ namespace GUIModel
 				} // end if
 			} // end method resize
 		}; // end class Model
+
+		template<typename CoordinateType, typename TextType>
+		const int Model<CoordinateType,TextType>::borderSize;
+		template<typename CoordinateType, typename TextType>
+		const int Model<CoordinateType,TextType>::controlTextHeight;
+		template<typename CoordinateType, typename TextType>
+		const int Model<CoordinateType,TextType>::constraintTextHeight;
 
 	} // end namespace Controls
 
