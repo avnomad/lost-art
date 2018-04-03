@@ -2451,7 +2451,6 @@ namespace graphene
 	{
 		// Had to workaround many VS2012 and gcc bugs related to decltype. The std::common_type<decltype(...)>::type workaround
 		// didn't work in the base list context.
-		// TODO: Replace the explicit specializations with variadic templates when available.
 		// TODO: Create a real DSEL when decltype becomes available. Include conditionals and sequences.
 		struct Omit {};
 
@@ -2460,119 +2459,85 @@ namespace graphene
 		// Substitute specializations
 		template<class BaseType, class FrameType> struct Substitute;
 
-		// base + 0 args
-		template<class BaseType, template<class TBaseType> class FrameType>
-		struct Substitute<BaseType, FrameType<Omit>>
-		{typedef FrameType<BaseType> type;};
+		// types only
+		template<class BaseType, template<class, class...> class FrameType, class... Types>
+		struct Substitute<BaseType, FrameType<Omit, Types...>>
+		{typedef FrameType<BaseType, Types...> type;};
 
-		// base + 1 args
-		template<class BaseType, template<class TBaseType, class> class FrameType, class P1>
-		struct Substitute<BaseType, FrameType<Omit,P1>>
-		{typedef FrameType<BaseType,P1> type;};
+		// base + booleans
+		template<class BaseType, template<class, bool, bool...> class FrameType, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, Booleans...>>
+		{typedef FrameType<BaseType, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, bool> class FrameType, bool P1>
-		struct Substitute<BaseType, FrameType<Omit,P1>>
-		{typedef FrameType<BaseType,P1> type;};
+		// base + 1 type + booleans
+		template<class BaseType, template<class, class, bool, bool...> class FrameType, class T1, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, T1, Booleans...>>
+		{typedef FrameType<BaseType, T1, Booleans...> type;};
 
-		// base + 2 args
-		template<class BaseType, template<class TBaseType, class, class> class FrameType, class P1, class P2>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
-		{typedef FrameType<BaseType,P1,P2> type;};
+		// base + 2 types + booleans
+		template<class BaseType, template<class, class, class, bool, bool...> class FrameType, class T1, class T2, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, T1, T2, Booleans...>>
+		{typedef FrameType<BaseType, T1, T2, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, bool, class> class FrameType, bool P1, class P2>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
-		{typedef FrameType<BaseType,P1,P2> type;};
+		// base + 3 types + booleans
+		template<class BaseType, template<class, class, class, class, bool, bool...> class FrameType, class T1, class T2, class T3, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, T1, T2, T3, Booleans...>>
+		{typedef FrameType<BaseType, T1, T2, T3, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, class, bool> class FrameType, class P1, bool P2>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
-		{typedef FrameType<BaseType,P1,P2> type;};
+		// base + 4 types + booleans
+		template<class BaseType, template<class, class, class, class, class, bool, bool...> class FrameType, class T1, class T2, class T3, class T4, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, T1, T2, T3, T4, Booleans...>>
+		{typedef FrameType<BaseType, T1, T2, T3, T4, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, bool, bool> class FrameType, bool P1, bool P2>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2>>
-		{typedef FrameType<BaseType,P1,P2> type;};
+		// base + bool + 1 type + booleans
+		template<class BaseType, template<class, bool, class, bool...> class FrameType, bool b1, class T1, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, T1, Booleans...>>
+		{typedef FrameType<BaseType, b1, T1, Booleans...> type;};
 
-		// base + 3 args
-		template<class BaseType, template<class TBaseType, class, class, class> class FrameType, class P1, class P2, class P3>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
-		{typedef FrameType<BaseType,P1,P2,P3> type;};
+		// base + bool + 2 types + booleans
+		template<class BaseType, template<class, bool, class, class, bool...> class FrameType, bool b1,class T1, class T2, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, Booleans...>>
+		{typedef FrameType<BaseType, b1, T1, T2, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, bool, class, class> class FrameType, bool P1, class P2, class P3>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
-		{typedef FrameType<BaseType,P1,P2,P3> type;};
+		// base + bool + 3 types + booleans
+		template<class BaseType, template<class, bool, class, class, class, bool...> class FrameType, bool b1, class T1, class T2, class T3, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, T3, Booleans...>>
+		{typedef FrameType<BaseType, b1, T1, T2, T3, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, class, bool, class> class FrameType, class P1, bool P2, class P3>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
-		{typedef FrameType<BaseType,P1,P2,P3> type;};
+		// base + bool + 4 types + booleans
+		template<class BaseType, template<class, bool, class, class, class, class, bool...> class FrameType, bool b1, class T1, class T2, class T3, class T4, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, T3, T4, Booleans...>>
+		{typedef FrameType<BaseType, b1, T1, T2, T3, T4, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, bool, bool, class> class FrameType, bool P1, bool P2, class P3>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3>>
-		{typedef FrameType<BaseType,P1,P2,P3> type;};
+		// base + 2 booleans + 1 type + booleans
+		template<class BaseType, template<class, bool, bool, class, bool...> class FrameType, bool b1, bool b2, class T1, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, Booleans...>>
+		{typedef FrameType<BaseType, b1, b2, T1, Booleans...> type;};
 
-		// base + 4 args
-		template<class BaseType, template<class TBaseType, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
+		// base + 2 booleans + 2 types + booleans
+		template<class BaseType, template<class, bool, bool, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, Booleans...>>
+		{typedef FrameType<BaseType, b1, b2, T1, T2, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, bool, class, class, class> class FrameType, bool P1, class P2, class P3, class P4>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
+		// base + 2 booleans + 3 types + booleans
+		template<class BaseType, template<class, bool, bool, class, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, class T3, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, T3, Booleans...>>
+		{typedef FrameType<BaseType, b1, b2, T1, T2, T3, Booleans...> type;};
 
-		template<class BaseType, template<class TBaseType, class, bool, class, class> class FrameType, class P1, bool P2, class P3, class P4>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
-
-		template<class BaseType, template<class TBaseType, bool, bool, class, class> class FrameType, bool P1, bool P2, class P3, class P4>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4> type;};
-
-		// base + 5 args
-		template<class BaseType, template<class TBaseType, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
-
-		template<class BaseType, template<class TBaseType, bool, class, class, class, class> class FrameType, bool P1, class P2, class P3, class P4, class P5>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
-
-		template<class BaseType, template<class TBaseType, class, bool, class, class, class> class FrameType, class P1, bool P2, class P3, class P4, class P5>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
-
-		template<class BaseType, template<class TBaseType, bool, bool, class, class, class> class FrameType, bool P1, bool P2, class P3, class P4, class P5>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5> type;};
-
-		// base + 6 args
-		template<class BaseType, template<class TBaseType, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6> type;};
-
-		// base + 7 args
-		template<class BaseType, template<class TBaseType, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7> type;};
-
-		// base + 8 args
-		template<class BaseType, template<class TBaseType, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7,P8>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8> type;};
-
-		// base + 9 args
-		template<class BaseType, template<class TBaseType, class, class, class, class, class, class, class, class, class> class FrameType, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
-		struct Substitute<BaseType, FrameType<Omit,P1,P2,P3,P4,P5,P6,P7,P8,P9>>
-		{typedef FrameType<BaseType,P1,P2,P3,P4,P5,P6,P7,P8,P9> type;};
+		// base + 2 booleans + 4 types + booleans
+		template<class BaseType, template<class, bool, bool, class, class, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, class T3, class T4, bool... Booleans>
+		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, T3, T4, Booleans...>>
+		{typedef FrameType<BaseType, b1, b2, T1, T2, T3, T4, Booleans...> type;};
 
 		// FrameStack specializations
-		template<class BaseType = Omit, class FrameType = Omit,
-													class T3 = Omit,  class T4 = Omit,  class T5 = Omit,
-				class T6 = Omit,  class T7 = Omit,  class T8 = Omit,  class T9 = Omit,  class T10 = Omit,
-				class T11 = Omit, class T12 = Omit, class T13 = Omit, class T14 = Omit, class T15 = Omit,
-				class T16 = Omit, class T17 = Omit, class T18 = Omit, class T19 = Omit, class T20 = Omit>
-		struct FrameStack
-		{typedef typename FrameStack<typename Substitute<BaseType,FrameType>::type,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,Omit>::type type;};
+		template<class BaseType = Omit, class... Frames> struct FrameStack;
+
+		template<class BaseType, class FrameType, class... Rest>
+		struct FrameStack<BaseType, FrameType, Rest...>
+		{typedef typename FrameStack<typename Substitute<BaseType,FrameType>::type, Rest...>::type type;};
 
 		template<class BaseType>
-		struct FrameStack<BaseType,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit,Omit>
+		struct FrameStack<BaseType>
 		{typedef BaseType type;};
 	} // end namespace DSEL
 
