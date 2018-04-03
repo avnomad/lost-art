@@ -1154,7 +1154,8 @@ namespace GUIModel
 			/** Construct an empty Model.
 			 */
 			Model()
-				:firstResize(true),createOnMove(false),inConstraintAddMode(false),controlIndex(0),tbFileName(0,0,0,0,borderSize,"last session.las",textBoxTextHeight)
+				:tbFileName(0,0,0,0,borderSize,"last session.las",textBoxTextHeight),
+				controlIndex(0),firstResize(true),createOnMove(false),inConstraintAddMode(false)
 			{
 				// initialize buttons
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Load",buttonTextHeight),[this](){load(tbFileName.text());});
@@ -1511,6 +1512,7 @@ namespace GUIModel
 				else if(caret)
 					caret->keyboardAscii(code,down,x,y);
 				else if(down && code == 0x7f) // delete key
+				{
 					if(selectedConstraint != constraints.end())
 					{
 						eraseConstraint(selectedConstraint);
@@ -1525,6 +1527,7 @@ namespace GUIModel
 						// assumes more invalidations than actually happen but will fix when I switch to std::list
 						selectedPart = nullptr;
 					} // end if
+				} // end else
 			} // end method keyboardAscii
 
 			void keyboardNonAscii(graphene::Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
@@ -1544,6 +1547,7 @@ namespace GUIModel
 			void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y)
 			{
 				if(button == 0)
+				{
 					if(down)
 					{
 						if(inConstraintAddMode)
@@ -1567,6 +1571,7 @@ namespace GUIModel
 									endPoint1 = nullptr;
 
 								if(endPoint1)
+								{
 									if(endPoint2 && geometry::isHorizontal(side1) == geometry::isHorizontal(side2))
 									{
 										// create new constraint and focus it
@@ -1588,6 +1593,7 @@ namespace GUIModel
 										control2 = control1;
 										side2 = side1;
 									} // end else
+								} // end else
 							} // end if
 						}
 						else
@@ -1656,6 +1662,7 @@ namespace GUIModel
 
 						createOnMove = false;
 					} // end else
+				} // end if
 			} // end method mouseButton
 
 			void mouseEnter(CoordinateType x, CoordinateType y)
