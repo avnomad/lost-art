@@ -264,7 +264,7 @@ namespace Symbolic
 				UIntType value;
 
 				// Constructors / Destructor
-				LiteralNode(const UIntType &value)
+				explicit LiteralNode(const UIntType &value)
 					:value(value)
 				{
 					// empty body
@@ -322,7 +322,7 @@ namespace Symbolic
 				IDType id;
 
 				// Constructors / Destructor
-				VariableNode(IDType id)
+				explicit VariableNode(IDType id)
 					:id(id)
 				{
 					// empty body
@@ -374,7 +374,7 @@ namespace Symbolic
 				std::unique_ptr<AbstractNode> child;
 
 				// Constructors / Destructor
-				UnaryNode(std::unique_ptr<AbstractNode> child)
+				explicit UnaryNode(std::unique_ptr<AbstractNode> child)
 					:child(std::move(child))
 				{
 					// empty body
@@ -563,7 +563,7 @@ namespace Symbolic
 		public:
 			/** Construct an empty Expression
 			 */
-			Expression(std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
+			explicit Expression(std::shared_ptr<symbol_table_type> symbolTable = std::make_shared<symbol_table_type>())
 				:symbols(std::move(symbolTable))
 			{
 				// empty body
@@ -723,7 +723,7 @@ namespace Symbolic
 				/** A Grammar object should not outlive the std::ostream
 				 *	one given as argument to its constructor.
 				 */
-				Grammar(std::ostream &errorStream)
+				explicit Grammar(std::ostream &errorStream)
 					:identifier("[a-zA-Z_][a-zA-Z_0-9]*"),
 					rationalLiteral("[0-9]+(\\.[0-9]+)?"),
 					whiteSpace("[ \t\v\f\n\r]"),
@@ -928,7 +928,7 @@ namespace Symbolic
 
 			// Constructors / Destructor
 		public:
-			ExpressionBuilder(std::shared_ptr<symbol_table_type> spSymbolTable = std::make_shared<symbol_table_type>())
+			explicit ExpressionBuilder(std::shared_ptr<symbol_table_type> spSymbolTable = std::make_shared<symbol_table_type>())
 				:spSymbolTable(std::move(spSymbolTable))
 			{
 				// empty body

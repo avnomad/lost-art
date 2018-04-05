@@ -1493,7 +1493,7 @@ namespace graphene
 					FilledRectangle() = default;
 
 					template<typename OtherType>
-					FilledRectangle(OtherType &&other)
+					explicit FilledRectangle(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
@@ -1531,7 +1531,7 @@ namespace graphene
 					BorderedRectangle() = default;
 
 					template<typename OtherType>
-					BorderedRectangle(OtherType &&other)
+					explicit BorderedRectangle(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
@@ -1583,7 +1583,7 @@ namespace graphene
 					BoxedText() = default;
 
 					template<typename OtherType>
-					BoxedText(OtherType &&other)
+					explicit BoxedText(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
@@ -1644,7 +1644,7 @@ namespace graphene
 					BoxedParagraph() = default;
 
 					template<typename OtherType>
-					BoxedParagraph(OtherType &&other)
+					explicit BoxedParagraph(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
@@ -1714,7 +1714,7 @@ namespace graphene
 					InversedColor() = default;
 
 					template<typename OtherType>
-					InversedColor(OtherType &&other)
+					explicit InversedColor(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
@@ -1760,7 +1760,7 @@ namespace graphene
 					IndirectCaret() = default;
 
 					template<typename OtherType>
-					IndirectCaret(OtherType &&other)
+					explicit IndirectCaret(OtherType &&other)
 						:BaseType(std::forward<OtherType>(other))
 					{
 						// empty body
@@ -1821,7 +1821,7 @@ namespace graphene
 				Stippled() = default;
 
 				template<typename OtherType>
-				Stippled(OtherType &&other)
+				explicit Stippled(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -1896,7 +1896,7 @@ namespace graphene
 				Conditional() = default;
 
 				template<typename OtherType>
-				Conditional(OtherType &&other)
+				explicit Conditional(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -1935,7 +1935,7 @@ namespace graphene
 				Sequential() = default;
 
 				template<typename OtherType>
-				Sequential(OtherType &&other)
+				explicit Sequential(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -1971,7 +1971,7 @@ namespace graphene
 				Rotated() = default;
 
 				template<typename OtherType>
-				Rotated(OtherType &&other)
+				explicit Rotated(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -2013,7 +2013,7 @@ namespace graphene
 				Scaled() = default;
 
 				template<typename OtherType>
-				Scaled(OtherType &&other)
+				explicit Scaled(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -2055,7 +2055,7 @@ namespace graphene
 				Translated() = default;
 
 				template<typename OtherType>
-				Translated(OtherType &&other)
+				explicit Translated(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -2099,7 +2099,7 @@ namespace graphene
 				Null() = default;
 
 				template<typename OtherType>
-				Null(OtherType &&other)
+				explicit Null(OtherType &&other)
 					:BaseType(std::forward<OtherType>(other))
 				{
 					// empty body
@@ -2466,7 +2466,7 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			GlutStrokeFontEngine(void *font = GLUT_STROKE_ROMAN)
+			explicit GlutStrokeFontEngine(void *font = GLUT_STROKE_ROMAN)
 				:iFont(font)
 			{
 				// empty body
