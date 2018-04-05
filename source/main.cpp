@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
 	// glut initialization
 	glutInit(&argc,argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_MULTISAMPLE);
 	glutInitWindowSize(800,800);
 	glutInitWindowPosition(700,160);
 	glutCreateWindow("LostArt");
@@ -40,10 +40,9 @@ int main(int argc, char **argv)
 
 	// OpenGL initialization
 	glColor3f(1.0,0.75,0.0);	// gold
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // consider adding alpha planes to framebuffer
-	glEnable(GL_BLEND); // and change factors for optimum polygon antialiasing.
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glEnable(GL_MULTISAMPLE);
 
 	// application initialization
 	typedef graphene::EventAdaptors::GLUT<GUIModel::Controls::Model<float>> AdaptorType;
