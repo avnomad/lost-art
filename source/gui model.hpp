@@ -71,7 +71,7 @@ namespace GUIModel
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class ButtonBase : public graphene::DSEL::FrameStack<
+		using ButtonBase = typename graphene::DSEL::FrameStack<
 			RectangleType,
 			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
 			graphene::Frames::Pressable<graphene::DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
@@ -79,40 +79,32 @@ namespace GUIModel
 			graphene::Frames::Textual<graphene::DSEL::Omit,TextType>,
 			graphene::Frames::SizedText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			graphene::Frames::BoxedAdaptableSizeText<graphene::DSEL::Omit,graphene::FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
-		>::type{}; // poor man's template alias
+		>::type;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class Button : public graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-									graphene::Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-									graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
-								graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-									graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-										graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-									graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-										graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-										graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-									graphene::FunctionObjects::Highlighted>,
-								graphene::FunctionObjects::Pressed>
+		using ButtonRenderableBase =
+			graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+				graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+					graphene::Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
+					graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
+				graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+					graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+						graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+					graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+						graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+					graphene::FunctionObjects::Highlighted>,
+				graphene::FunctionObjects::Pressed>;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class Button : public ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-						graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-							graphene::Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
-						graphene::Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-							graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-							graphene::Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								graphene::Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-							graphene::FunctionObjects::Highlighted>,
-						graphene::FunctionObjects::Pressed> base_type;
+			using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -138,41 +130,36 @@ namespace GUIModel
 		}; // end class Button
 
 		template<typename CoordinateType>
-		class IShapePart : public graphene::DSEL::FrameStack<
+		using IShapePart = typename graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
 			graphene::Bases::Destructible<graphene::DSEL::Omit>,
 			graphene::Bases::Movable<graphene::DSEL::Omit,CoordinateType>,
 			graphene::Bases::Rectangular<graphene::DSEL::Omit,CoordinateType>, // TODO: move rectangular back to concrete control when the screen special case is handled
 			graphene::Bases::Containing<graphene::DSEL::Omit,CoordinateType>,
 			graphene::Bases::Renderable<graphene::DSEL::Omit>
-		>::type{}; // poor man's template alias
+		>::type;
+
+		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		using ControlPartBase = typename graphene::DSEL::FrameStack<
+			IShapePart<CoordinateType>,
+			graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
+			graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
+			graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
+			graphene::Frames::Renderable::Stippled<graphene::DSEL::Omit>,
+			graphene::Frames::Renderable::Colorblind::InversedColor<graphene::DSEL::Omit>,
+			graphene::Frames::Adapting::Rectangular<graphene::DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+		>::type;
 
 		/** Const instances should be constant and non-const instances should be non-constant
 		 */
 		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		class ControlPart : public graphene::DSEL::FrameStack<
-				IShapePart<CoordinateType>,
-				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
-				graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
-				graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
-				graphene::Frames::Renderable::Stippled<graphene::DSEL::Omit>,
-				graphene::Frames::Renderable::Colorblind::InversedColor<graphene::DSEL::Omit>,
-				graphene::Frames::Adapting::Rectangular<graphene::DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
-			>::type
+		class ControlPart : public ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef typename graphene::DSEL::FrameStack<
-				IShapePart<CoordinateType>,
-				graphene::Frames::Movable::Rectangular<graphene::DSEL::Omit,CoordinateType>,
-				graphene::Frames::Movable::HVMovable<graphene::DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
-				graphene::Frames::Renderable::Colorblind::FilledRectangle<graphene::DSEL::Omit>,
-				graphene::Frames::Renderable::Stippled<graphene::DSEL::Omit>,
-				graphene::Frames::Renderable::Colorblind::InversedColor<graphene::DSEL::Omit>,
-				graphene::Frames::Adapting::Rectangular<graphene::DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
-			>::type base_type;
+			using base_type = ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>;
 			typedef typename ControlPart::rectangle_type rectangle_type;
 
 			/*********************
@@ -192,40 +179,34 @@ namespace GUIModel
 		}; // end class ControlPart
 
 		template<typename CoordinateType, typename CharType>
-		class ICaret : public graphene::DSEL::FrameStack<
+		using ICaret = typename graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
 			graphene::Bases::Destructible<graphene::DSEL::Omit>,
 			graphene::Bases::CaretLike<graphene::DSEL::Omit,CharType>,
 			graphene::Bases::EventHandling::KeyboardAndMouse<graphene::DSEL::Omit,CoordinateType>, // TODO: handle in parent
 			graphene::Bases::Renderable<graphene::DSEL::Omit>
-		>::type{}; // poor man's template alias
+		>::type;
 
 		template<typename CoordinateType, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
-		class Caret : public graphene::DSEL::FrameStack<
-				ICaret<CoordinateType,CharType>,
-				graphene::Frames::Indexing<graphene::DSEL::Omit,size_t>,
-				graphene::Frames::Offset<graphene::DSEL::Omit,CoordinateType>,
-				graphene::Frames::Pointing<graphene::DSEL::Omit,PointedToType*>,
-				graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,CharType>,
-				graphene::Frames::EventHandling::KeyboardAndMouseStub<graphene::DSEL::Omit,CoordinateType>, // TODO: remove...
-				graphene::Frames::EventHandling::CaretLike<graphene::DSEL::Omit,CoordinateType>, // ...and handle in parent
-				graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,Width>
-			>::type
+		using CaretBase = typename graphene::DSEL::FrameStack<
+			ICaret<CoordinateType,CharType>,
+			graphene::Frames::Indexing<graphene::DSEL::Omit,size_t>,
+			graphene::Frames::Offset<graphene::DSEL::Omit,CoordinateType>,
+			graphene::Frames::Pointing<graphene::DSEL::Omit,PointedToType*>,
+			graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,CharType>,
+			graphene::Frames::EventHandling::KeyboardAndMouseStub<graphene::DSEL::Omit,CoordinateType>, // TODO: remove...
+			graphene::Frames::EventHandling::CaretLike<graphene::DSEL::Omit,CoordinateType>, // ...and handle in parent
+			graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,Width>
+		>::type;
+
+		template<typename CoordinateType, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
+		class Caret : public CaretBase<CoordinateType, TextConceptMap, CharType, PointedToType, Width>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef typename graphene::DSEL::FrameStack<
-				ICaret<CoordinateType,CharType>,
-				graphene::Frames::Indexing<graphene::DSEL::Omit,size_t>,
-				graphene::Frames::Offset<graphene::DSEL::Omit,CoordinateType>,
-				graphene::Frames::Pointing<graphene::DSEL::Omit,PointedToType*>,
-				graphene::Frames::IndirectCaretLike<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,CharType>,
-				graphene::Frames::EventHandling::KeyboardAndMouseStub<graphene::DSEL::Omit,CoordinateType>, // TODO: remove...
-				graphene::Frames::EventHandling::CaretLike<graphene::DSEL::Omit,CoordinateType>, // ...and handle in parent
-				graphene::Frames::Renderable::Colorblind::IndirectCaret<graphene::DSEL::Omit,TextConceptMap,graphene::FunctionObjects::GlutStrokeFontEngine,Width>
-			>::type base_type;
+			using base_type = CaretBase<CoordinateType, TextConceptMap, CharType, PointedToType, Width>;
 			typedef PointedToType pointed_to_type;
 			typedef Width width;
 
@@ -247,7 +228,7 @@ namespace GUIModel
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string>	class Control;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
-		class ControlBase : public
+		using ControlBase =
 			graphene::Frames::MultiPartBorderedRectangle<typename graphene::DSEL::FrameStack<
 				RectangleType,
 				graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -264,54 +245,39 @@ namespace GUIModel
 						  Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Named,typename TextType::value_type,      Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 					const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Named,typename TextType::value_type,const Control<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 					size_t,typename RectangleType::coordinate_type>
-			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>{}; // poor man's template alias
+			>::type,ControlPart,std::unique_ptr<IShapePart<typename RectangleType::coordinate_type>>,std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
-		class Control : public graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-										graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
-											graphene::Frames::Renderable::Colorblind::InversedColor<
-												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
-										graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
-												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
-											graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
-												graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
-											graphene::FunctionObjects::Highlighted>,
-										graphene::FunctionObjects::Selected>,
-									graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-										graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>>>,
-										graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
-										graphene::FunctionObjects::Focused>>
+		using ControlRenderableBase =
+			graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+				graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+					graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+						graphene::Frames::Renderable::Colorblind::InversedColor<
+							graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
+					graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+							graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+							graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
+						graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+							graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+							graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
+						graphene::FunctionObjects::Highlighted>,
+					graphene::FunctionObjects::Selected>,
+				graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+					graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>>>,
+					graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+					graphene::FunctionObjects::Focused>>;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
+		class Control : public ControlRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-							graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
-								graphene::Frames::Renderable::Colorblind::InversedColor<
-									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>>,
-							graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
-									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
-								graphene::Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-									graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
-									graphene::Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Named,Margin>>,
-								graphene::FunctionObjects::Highlighted>,
-							graphene::FunctionObjects::Selected>,
-						graphene::Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>>>,
-							graphene::Frames::Renderable::Null<ControlBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
-							graphene::FunctionObjects::Focused>> base_type;
+			using base_type = ControlRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>;
 			typedef typename Control::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 			typedef boost::property_tree::ptree property_tree_type;
@@ -382,7 +348,7 @@ namespace GUIModel
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string> class TextBox;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
-		class TextBoxBase : public graphene::DSEL::FrameStack<
+		using TextBoxBase = typename graphene::DSEL::FrameStack<
 			RectangleType,
 			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
 			graphene::Frames::Focusable<graphene::DSEL::Omit,TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
@@ -397,42 +363,33 @@ namespace GUIModel
 				      Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,const TextBox<RectangleType,BorderSize,Margin,CaretWidth,TextType>,CaretWidth>,
 				size_t,typename RectangleType::coordinate_type>
-		>::type{}; // poor man's template alias
+		>::type;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
-		class TextBox : public graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-									graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-										graphene::Frames::Renderable::Colorblind::FilledRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
-										graphene::Frames::Renderable::Colorblind::InversedColor<
-											graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
-									graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-										graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
-											graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-										graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
-											graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-										graphene::FunctionObjects::Highlighted>,
-									graphene::FunctionObjects::Focused>
+		using TextBoxRenderableBase =
+			graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+				graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+					graphene::Frames::Renderable::Colorblind::FilledRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
+					graphene::Frames::Renderable::Colorblind::InversedColor<
+						graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
+				graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+					graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
+						graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+					graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
+						graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
+					graphene::FunctionObjects::Highlighted>,
+				graphene::FunctionObjects::Focused>;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
+		class TextBox : public TextBoxRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-						graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-							graphene::Frames::Renderable::Colorblind::FilledRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>>,
-							graphene::Frames::Renderable::Colorblind::InversedColor<
-								graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>>,
-						graphene::Frames::Renderable::Conditional<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-							graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,std::ratio<0>>,
-								graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-							graphene::Frames::Renderable::Sequential<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,BorderSize>,
-								graphene::Frames::Renderable::Colorblind::BoxedText<TextBoxBase<RectangleType,BorderSize,Margin,CaretWidth,TextType>,graphene::FunctionObjects::Textual,Margin>>,
-							graphene::FunctionObjects::Highlighted>,
-						graphene::FunctionObjects::Focused> base_type;
+			using base_type = TextBoxRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>;
 			typedef typename TextBox::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -555,7 +512,7 @@ namespace GUIModel
 		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType = std::string>	class Constraint;
 
 		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
-		class ConstraintBase : public
+		using ConstraintBase = typename
 		graphene::DSEL::FrameStack<
 			RectangleType,
 			graphene::Frames::UniformlyBordered<graphene::DSEL::Omit,typename RectangleType::coordinate_type>,
@@ -571,23 +528,27 @@ namespace GUIModel
 					  Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,      Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type,graphene::FunctionObjects::Textual,typename TextType::value_type,const Constraint<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,CaretWidth>,
 				size_t,typename RectangleType::coordinate_type>
-		>::type{}; // poor man's template alias
+		>::type;
+
+		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
+		using ConstaintBase =
+			graphene::Frames::Renderable::Sequential<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+				graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+					graphene::Frames::Renderable::Colorblind::FilledRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+					graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>,
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,std::ratio<0>>,
+						graphene::FunctionObjects::Highlighted>,
+					graphene::FunctionObjects::Selected>,
+				graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
+					graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
+						graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>>>,
+					graphene::Frames::Renderable::Null<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
+				graphene::FunctionObjects::Focused>>;
 
 		// TODO: decompose Constraint to frames
 		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
-		class Constraint : public	graphene::Frames::Renderable::Sequential<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-										graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::FilledRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
-											graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>,
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,std::ratio<0>>,
-												graphene::FunctionObjects::Highlighted>,
-											graphene::FunctionObjects::Selected>,
-										graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-											graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
-												graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>>>,
-											graphene::Frames::Renderable::Null<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
-										graphene::FunctionObjects::Focused>>
+		class Constraint : public ConstaintBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>
 		{
 			/*********************
 			*    Member Types    *
@@ -602,19 +563,7 @@ namespace GUIModel
 				RationalType rhsConstant;
 			}; // end struct ParseResult
 
-			typedef graphene::Frames::Renderable::Sequential<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-						graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-							graphene::Frames::Renderable::Colorblind::FilledRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
-							graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>,
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,std::ratio<0>>,
-								graphene::FunctionObjects::Highlighted>,
-							graphene::FunctionObjects::Selected>,
-						graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
-							graphene::Frames::Renderable::Colorblind::InversedColor<graphene::Frames::Renderable::Stippled<
-								graphene::Frames::Renderable::Colorblind::BorderedRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,BorderSize>>>,
-							graphene::Frames::Renderable::Null<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
-						graphene::FunctionObjects::Focused>> base_type;
+			using base_type = ConstaintBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>;
 			typedef RectangleType rectangle_type;
 			typedef ControlContainerType control_container_type;
 			typedef typename RectangleType::coordinate_type coordinate_type;
@@ -1801,3 +1750,4 @@ namespace GUIModel
 } // end namespace GUIModel
 
 #endif // GUI_MODEL_H
+

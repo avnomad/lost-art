@@ -2631,7 +2631,7 @@ namespace graphene
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class ButtonBase : public DSEL::FrameStack<
+		using ButtonBase = typename DSEL::FrameStack<
 			RectangleType,
 			Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
 			Frames::Pressable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
@@ -2640,40 +2640,32 @@ namespace graphene
 			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>,
 			Frames::EventHandling::TwoStagePressable<DSEL::Omit,typename RectangleType::coordinate_type>
-		>::type{}; // poor man's template alias
+		>::type;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class Button : public Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-									Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-									Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-								Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-									Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-										Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-									Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-										Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-										Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-									FunctionObjects::Highlighted>,
-								FunctionObjects::Pressed>
+		using ButtonRenderableBase =
+			Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+				Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+					Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
+					Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
+				Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+					Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+						Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
+					Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+						Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
+					FunctionObjects::Highlighted>,
+				FunctionObjects::Pressed>;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
+		class Button : public ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-							Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-						Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-							Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-							Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-							FunctionObjects::Highlighted>,
-						FunctionObjects::Pressed> base_type;
+			using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
 			typedef typename Button::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -2700,42 +2692,36 @@ namespace graphene
 
 
 		template<typename CoordinateType>
-		class IShapePart : public DSEL::FrameStack<
+		using IShapePart = typename DSEL::FrameStack<
 			Bases::Empty,
 			Bases::Destructible<DSEL::Omit>,
 			Bases::Movable<DSEL::Omit,CoordinateType>,
 			Bases::Containing<DSEL::Omit,CoordinateType>,
 			Bases::Renderable<DSEL::Omit>
-		>::type{}; // poor man's template alias
+		>::type;
+
+		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		using ControlPartBase = typename DSEL::FrameStack<
+			IShapePart<CoordinateType>,
+			Bases::Rectangular<DSEL::Omit,CoordinateType>,
+			Frames::Movable::Rectangular<DSEL::Omit,CoordinateType>,
+			Frames::Movable::HVMovable<DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
+			Frames::Renderable::Colorblind::FilledRectangle<DSEL::Omit>,
+			Frames::Renderable::Stippled<DSEL::Omit>,
+			Frames::Renderable::Colorblind::InversedColor<DSEL::Omit>,
+			Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
+		>::type;
 
 		/** Const instances should be constant and non-const instances should be non constant
 		 */
 		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		class ControlPart : public DSEL::FrameStack<
-				IShapePart<CoordinateType>,
-				Bases::Rectangular<DSEL::Omit,CoordinateType>,
-				Frames::Movable::Rectangular<DSEL::Omit,CoordinateType>,
-				Frames::Movable::HVMovable<DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
-				Frames::Renderable::Colorblind::FilledRectangle<DSEL::Omit>,
-				Frames::Renderable::Stippled<DSEL::Omit>,
-				Frames::Renderable::Colorblind::InversedColor<DSEL::Omit>,
-				Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
-			>::type
+		class ControlPart : public ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef typename DSEL::FrameStack<
-				IShapePart<CoordinateType>,
-				Bases::Rectangular<DSEL::Omit,CoordinateType>,
-				Frames::Movable::Rectangular<DSEL::Omit,CoordinateType>,
-				Frames::Movable::HVMovable<DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
-				Frames::Renderable::Colorblind::FilledRectangle<DSEL::Omit>,
-				Frames::Renderable::Stippled<DSEL::Omit>,
-				Frames::Renderable::Colorblind::InversedColor<DSEL::Omit>,
-				Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
-			>::type base_type;
+			using base_type = ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>;
 			typedef typename ControlPart::rectangle_type rectangle_type;
 
 			/*********************
@@ -2772,7 +2758,7 @@ namespace graphene
 		>::type{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class ControlBase : public
+		using ControlBase =
 			Frames::MultiPartBorderedRectangle<typename DSEL::FrameStack<
 				IControl<typename RectangleType::coordinate_type,TextType>,
 				Frames::Adapting::Rectangular<DSEL::Omit,RectangleType>,
@@ -2783,40 +2769,32 @@ namespace graphene
 				Frames::Textual<DSEL::Omit,TextType>,
 				Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 				Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
-			>::type,ControlPart>{}; // poor man's template alias
+			>::type,ControlPart>;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
-		class Control : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-									Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-										Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-									Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-											Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-										FunctionObjects::Highlighted>,
-									FunctionObjects::Selected>
+		using ControlRenderableBase =
+			Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+				Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+					Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
+					Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
+				Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+						Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
+					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+						Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
+					FunctionObjects::Highlighted>,
+				FunctionObjects::Selected>;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
+		class Control : public ControlRenderableBase<RectangleType, BorderSize, Margin, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-							Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-						Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-							FunctionObjects::Highlighted>,
-						FunctionObjects::Selected> base_type;
+			using base_type = ControlRenderableBase<RectangleType, BorderSize, Margin, TextType>;
 			typedef typename Control::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -2842,37 +2820,29 @@ namespace graphene
 		}; // end class Control
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename LineSpacing, typename TextType = std::string>
-		class Paragraph : public Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-									Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-										Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-										Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
-									Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-											Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-										Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-											Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-											Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-										FunctionObjects::Highlighted>,
-									FunctionObjects::Selected>
+		using ParagraphBase =
+			Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+				Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+					Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
+					Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
+				Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
+						Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
+					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
+						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
+						Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
+					FunctionObjects::Highlighted>,
+				FunctionObjects::Selected>;
+
+		template<typename RectangleType, typename BorderSize, typename Margin, typename LineSpacing, typename TextType = std::string>
+		class Paragraph : public ParagraphBase<RectangleType, BorderSize, Margin, LineSpacing, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-							Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-							Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
-						Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-								Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-							Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-								Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-								Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-							FunctionObjects::Highlighted>,
-						FunctionObjects::Selected> base_type;
+			using base_type = ParagraphBase<RectangleType, BorderSize, Margin, LineSpacing, TextType>;
 			typedef typename Paragraph::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
@@ -2898,28 +2868,29 @@ namespace graphene
 		}; // end class Paragraph
 
 		template<typename RectangleType, typename Margin, typename TextType>
-		class LabelBase : public DSEL::FrameStack<
+		using LabelBase = typename DSEL::FrameStack<
 			RectangleType,
 			Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
 			Frames::Textual<DSEL::Omit,TextType>,
 			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
 			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
-		>::type{}; // poor man's template alias
+		>::type;
 
 		template<typename RectangleType, typename Margin, typename TextType = std::string>
-		class Label : public Frames::Renderable::Sequential<
-								LabelBase<RectangleType,Margin,TextType>,
-								Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
-								Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>>
+		using LabelRenderableBase =
+			Frames::Renderable::Sequential<
+				LabelBase<RectangleType,Margin,TextType>,
+				Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
+				Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>>;
+
+		template<typename RectangleType, typename Margin, typename TextType = std::string>
+		class Label : public LabelRenderableBase<RectangleType, Margin, TextType>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			typedef Frames::Renderable::Sequential<
-						LabelBase<RectangleType,Margin,TextType>,
-						Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
-						Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>> base_type;
+			using base_type = LabelRenderableBase<RectangleType, Margin, TextType>;
 			typedef typename Label::coordinate_type coordinate_type;
 			typedef RectangleType rectangle_type;
 
