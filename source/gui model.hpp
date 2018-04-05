@@ -105,8 +105,8 @@ namespace GUIModel
 			*********************/
 		public:
 			using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-			typedef typename Button::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
+			using coordinate_type = typename Button::coordinate_type;
+			using rectangle_type = RectangleType ;
 
 			/*********************
 			*    Constructors    *
@@ -160,7 +160,7 @@ namespace GUIModel
 			*********************/
 		public:
 			using base_type = ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>;
-			typedef typename ControlPart::rectangle_type rectangle_type;
+			using rectangle_type = typename ControlPart::rectangle_type;
 
 			/*********************
 			*    Constructors    *
@@ -207,8 +207,8 @@ namespace GUIModel
 			*********************/
 		public:
 			using base_type = CaretBase<CoordinateType, TextConceptMap, CharType, PointedToType, Width>;
-			typedef PointedToType pointed_to_type;
-			typedef Width width;
+			using pointed_to_type = PointedToType;
+			using width = Width;
 
 			/*********************
 			*    Constructors    *
@@ -278,9 +278,9 @@ namespace GUIModel
 			*********************/
 		public:
 			using base_type = ControlRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>;
-			typedef typename Control::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
-			typedef boost::property_tree::ptree property_tree_type;
+			using coordinate_type = typename Control::coordinate_type;
+			using rectangle_type = RectangleType;
+			using property_tree_type = boost::property_tree::ptree;
 
 			// TODO: add color
 			// TODO: add type
@@ -390,8 +390,8 @@ namespace GUIModel
 			*********************/
 		public:
 			using base_type = TextBoxRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>;
-			typedef typename TextBox::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
+			using coordinate_type = typename TextBox::coordinate_type;
+			using rectangle_type = RectangleType;
 
 			/*********************
 			*    Constructors    *
@@ -426,10 +426,10 @@ namespace GUIModel
 			*    Member Types    *
 			*********************/
 
-			typedef ControlContainerType control_container_type;
-			typedef typename control_container_type::value_type::coordinate_type coordinate_type;
-			typedef boost::property_tree::ptree property_tree_type;
-			typedef geometry::RectangleSide side_type;
+			using control_container_type = ControlContainerType;
+			using coordinate_type = typename control_container_type::value_type::coordinate_type;
+			using property_tree_type = boost::property_tree::ptree;
+			using side_type = geometry::RectangleSide;
 
 			/***************
 			*    Fields    *
@@ -564,18 +564,18 @@ namespace GUIModel
 			}; // end struct ParseResult
 
 			using base_type = ConstaintBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>;
-			typedef RectangleType rectangle_type;
-			typedef ControlContainerType control_container_type;
-			typedef typename RectangleType::coordinate_type coordinate_type;
-			typedef TextType text_type;
-			typedef boost::property_tree::ptree property_tree_type;
-			typedef ConstraintEndPoint<ControlContainerType> EndPoint;
-			typedef typename EndPoint::side_type side_type;
-			typedef std::unique_ptr<IShapePart<coordinate_type>> PartType;
-			typedef std::unique_ptr<const IShapePart<coordinate_type>> ConstPartType;
-			typedef BorderSize border_size;
-			typedef LineWidth line_width;
-			typedef CaretWidth caret_width;
+			using rectangle_type = RectangleType;
+			using control_container_type = ControlContainerType;
+			using coordinate_type = typename RectangleType::coordinate_type;
+			using text_type = TextType;
+			using property_tree_type = boost::property_tree::ptree;
+			using EndPoint = ConstraintEndPoint<ControlContainerType>;
+			using side_type = typename EndPoint::side_type;
+			using PartType = std::unique_ptr<IShapePart<coordinate_type>>;
+			using ConstPartType = std::unique_ptr<const IShapePart<coordinate_type>>;
+			using border_size = BorderSize;
+			using line_width = LineWidth;
+			using caret_width = CaretWidth;
 
 			/***************
 			*    Fields    *
@@ -1026,18 +1026,18 @@ namespace GUIModel
 			*    Member Types    *
 			*********************/
 		public:
-			typedef boost::property_tree::ptree property_tree_type;
-			typedef CoordinateType coordinate_type;
-			typedef TextType text_type;
-			typedef typename TextType::value_type char_type;
+			using property_tree_type = boost::property_tree::ptree;
+			using coordinate_type = CoordinateType;
+			using text_type = TextType;
+			using char_type = typename TextType::value_type;
 
-			typedef Control<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType> control_type;
-			typedef Constraint<geometry::Rectangle<CoordinateType>,std::vector<control_type>,std::ratio<1,2>,std::ratio<1,2>,std::ratio<1>,TextType> constraint_type;
-			typedef Button<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,TextType> button_type;
-			typedef TextBox<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType> text_box_type;
+			using control_type = Control<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType>;
+			using constraint_type = Constraint<geometry::Rectangle<CoordinateType>,std::vector<control_type>,std::ratio<1,2>,std::ratio<1,2>,std::ratio<1>,TextType>;
+			using button_type = Button<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,TextType>;
+			using text_box_type = TextBox<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType>;
 
-			typedef typename constraint_type::EndPoint end_point_type;
-			typedef typename end_point_type::side_type side_type;
+			using end_point_type = typename constraint_type::EndPoint;
+			using side_type = typename end_point_type::side_type;
 
 			/***************
 			*    Fields    *

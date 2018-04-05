@@ -31,7 +31,7 @@ using std::max;
 using namespace boost;
 using namespace Eigen;
 
-typedef boost::rational<long long int> Rational;
+using Rational = boost::rational<long long int>;
 
 #define BOOST_TEST_MODULE Linear System Solving
 #include <boost/test/included/unit_test.hpp>

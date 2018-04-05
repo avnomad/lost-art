@@ -46,9 +46,9 @@ namespace Symbolic
 
 		public:
 			// Types
-			typedef typename std::vector<typename std::map<NameType,IDType>::iterator>::size_type size_type;
-			typedef NameType name_type;
-			typedef IDType id_type;
+			using size_type = typename std::vector<typename std::map<NameType,IDType>::iterator>::size_type;
+			using name_type = NameType;
+			using id_type = IDType;
 
 
 			// Constructors / Destructor

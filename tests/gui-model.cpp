@@ -29,7 +29,7 @@ using std::vector;
 BOOST_AUTO_TEST_CASE(Test_Constraint_Parser)
 {
 	using geometry::RectangleSide;
-	typedef boost::rational<long long> Rational;
+	using Rational = boost::rational<long long>;
 	using GUIModel::Controls::Model;
 
 	Model<int> model;

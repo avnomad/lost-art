@@ -65,7 +65,7 @@ namespace Symbolic
 
 		namespace OpTags
 		{
-			typedef int priority_type;
+			using priority_type = int;
 			enum class Associativity {LEFT,RIGHT};
 			enum class Child{LEFT,RIGHT};
 
@@ -120,8 +120,8 @@ namespace Symbolic
 			template<typename T>
 			struct unary_plus
 			{
-				typedef T argument_type;
-				typedef T result_type;
+				using argument_type = T;
+				using result_type = T;
 
 				T operator()(const T &x) const
 				{
@@ -213,10 +213,10 @@ namespace Symbolic
 			*    Member Types    *
 			*********************/
 		public:
-			typedef UIntType uint_type;
-			typedef NameType name_type;
-			typedef IDType id_type;
-			typedef Common::SymbolTable<NameType,IDType> symbol_table_type;
+			using uint_type = UIntType;
+			using name_type = NameType;
+			using id_type = IDType;
+			using symbol_table_type = Common::SymbolTable<NameType,IDType>;
 
 		private:
 			struct Extends
@@ -236,7 +236,7 @@ namespace Symbolic
 				} // end Extends constructor
 			}; // end struct Extends
 
-			typedef std::vector<Extends> extends_container; // I would like to make that a template parameter...
+			using extends_container = std::vector<Extends>; // I would like to make that a template parameter...
 			static const char quotientSymbol;
 
 			struct AbstractNode
@@ -608,9 +608,9 @@ namespace Symbolic
 			Expression(ForwardIterator begin, ForwardIterator end, std::shared_ptr<symbol_table_type> symbolTable = std::shared_ptr<symbol_table_type>(new symbol_table_type()))
 				:symbols(std::move(symbolTable))
 			{
-				typedef lex::lexertl::token<ForwardIterator,boost::mpl::vector<NameType>,boost::mpl::false_> token_type;
-				typedef lex::lexertl::actor_lexer<token_type> lexer_type;
-				typedef typename lexer_type::iterator_type iterator_type;
+				using token_type = lex::lexertl::token<ForwardIterator,boost::mpl::vector<NameType>,boost::mpl::false_>;
+				using lexer_type = lex::lexertl::actor_lexer<token_type>;
+				using iterator_type = typename lexer_type::iterator_type;
 
 				std::stringstream sout;
 				Grammar<lexer_type> scanner(sout);
@@ -739,7 +739,7 @@ namespace Symbolic
 				} // end Grammar constructor
 			}; // end struct Grammar
 
-			typedef AbstractNode *attribute_signature(symbol_table_type *);
+			using attribute_signature = AbstractNode *(symbol_table_type *);
 
 			template<typename ForwardIterator>
 			struct Syntax : public qi::grammar<ForwardIterator,attribute_signature>
@@ -906,19 +906,19 @@ namespace Symbolic
 		// Support Metafunction
 		template<Primitive primitive,typename UIntType, typename NameType> struct ArgType;
 		template<typename UIntType, typename NameType>
-		struct ArgType<Primitive::Variable,UIntType,NameType>{typedef NameType type;};
+		struct ArgType<Primitive::Variable,UIntType,NameType>{using type = NameType;};
 		template<typename UIntType, typename NameType>
-		struct ArgType<Primitive::Constant,UIntType,NameType>{typedef UIntType type;};
+		struct ArgType<Primitive::Constant,UIntType,NameType>{using type = UIntType;};
 
 		template<Primitive primitive, typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = int>
 		struct ExpressionBuilder
 		{
 			// Member Types
-			typedef UIntType uint_type;
-			typedef NameType name_type;
-			typedef IDType id_type;
-			typedef FreeForms::Expression<UIntType,NameType,IDType> expression_type;
-			typedef typename expression_type::symbol_table_type symbol_table_type;
+			using uint_type = UIntType;
+			using name_type = NameType;
+			using id_type = IDType;
+			using expression_type = FreeForms::Expression<UIntType,NameType,IDType>;
+			using symbol_table_type = typename expression_type::symbol_table_type;
 
 			// Fields
 		public:

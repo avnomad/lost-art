@@ -27,9 +27,9 @@ namespace Eigen
 	template<typename I>
 	struct NumTraits<boost::rational<I>>
 	{
-		typedef boost::rational<I> Real;
-		typedef boost::rational<I> NonInteger; // perhaps double would be better?
-		typedef boost::rational<I> Nested;
+		using Real       = boost::rational<I>;
+		using NonInteger = boost::rational<I>; // perhaps double would be better?
+		using Nested     = boost::rational<I>;
 
 		enum{
 			IsComplex = 0,

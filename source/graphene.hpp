@@ -45,7 +45,7 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
+			using base_type = BaseType;
 
 			// Methods
 		public:
@@ -57,7 +57,7 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
+			using base_type = BaseType;
 
 			// Methods
 		public:
@@ -69,8 +69,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -82,8 +82,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -108,8 +108,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -121,8 +121,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef PointerType pointer_type;
+			using base_type = BaseType;
+			using pointer_type = PointerType;
 
 			// Methods
 		public:
@@ -135,8 +135,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef IndexType index_type;
+			using base_type = BaseType;
+			using index_type = IndexType;
 
 			// Methods
 		public:
@@ -149,8 +149,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -165,8 +165,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			// Methods
 		public:
@@ -181,8 +181,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			// Methods
 		public:
@@ -197,8 +197,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			// Methods
 		public:
@@ -213,8 +213,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			// Methods
 		public:
@@ -229,8 +229,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef BorderSizeType border_size_type;
+			using base_type = BaseType;
+			using border_size_type = BorderSizeType;
 
 			// Methods
 		public:
@@ -243,8 +243,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef TextType text_type;
+			using base_type = BaseType;
+			using text_type = TextType;
 
 			// Methods
 		public:
@@ -261,8 +261,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -286,8 +286,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -300,8 +300,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef NameType name_type;
+			using base_type = BaseType;
+			using name_type = NameType;
 
 			// Methods
 		public:
@@ -318,8 +318,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -343,8 +343,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -360,10 +360,10 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef PartType part_type;
-			typedef ConstPartType const_part_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using part_type = PartType;
+			using const_part_type = ConstPartType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -381,11 +381,11 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CharType char_type;
-			typedef ConstCharType const_char_type;
-			typedef IndexType index_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using char_type = CharType;
+			using const_char_type = ConstCharType;
+			using index_type = IndexType;
+			using coordinate_type = CoordinateType;
 
 			// Methods
 		public:
@@ -400,8 +400,8 @@ namespace graphene
 		{
 			// Member Types
 		public:
-			typedef BaseType base_type;
-			typedef CharType char_type;
+			using base_type = BaseType;
+			using char_type = CharType;
 
 			// Methods
 		public:
@@ -429,8 +429,8 @@ namespace graphene
 			{
 				// Member Types
 			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
+				using base_type = BaseType;
+				using coordinate_type = CoordinateType;
 
 				// Methods
 			public:
@@ -461,8 +461,8 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
+				using base_type = BaseType;
+				using coordinate_type = CoordinateType;
 
 				/*********************
 				*    Constructors    *
@@ -492,8 +492,8 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
+				using base_type = BaseType;
+				using coordinate_type = CoordinateType;
 
 				/*********************
 				*    Constructors    *
@@ -520,8 +520,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef PointerType pointer_type;
+			using base_type = BaseType;
+			using pointer_type = PointerType;
 
 			/***************
 			*    Fields    *
@@ -551,8 +551,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef IndexType index_type;
+			using base_type = BaseType;
+			using index_type = IndexType;
 
 			/***************
 			*    Fields    *
@@ -582,8 +582,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
 
 			/***************
 			*    Fields    *
@@ -634,8 +634,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			/****************
 			*    Methods    *
@@ -682,8 +682,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			/****************
 			*    Methods    *
@@ -729,8 +729,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			/****************
 			*    Methods    *
@@ -776,8 +776,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef FrameStackType frame_stack_type;
+			using base_type = BaseType;
+			using frame_stack_type = FrameStackType;
 
 			/****************
 			*    Methods    *
@@ -819,8 +819,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef BorderSizeType border_size_type;
+			using base_type = BaseType;
+			using border_size_type = BorderSizeType;
 
 			/****************
 			*    Methods    *
@@ -850,8 +850,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef TextType text_type;
+			using base_type = BaseType;
+			using text_type = TextType;
 
 			/****************
 			*    Methods    *
@@ -883,9 +883,9 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
-			typedef FontEngineType font_engine_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
+			using font_engine_type = FontEngineType;
 
 			/****************
 			*    Methods    *
@@ -931,10 +931,10 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
-			typedef FontEngineType font_engine_type;
-			typedef Margin margin;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
+			using font_engine_type = FontEngineType;
+			using margin = Margin;
 
 			/*********************
 			*    Constructors    *
@@ -984,8 +984,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef NameType name_type;
+			using base_type = BaseType;
+			using name_type = NameType;
 
 			/****************
 			*    Methods    *
@@ -1017,9 +1017,9 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
-			typedef FontEngineType font_engine_type;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
+			using font_engine_type = FontEngineType;
 
 			/****************
 			*    Methods    *
@@ -1071,10 +1071,10 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef CoordinateType coordinate_type;
-			typedef FontEngineType font_engine_type;
-			typedef Margin margin;
+			using base_type = BaseType;
+			using coordinate_type = CoordinateType;
+			using font_engine_type = FontEngineType;
+			using margin = Margin;
 
 			/****************
 			*    Methods    *
@@ -1122,32 +1122,32 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef PartType part_type;
-			typedef ConstPartType const_part_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using part_type = PartType;
+			using const_part_type = ConstPartType;
+			using coordinate_type = CoordinateType;
 			// TODO: add template alias for ConcretePartTemplate when implemented
 
 			struct concrete_return_type
 			{
-				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true, true,false,false>       bottom_left;
-				typedef const ConcretePartTemplate<CoordinateType, true, true, true, true, true,false,false> const_bottom_left;
-				typedef       ConcretePartTemplate<CoordinateType, true,false,false, true,false,false,false>       left;
-				typedef const ConcretePartTemplate<CoordinateType, true,false, true, true,false,false,false> const_left;
-				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true,false,false, true>       top_left;
-				typedef const ConcretePartTemplate<CoordinateType, true, true, true, true,false,false, true> const_top_left;
-				typedef       ConcretePartTemplate<CoordinateType,false, true,false,false, true,false,false>       bottom;
-				typedef const ConcretePartTemplate<CoordinateType,false, true, true,false, true,false,false> const_bottom;
-				typedef       ConcretePartTemplate<CoordinateType, true, true,false, true, true, true, true>       center;
-				typedef const ConcretePartTemplate<CoordinateType, true, true, true, true, true, true, true> const_center;
-				typedef       ConcretePartTemplate<CoordinateType,false, true,false,false,false,false, true>       top;
-				typedef const ConcretePartTemplate<CoordinateType,false, true, true,false,false,false, true> const_top;
-				typedef       ConcretePartTemplate<CoordinateType, true, true,false,false, true, true,false>       bottom_right;
-				typedef const ConcretePartTemplate<CoordinateType, true, true, true,false, true, true,false> const_bottom_right;
-				typedef       ConcretePartTemplate<CoordinateType, true,false,false,false,false, true,false>       right;
-				typedef const ConcretePartTemplate<CoordinateType, true,false, true,false,false, true,false> const_right;
-				typedef       ConcretePartTemplate<CoordinateType, true, true,false,false,false, true, true>       top_right;
-				typedef const ConcretePartTemplate<CoordinateType, true, true, true,false,false, true, true> const_top_right;
+				using       bottom_left  =       ConcretePartTemplate<CoordinateType, true, true,false, true, true,false,false>;
+				using const_bottom_left  = const ConcretePartTemplate<CoordinateType, true, true, true, true, true,false,false>;
+				using       left         =       ConcretePartTemplate<CoordinateType, true,false,false, true,false,false,false>;
+				using const_left         = const ConcretePartTemplate<CoordinateType, true,false, true, true,false,false,false>;
+				using       top_left     =       ConcretePartTemplate<CoordinateType, true, true,false, true,false,false, true>;
+				using const_top_left     = const ConcretePartTemplate<CoordinateType, true, true, true, true,false,false, true>;
+				using       bottom       =       ConcretePartTemplate<CoordinateType,false, true,false,false, true,false,false>;
+				using const_bottom       = const ConcretePartTemplate<CoordinateType,false, true, true,false, true,false,false>;
+				using       center       =       ConcretePartTemplate<CoordinateType, true, true,false, true, true, true, true>;
+				using const_center       = const ConcretePartTemplate<CoordinateType, true, true, true, true, true, true, true>;
+				using       top          =       ConcretePartTemplate<CoordinateType,false, true,false,false,false,false, true>;
+				using const_top          = const ConcretePartTemplate<CoordinateType,false, true, true,false,false,false, true>;
+				using       bottom_right =       ConcretePartTemplate<CoordinateType, true, true,false,false, true, true,false>;
+				using const_bottom_right = const ConcretePartTemplate<CoordinateType, true, true, true,false, true, true,false>;
+				using       right        =       ConcretePartTemplate<CoordinateType, true,false,false,false,false, true,false>;
+				using const_right        = const ConcretePartTemplate<CoordinateType, true,false, true,false,false, true,false>;
+				using       top_right    =       ConcretePartTemplate<CoordinateType, true, true,false,false,false, true, true>;
+				using const_top_right    = const ConcretePartTemplate<CoordinateType, true, true, true,false,false, true, true>;
 			}; // end struct concrete_return_type
 
 			/****************
@@ -1241,14 +1241,14 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef FontEngineType font_engine_type;
-			typedef CharType char_type;
-			typedef ConstCharType const_char_type;
-			typedef ConcreteCharType concrete_char_type;
-			typedef ConstConcreteCharType const_concrete_char_type;
-			typedef IndexType index_type;
-			typedef CoordinateType coordinate_type;
+			using base_type = BaseType;
+			using font_engine_type = FontEngineType;
+			using char_type = CharType;
+			using const_char_type = ConstCharType;
+			using concrete_char_type = ConcreteCharType;
+			using const_concrete_char_type = ConstConcreteCharType;
+			using index_type = IndexType;
+			using coordinate_type = CoordinateType;
 			// TODO: add template alias for ConcreteCharTemplate when implemented
 
 			/****************
@@ -1315,9 +1315,9 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef BaseType base_type;
-			typedef CharType char_type;
-			typedef FontEngineType font_engine_type;
+			using base_type = BaseType;
+			using char_type = CharType;
+			using font_engine_type = FontEngineType;
 
 			/***************
 			*    Fields    *
@@ -1395,10 +1395,10 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef RectangleType rectangle_type;
-				typedef typename rectangle_type::coordinate_type coordinate_type;
-				typedef typename rectangle_type::Side Side;
+				using base_type = BaseType;
+				using rectangle_type = RectangleType;
+				using coordinate_type = typename rectangle_type::coordinate_type;
+				using Side = typename rectangle_type::Side;
 
 				/***************
 				*    Fields    *
@@ -1484,7 +1484,7 @@ namespace graphene
 					*    Member Types    *
 					*********************/
 				public:
-					typedef BaseType base_type;
+					using base_type = BaseType;
 
 					/*********************
 					*    Constructors    *
@@ -1521,8 +1521,8 @@ namespace graphene
 					*    Member Types    *
 					*********************/
 				public:
-					typedef BaseType base_type;
-					typedef CTRational compile_time_rational_type;
+					using base_type = BaseType;
+					using compile_time_rational_type = CTRational;
 
 					/*********************
 					*    Constructors    *
@@ -1573,8 +1573,8 @@ namespace graphene
 					*    Member Types    *
 					*********************/
 				public:
-					typedef BaseType base_type;
-					typedef Margin margin;
+					using base_type = BaseType;
+					using margin = Margin;
 
 					/*********************
 					*    Constructors    *
@@ -1633,9 +1633,9 @@ namespace graphene
 					*    Member Types    *
 					*********************/
 				public:
-					typedef BaseType base_type;
-					typedef Margin margin;
-					typedef LineSpacing line_spacing;
+					using base_type = BaseType;
+					using margin = Margin;
+					using line_spacing = LineSpacing;
 
 					/*********************
 					*    Constructors    *
@@ -1705,7 +1705,7 @@ namespace graphene
 					*    Member Types    *
 					*********************/
 				public:
-					typedef BaseType base_type;
+					using base_type = BaseType;
 
 					/*********************
 					*    Constructors    *
@@ -1749,9 +1749,9 @@ namespace graphene
 					*    Member Types    *
 					*********************/
 				public:
-					typedef BaseType base_type;
-					typedef FontEngineType font_engine_type;
-					typedef Width width;
+					using base_type = BaseType;
+					using font_engine_type = FontEngineType;
+					using width = Width;
 
 					/*********************
 					*    Constructors    *
@@ -1812,7 +1812,7 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
+				using base_type = BaseType;
 
 				/*********************
 				*    Constructors    *
@@ -1884,10 +1884,10 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef UnaryPredicate unary_predicate_type;
-				typedef TrueWrapper true_wrapper_type;
-				typedef FalseWrapper false_wrapper_type;
+				using base_type = BaseType;
+				using unary_predicate_type = UnaryPredicate;
+				using true_wrapper_type = TrueWrapper;
+				using false_wrapper_type = FalseWrapper;
 
 				/*********************
 				*    Constructors    *
@@ -1924,9 +1924,9 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef FirstWrapper first_wrapper_type;
-				typedef SecondWrapper second_wrapper_type;
+				using base_type = BaseType;
+				using first_wrapper_type = FirstWrapper;
+				using second_wrapper_type = SecondWrapper;
 
 				/*********************
 				*    Constructors    *
@@ -1961,8 +1961,8 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef Angle angle;
+				using base_type = BaseType;
+				using angle = Angle;
 
 				/*********************
 				*    Constructors    *
@@ -2002,9 +2002,9 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef XCoeff x_coeff;
-				typedef YCoeff y_coeff;
+				using base_type = BaseType;
+				using x_coeff = XCoeff;
+				using y_coeff = YCoeff;
 
 				/*********************
 				*    Constructors    *
@@ -2044,9 +2044,9 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef XOffset x_offset;
-				typedef YOffset y_offset;
+				using base_type = BaseType;
+				using x_offset = XOffset;
+				using y_offset = YOffset;
 
 				/*********************
 				*    Constructors    *
@@ -2090,7 +2090,7 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
+				using base_type = BaseType;
 
 				/*********************
 				*    Constructors    *
@@ -2130,8 +2130,8 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
+				using base_type = BaseType;
+				using coordinate_type = CoordinateType;
 
 				/*********************
 				*    Constructors    *
@@ -2175,9 +2175,9 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
-				typedef Focus<TwoStagePressable<Bases::Empty,void>> focus_type;
+				using base_type = BaseType;
+				using coordinate_type = CoordinateType;
+				using focus_type = Focus<TwoStagePressable<Bases::Empty,void>>;
 
 				/*********************
 				*    Constructors    *
@@ -2250,8 +2250,8 @@ namespace graphene
 				*    Member Types    *
 				*********************/
 			public:
-				typedef BaseType base_type;
-				typedef CoordinateType coordinate_type;
+				using base_type = BaseType;
+				using coordinate_type = CoordinateType;
 
 				/*********************
 				*    Constructors    *
@@ -2542,83 +2542,83 @@ namespace graphene
 		// types only
 		template<class BaseType, template<class, class...> class FrameType, class... Types>
 		struct Substitute<BaseType, FrameType<Omit, Types...>>
-		{typedef FrameType<BaseType, Types...> type;};
+		{using type = FrameType<BaseType, Types...>;};
 
 		// base + booleans
 		template<class BaseType, template<class, bool, bool...> class FrameType, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, Booleans...>>
-		{typedef FrameType<BaseType, Booleans...> type;};
+		{using type = FrameType<BaseType, Booleans...>;};
 
 		// base + 1 type + booleans
 		template<class BaseType, template<class, class, bool, bool...> class FrameType, class T1, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, T1, Booleans...>>
-		{typedef FrameType<BaseType, T1, Booleans...> type;};
+		{using type = FrameType<BaseType, T1, Booleans...>;};
 
 		// base + 2 types + booleans
 		template<class BaseType, template<class, class, class, bool, bool...> class FrameType, class T1, class T2, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, T1, T2, Booleans...>>
-		{typedef FrameType<BaseType, T1, T2, Booleans...> type;};
+		{using type = FrameType<BaseType, T1, T2, Booleans...>;};
 
 		// base + 3 types + booleans
 		template<class BaseType, template<class, class, class, class, bool, bool...> class FrameType, class T1, class T2, class T3, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, T1, T2, T3, Booleans...>>
-		{typedef FrameType<BaseType, T1, T2, T3, Booleans...> type;};
+		{using type = FrameType<BaseType, T1, T2, T3, Booleans...>;};
 
 		// base + 4 types + booleans
 		template<class BaseType, template<class, class, class, class, class, bool, bool...> class FrameType, class T1, class T2, class T3, class T4, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, T1, T2, T3, T4, Booleans...>>
-		{typedef FrameType<BaseType, T1, T2, T3, T4, Booleans...> type;};
+		{using type = FrameType<BaseType, T1, T2, T3, T4, Booleans...>;};
 
 		// base + bool + 1 type + booleans
 		template<class BaseType, template<class, bool, class, bool...> class FrameType, bool b1, class T1, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, T1, Booleans...>>
-		{typedef FrameType<BaseType, b1, T1, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, T1, Booleans...>;};
 
 		// base + bool + 2 types + booleans
 		template<class BaseType, template<class, bool, class, class, bool...> class FrameType, bool b1,class T1, class T2, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, Booleans...>>
-		{typedef FrameType<BaseType, b1, T1, T2, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, T1, T2, Booleans...>;};
 
 		// base + bool + 3 types + booleans
 		template<class BaseType, template<class, bool, class, class, class, bool...> class FrameType, bool b1, class T1, class T2, class T3, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, T3, Booleans...>>
-		{typedef FrameType<BaseType, b1, T1, T2, T3, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, T1, T2, T3, Booleans...>;};
 
 		// base + bool + 4 types + booleans
 		template<class BaseType, template<class, bool, class, class, class, class, bool...> class FrameType, bool b1, class T1, class T2, class T3, class T4, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, T3, T4, Booleans...>>
-		{typedef FrameType<BaseType, b1, T1, T2, T3, T4, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, T1, T2, T3, T4, Booleans...>;};
 
 		// base + 2 booleans + 1 type + booleans
 		template<class BaseType, template<class, bool, bool, class, bool...> class FrameType, bool b1, bool b2, class T1, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, Booleans...>>
-		{typedef FrameType<BaseType, b1, b2, T1, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, b2, T1, Booleans...>;};
 
 		// base + 2 booleans + 2 types + booleans
 		template<class BaseType, template<class, bool, bool, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, Booleans...>>
-		{typedef FrameType<BaseType, b1, b2, T1, T2, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, b2, T1, T2, Booleans...>;};
 
 		// base + 2 booleans + 3 types + booleans
 		template<class BaseType, template<class, bool, bool, class, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, class T3, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, T3, Booleans...>>
-		{typedef FrameType<BaseType, b1, b2, T1, T2, T3, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, b2, T1, T2, T3, Booleans...>;};
 
 		// base + 2 booleans + 4 types + booleans
 		template<class BaseType, template<class, bool, bool, class, class, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, class T3, class T4, bool... Booleans>
 		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, T3, T4, Booleans...>>
-		{typedef FrameType<BaseType, b1, b2, T1, T2, T3, T4, Booleans...> type;};
+		{using type = FrameType<BaseType, b1, b2, T1, T2, T3, T4, Booleans...>;};
 
 		// FrameStack specializations
 		template<class BaseType = Omit, class... Frames> struct FrameStack;
 
 		template<class BaseType, class FrameType, class... Rest>
 		struct FrameStack<BaseType, FrameType, Rest...>
-		{typedef typename FrameStack<typename Substitute<BaseType,FrameType>::type, Rest...>::type type;};
+		{using type = typename FrameStack<typename Substitute<BaseType,FrameType>::type, Rest...>::type;};
 
 		template<class BaseType>
 		struct FrameStack<BaseType>
-		{typedef BaseType type;};
+		{using type = BaseType;};
 	} // end namespace DSEL
 
 	/** The intention is to let the client easily combine frames to create controls as needed.
@@ -2666,8 +2666,8 @@ namespace graphene
 			*********************/
 		public:
 			using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-			typedef typename Button::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
+			using coordinate_type = typename Button::coordinate_type;
+			using rectangle_type = RectangleType;
 
 			/*********************
 			*    Constructors    *
@@ -2722,7 +2722,7 @@ namespace graphene
 			*********************/
 		public:
 			using base_type = ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>;
-			typedef typename ControlPart::rectangle_type rectangle_type;
+			using rectangle_type = typename ControlPart::rectangle_type;
 
 			/*********************
 			*    Constructors    *
@@ -2795,8 +2795,8 @@ namespace graphene
 			*********************/
 		public:
 			using base_type = ControlRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-			typedef typename Control::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
+			using coordinate_type = typename Control::coordinate_type;
+			using rectangle_type = RectangleType;
 
 			/*********************
 			*    Constructors    *
@@ -2843,8 +2843,8 @@ namespace graphene
 			*********************/
 		public:
 			using base_type = ParagraphBase<RectangleType, BorderSize, Margin, LineSpacing, TextType>;
-			typedef typename Paragraph::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
+			using coordinate_type = typename Paragraph::coordinate_type;
+			using rectangle_type = RectangleType;
 
 			/*********************
 			*    Constructors    *
@@ -2891,8 +2891,8 @@ namespace graphene
 			*********************/
 		public:
 			using base_type = LabelRenderableBase<RectangleType, Margin, TextType>;
-			typedef typename Label::coordinate_type coordinate_type;
-			typedef RectangleType rectangle_type;
+			using coordinate_type = typename Label::coordinate_type;
+			using rectangle_type = RectangleType;
 
 			/*********************
 			*    Constructors    *
@@ -2923,8 +2923,8 @@ namespace graphene
 			*    Member Types    *
 			*********************/
 		public:
-			typedef RootControlType root_control_type;
-			typedef typename root_control_type::coordinate_type coordinate_type;
+			using root_control_type = RootControlType;
+			using coordinate_type = typename root_control_type::coordinate_type;
 
 			/***************
 			*    Fields    *

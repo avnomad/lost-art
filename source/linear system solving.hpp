@@ -42,8 +42,8 @@ namespace LinearSystem
 	template<typename Derived>	// should optimize later... e.g. set to 0s and 1s instead of computing them and swap whole rows if that's faster in eigen.
 	Eigen::MatrixBase<Derived> &numericReducedRowEchelonFormNoPivot(Eigen::MatrixBase<Derived> &input)
 	{
-		typedef Eigen::MatrixBase<Derived> MatrixType;
-		typedef typename MatrixType::Index IndexType;
+		using MatrixType = Eigen::MatrixBase<Derived>;
+		using IndexType = typename MatrixType::Index;
 
 		for(IndexType row = 0, col = 0 ; col < input.cols() ; ++col)
 		{
@@ -133,7 +133,7 @@ namespace LinearSystem
 	template<typename Derived>
 	Properties numericInvestigate(const Eigen::MatrixBase<Derived> &system)
 	{
-		typedef typename Eigen::MatrixBase<Derived>::Index IndexType;
+		using IndexType = typename Eigen::MatrixBase<Derived>::Index;
 
 		Properties result;
 		result.nEquations = system.rows();
@@ -203,7 +203,7 @@ namespace LinearSystem
 		std::pair<Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>,
 					Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>>
 	{
-		typedef typename Eigen::MatrixBase<Derived>::Index IndexType;
+		using IndexType = typename Eigen::MatrixBase<Derived>::Index;
 
 		Properties properties = numericInvestigate(system);
 		Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic> base(properties.nVariables,0);
@@ -260,8 +260,8 @@ namespace LinearSystem
 					Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>,
 					Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>>
 	{
-		typedef Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic> MatrixType;
-		typedef Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1> ColumnType;
+		using MatrixType = Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,Eigen::Dynamic>;
+		using ColumnType = Eigen::Matrix<typename Eigen::MatrixBase<Derived>::Scalar,Eigen::Dynamic,1>;
 
 		Properties properties = semiSymbolicInvestigate(system,nUnknownConstants);
 		auto numSolution = numericSolve(system);

@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	glEnable(GL_MULTISAMPLE);
 
 	// application initialization
-	typedef graphene::EventAdaptors::GLUT<GUIModel::Controls::Model<float>> AdaptorType;
+	using AdaptorType = graphene::EventAdaptors::GLUT<GUIModel::Controls::Model<float>>;
 	AdaptorType::initialize();
 
 	// event handling initialization
