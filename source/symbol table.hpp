@@ -85,7 +85,7 @@ namespace Symbolic
 				} // end while
 			} // end SymbolTable constructor
 
-			~SymbolTable(){/* empty body */}
+			~SymbolTable() = default;
 
 
 			// Methods

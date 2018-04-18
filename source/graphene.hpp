@@ -49,7 +49,7 @@ namespace graphene
 
 			// Methods
 		public:
-			virtual ~Destructible(){}
+			virtual ~Destructible() = default;
 		}; // end class Destructible
 
 		template<typename BaseType>

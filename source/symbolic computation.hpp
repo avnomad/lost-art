@@ -254,7 +254,7 @@ namespace Symbolic
 				virtual void print2D(std::vector<NameType> &out, size_t left, size_t top, const symbol_table_type &symbols, bool fullyParenthesized,
 										typename extends_container::const_reverse_iterator &currentExtends, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const = 0;
 				virtual std::unique_ptr<AbstractNode> deepCopy() const = 0;
-				virtual ~AbstractNode(){/* empty body */}
+				virtual ~AbstractNode() = default;
 			}; // end struct AbstractNode
 
 
@@ -270,7 +270,7 @@ namespace Symbolic
 					// empty body
 				} // end LiteralNode constructor
 
-				virtual ~LiteralNode(){/* empty body */}
+				virtual ~LiteralNode() = default;
 
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
@@ -328,7 +328,7 @@ namespace Symbolic
 					// empty body
 				} // end VariableNode constructor
 
-				virtual ~VariableNode(){/* empty body */}
+				virtual ~VariableNode() = default;
 
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
@@ -380,7 +380,7 @@ namespace Symbolic
 					// empty body
 				} // end VariableNode constructor
 
-				virtual ~UnaryNode(){/* empty body */}
+				virtual ~UnaryNode() = default;
 
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
@@ -440,7 +440,7 @@ namespace Symbolic
 					// empty body
 				} // end BinaryNode constructor
 
-				virtual ~BinaryNode(){/* empty body */}
+				virtual ~BinaryNode() = default;
 
 				// Methods
 				virtual void print1D(std::ostream &out, const symbol_table_type &symbols, bool fullyParenthesized, OpTags::OpTraits parentTraits, OpTags::Child thisChild) const
@@ -624,7 +624,7 @@ namespace Symbolic
 					throw std::runtime_error(sout.str().empty() ? "Parse error reading mathematical expression!" : sout.str());
 			} // end Expression constructor
 
-			~Expression(){/* empty body */}
+			~Expression() = default;
 
 
 			/****************
