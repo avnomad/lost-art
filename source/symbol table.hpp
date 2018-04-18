@@ -55,7 +55,7 @@ namespace Symbolic
 
 			/**	Construct an empty symbol table
 			 */
-			SymbolTable(){/* empty body */}
+			SymbolTable() = default;
 
 			SymbolTable(const SymbolTable &other)
 				:names(other.names),IDs(other.IDs.size())

@@ -84,7 +84,7 @@ namespace LinearSystem
 		bool hasUniqueSolution;
 
 		// constructors
-		Properties(){/* empty body */}
+		Properties() = default;
 
 		Properties(size_t nEquations, size_t nVariables, size_t nIndependentEquations,
 			bool isImpossible, bool hasUniqueSolution, size_t nUnknownConstants = 0,

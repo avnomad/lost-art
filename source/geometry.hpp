@@ -95,7 +95,7 @@ namespace geometry
 
 		/** Construct an uninitialized Rectangle.
 		 */
-		Rectangle(){/* empty body */}
+		Rectangle() = default;
 
 		/** Construct a rectangle with the specified sides.
 		 */
@@ -213,7 +213,7 @@ namespace geometry
 
 		/** Construct an uninitialized RefRectangle.
 		 */
-		RefRectangle(){/* empty body */}
+		RefRectangle() = default;
 
 		/** Construct a rectangle with the specified sides.
 		 *	Depending on the template parameters some arguments may be captured by reference!

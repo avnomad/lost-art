@@ -120,7 +120,7 @@ namespace GUIModel
 			*    Constructors    *
 			*********************/
 		public:
-			Button(){/* empty body */}
+			Button() = default;
 
 			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
@@ -179,7 +179,7 @@ namespace GUIModel
 			*    Constructors    *
 			*********************/
 		public:
-			ControlPart(){/* empty body */}
+			ControlPart() = default;
 
 			/** Forwards arguments to the underlying RectangularType constructor
 			 */
@@ -233,7 +233,7 @@ namespace GUIModel
 			*    Constructors    *
 			*********************/
 		public:
-			Caret(){/* empty body */}
+			Caret() = default;
 
 			Caret(PointedToType *pointer, size_t index, CoordinateType xOffset)
 			{
@@ -325,7 +325,7 @@ namespace GUIModel
 		public:
 			/** Construct an uninitialized Control.
 			 */
-			Control(){/* empty body */}
+			Control() = default;
 
 			/** Construct a Control with the specified properties.
 			 */
@@ -442,7 +442,7 @@ namespace GUIModel
 		public:
 			/** Construct an uninitialized TextBox.
 			 */
-			TextBox(){/* empty body */}
+			TextBox() = default;
 
 			/** Construct a TextBox with the specified properties.
 			 */
@@ -487,7 +487,7 @@ namespace GUIModel
 			*    Constructors    *
 			*********************/
 
-			ConstraintEndPoint(){/* empty body */}
+			ConstraintEndPoint() = default;
 
 			ConstraintEndPoint(ControlContainerType *container, size_t control, side_type side)
 				:iContainer(container),control(control),side(side)
@@ -641,7 +641,7 @@ namespace GUIModel
 		public:
 			/** Construct an uninitialized Constraint.
 			 */
-			Constraint(){/* empty body */}
+			Constraint() = default;
 
 			/** Construct a Constraint with the specified sides.
 			 */

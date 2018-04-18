@@ -1376,7 +1376,7 @@ namespace graphene
 			public:
 				/** Default constructs the underlying RectangularType
 				 */
-				Rectangular(){/* empty body */}
+				Rectangular() = default;
 
 				/** Forwards arguments to the underlying RectangularType constructor
 				 */
@@ -1454,7 +1454,7 @@ namespace graphene
 					*    Constructors    *
 					*********************/
 				public:
-					FilledRectangle(){/* empty body */}
+					FilledRectangle() = default;
 
 					template<typename OtherType>
 					FilledRectangle(OtherType &&other) // this class does not add extra members
@@ -1490,7 +1490,7 @@ namespace graphene
 					*    Constructors    *
 					*********************/
 				public:
-					BorderedRectangle(){/* empty body */}
+					BorderedRectangle() = default;
 
 					template<typename OtherType>
 					BorderedRectangle(OtherType &&other) // this class does not add extra members
@@ -1540,7 +1540,7 @@ namespace graphene
 					*    Constructors    *
 					*********************/
 				public:
-					BoxedText(){/* empty body */}
+					BoxedText() = default;
 
 					template<typename OtherType>
 					BoxedText(OtherType &&other) // this class does not add extra members
@@ -1599,7 +1599,7 @@ namespace graphene
 					*    Constructors    *
 					*********************/
 				public:
-					BoxedParagraph(){/* empty body */}
+					BoxedParagraph() = default;
 
 					template<typename OtherType>
 					BoxedParagraph(OtherType &&other) // this class does not add extra members
@@ -1667,7 +1667,7 @@ namespace graphene
 					*    Constructors    *
 					*********************/
 				public:
-					InversedColor(){/* empty body */}
+					InversedColor() = default;
 
 					template<typename OtherType>
 					InversedColor(OtherType &&other) // this class does not add extra members
@@ -1711,7 +1711,7 @@ namespace graphene
 					*    Constructors    *
 					*********************/
 				public:
-					IndirectCaret(){/* empty body */}
+					IndirectCaret() = default;
 
 					template<typename OtherType>
 					IndirectCaret(OtherType &&other) // this class does not add extra members
@@ -1770,7 +1770,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Stippled(){/* empty body */}
+				Stippled() = default;
 
 				template<typename OtherType>
 				Stippled(OtherType &&other) // this class does not add extra members
@@ -1843,7 +1843,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Conditional(){/* empty body */}
+				Conditional() = default;
 
 				template<typename OtherType>
 				Conditional(OtherType &&other) // this class does not add extra members
@@ -1880,7 +1880,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Sequential(){/* empty body */}
+				Sequential() = default;
 
 				template<typename OtherType>
 				Sequential(OtherType &&other) // this class does not add extra members
@@ -1914,7 +1914,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Rotated(){/* empty body */}
+				Rotated() = default;
 
 				template<typename OtherType>
 				Rotated(OtherType &&other) // this class does not add extra members
@@ -1954,7 +1954,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Scaled(){/* empty body */}
+				Scaled() = default;
 
 				template<typename OtherType>
 				Scaled(OtherType &&other) // this class does not add extra members
@@ -1994,7 +1994,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Translated(){/* empty body */}
+				Translated() = default;
 
 				template<typename OtherType>
 				Translated(OtherType &&other) // this class does not add extra members
@@ -2036,7 +2036,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				Null(){/* empty body */}
+				Null() = default;
 
 				template<typename OtherType>
 				Null(OtherType &&other) // this class does not add extra members
@@ -2601,7 +2601,7 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			Button(){/* empty body */}
+			Button() = default;
 
 			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
@@ -2662,7 +2662,7 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			ControlPart(){/* empty body */}
+			ControlPart() = default;
 
 			/** Forwards arguments to the underlying RectangularType constructor
 			 */
@@ -2744,7 +2744,7 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			Control(){/* empty body */}
+			Control() = default;
 
 			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
@@ -2800,7 +2800,7 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			Paragraph(){/* empty body */}
+			Paragraph() = default;
 
 			Paragraph(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
 					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
@@ -2847,7 +2847,7 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			Label(){/* empty body */}
+			Label() = default;
 
 			Label(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, TextType text, coordinate_type textHeight)
 			{

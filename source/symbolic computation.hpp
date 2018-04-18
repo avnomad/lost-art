@@ -227,7 +227,7 @@ namespace Symbolic
 				size_t aboveBaseLine;
 				size_t belowBaseLine;
 
-				Extends(){/* empty body */}
+				Extends() = default;
 
 				Extends(size_t width, size_t aboveBaseLine, size_t belowBaseLine)
 					:width(width),aboveBaseLine(aboveBaseLine),belowBaseLine(belowBaseLine)
