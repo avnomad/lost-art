@@ -361,3 +361,10 @@ namespace LinearSystem
 	} // end function runTestSuite
 
 } // end namespace LinearSystem
+
+int main()
+{
+	LinearSystem::runTestSuite();
+
+	return 0;
+}

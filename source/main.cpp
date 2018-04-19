@@ -28,13 +28,6 @@
 
 int main(int argc, char **argv)
 {
-	// run test suites
-	LinearSystem::runTestSuite();
-	Symbolic::runTestSuite();
-	geometry::runTestSuite();
-	graphene::runTestSuite();
-	GUIModel::runTestSuite();
-
 	// glut initialization
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);

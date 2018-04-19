@@ -36,7 +36,6 @@ namespace Symbolic
 
 	void runTestSuite()
 	{
-		Common::testSymbolTable();
 		testExpression();
 	} // end function runTestSuite
 
@@ -1425,3 +1424,10 @@ namespace Symbolic
 	} // end function testExpression
 
 } // end namespace Symbolic
+
+int main()
+{
+	Symbolic::runTestSuite();
+
+	return 0;
+}

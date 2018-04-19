@@ -49,3 +49,10 @@ namespace graphene
 	} // end function runTestSuite
 
 } // end namespace graphene
+
+int main()
+{
+	graphene::runTestSuite();
+
+	return 0;
+}

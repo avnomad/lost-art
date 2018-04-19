@@ -31,8 +31,6 @@
 
 namespace LinearSystem
 {
-	void runTestSuite();
-
 	/** Transforms the input matrix to its reduced row echelon form, without
 	 *	doing any pivoting. The operations are done numerically as opposed to
 	 *	symbolic operations. The current version will work best with matrices

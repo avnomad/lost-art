@@ -95,3 +95,10 @@ namespace GUIModel
 	} // end function runTestSuite
 
 } // end namespace GUIModel
+
+int main()
+{
+	GUIModel::runTestSuite();
+
+	return 0;
+}

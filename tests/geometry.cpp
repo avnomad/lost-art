@@ -92,3 +92,10 @@ namespace geometry
 	} // end function runTestSuite
 
 } // end namespace geometry
+
+int main()
+{
+	geometry::runTestSuite();
+
+	return 0;
+}

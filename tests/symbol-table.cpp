@@ -27,6 +27,13 @@ namespace Symbolic
 {
 	namespace Common
 	{
+		void testSymbolTable();
+
+		void runTestSuite()
+		{
+			testSymbolTable();
+		} // end function runTestSuite
+
 		void testSymbolTable()
 		{
 			// currently does not check whether exceptions are indeed thrown on errors.
@@ -166,3 +173,10 @@ namespace Symbolic
 	} // end namespace Common
 
 } // end namespace Symbolic
+
+int main()
+{
+	Symbolic::Common::runTestSuite();
+
+	return 0;
+}

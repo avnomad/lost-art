@@ -52,8 +52,6 @@
 
 namespace GUIModel
 {
-	void runTestSuite();
-
 	/** Will follow the Frames architecture from Graphene.
 	 */
 	namespace Bases

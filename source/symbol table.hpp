@@ -28,8 +28,6 @@ namespace Symbolic
 {
 	namespace Common
 	{
-		void testSymbolTable();
-
 		/** Single-scope symbol table for mathematical expressions.
 		 *	For efficiency, string names are mapped to integer IDs
 		 *	that are used internally.

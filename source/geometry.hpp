@@ -26,8 +26,6 @@
 
 namespace geometry
 {
-	void runTestSuite();
-
 	enum class RectangleSide:unsigned {LEFT = 0, BOTTOM = 1, RIGHT = 2, TOP = 3};
 
 	// TODO: could be overloaded for other objects like lines, etc.

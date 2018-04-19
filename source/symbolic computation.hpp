@@ -38,8 +38,6 @@
 
 namespace Symbolic
 {
-	void runTestSuite();
-
 	// perhaps wrap following namespaces in namespace "Expressions"?
 
 	namespace FreeForms

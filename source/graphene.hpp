@@ -34,8 +34,6 @@
 
 namespace graphene
 {
-	void runTestSuite();
-
 	// TODO: add overloads taking suitable vector types
 
 	namespace Bases

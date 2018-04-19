@@ -18,6 +18,8 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(LostArt LANGUAGES CXX)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 14)
 
 # Locate dependencies
@@ -31,9 +33,19 @@ add_definitions(${EIGEN3_DEFINITIONS})
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLUT_INCLUDE_DIR})
+include_directories("source")
 
 aux_source_directory("source" SOURCES) # CMake won't automatically detect new files!
+aux_source_directory("tests" TESTS) # same as above!
+
+foreach(test_file ${TESTS})
+	get_filename_component(test_name ${test_file} NAME_WE)
+	add_executable(${test_name} ${test_file})
+	set_target_properties(${test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests)
+	add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach(test_file)
 
 add_executable(lost-art ${SOURCES})
+set_target_properties(lost-art PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/binaries)
 target_compile_options(lost-art PRIVATE -pthread)
 target_link_libraries(lost-art -pthread ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
