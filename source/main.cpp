@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
 	// run test suites
 	LinearSystem::runTestSuite();
-	//Symbolic::runTestSuite();
+	Symbolic::runTestSuite();
 	geometry::runTestSuite();
 	graphene::runTestSuite();
 	GUIModel::runTestSuite();
