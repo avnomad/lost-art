@@ -1305,7 +1305,8 @@ namespace GUIModel
 				for(const auto &constraint : constraints)
 					tree.add_child("gui-model.constraints.constraint",constraint);
 
-				boost::property_tree::write_xml(fileName,tree);
+				using namespace boost::property_tree;
+				write_xml(fileName, tree, std::locale(), xml_writer_make_settings<std::string>('\t', 1));
 			} // end method save
 
 
