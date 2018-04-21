@@ -21,162 +21,143 @@
 #include <string>
 using std::string;
 
-#include <cassert>
+#define BOOST_TEST_MODULE Symbol Table
+#include <boost/test/included/unit_test.hpp>
 
-namespace Symbolic
+BOOST_AUTO_TEST_CASE(Test_Symbol_Table_Operations)
 {
-	namespace Common
-	{
-		void testSymbolTable();
+	using Symbolic::Common::SymbolTable;
 
-		void runTestSuite()
-		{
-			testSymbolTable();
-		} // end function runTestSuite
+	// currently does not check whether exceptions are indeed thrown on errors.
+	SymbolTable<string,long long int> st;
 
-		void testSymbolTable()
-		{
-			// currently does not check whether exceptions are indeed thrown on errors.
-			SymbolTable<string,long long int> st;
+	BOOST_CHECK(st.empty());
+	BOOST_CHECK_EQUAL(st.size(), 0);
+	BOOST_CHECK(!st.declared("x"));
+	BOOST_CHECK(!st.declared(0));
+	BOOST_CHECK(!st.declared("y"));
+	BOOST_CHECK(!st.declared(1));
+	BOOST_CHECK(!st.declared("z"));
+	BOOST_CHECK(!st.declared(2));
 
-			assert(st.empty());
-			assert(st.size() == 0);
-			assert(!st.declared("x"));
-			assert(!st.declared(0));
-			assert(!st.declared("y"));
-			assert(!st.declared(1));
-			assert(!st.declared("z"));
-			assert(!st.declared(2));
+	BOOST_CHECK_EQUAL(st.declare("x"), 0);
+	BOOST_CHECK(!st.empty());
+	BOOST_CHECK_EQUAL(st.size(), 1);
+	BOOST_CHECK(st.declared("x"));
+	BOOST_CHECK(st.declared(0));
+	BOOST_CHECK(!st.declared("y"));
+	BOOST_CHECK(!st.declared(1));
+	BOOST_CHECK(!st.declared("z"));
+	BOOST_CHECK(!st.declared(2));
+	BOOST_CHECK_EQUAL(st.id("x"), 0);
+	BOOST_CHECK_EQUAL(st.name(0), "x");
 
-			assert(st.declare("x") == 0);
-			assert(!st.empty());
-			assert(st.size() == 1);
-			assert(st.declared("x"));
-			assert(st.declared(0));
-			assert(!st.declared("y"));
-			assert(!st.declared(1));
-			assert(!st.declared("z"));
-			assert(!st.declared(2));
-			assert(st.id("x") == 0);
-			assert(st.name(0) == "x");
+	BOOST_CHECK_EQUAL(st.declare("y"), 1);
+	BOOST_CHECK(!st.empty());
+	BOOST_CHECK_EQUAL(st.size(), 2);
+	BOOST_CHECK(st.declared("x"));
+	BOOST_CHECK(st.declared(0));
+	BOOST_CHECK(st.declared("y"));
+	BOOST_CHECK(st.declared(1));
+	BOOST_CHECK(!st.declared("z"));
+	BOOST_CHECK(!st.declared(2));
+	BOOST_CHECK_EQUAL(st.id("x"), 0);
+	BOOST_CHECK_EQUAL(st.name(0), "x");
+	BOOST_CHECK_EQUAL(st.id("y"), 1);
+	BOOST_CHECK_EQUAL(st.name(1), "y");
 
-			assert(st.declare("y") == 1);
-			assert(!st.empty());
-			assert(st.size() == 2);
-			assert(st.declared("x"));
-			assert(st.declared(0));
-			assert(st.declared("y"));
-			assert(st.declared(1));
-			assert(!st.declared("z"));
-			assert(!st.declared(2));
-			assert(st.id("x") == 0);
-			assert(st.name(0) == "x");
-			assert(st.id("y") == 1);
-			assert(st.name(1) == "y");
+	BOOST_CHECK_EQUAL(st.declare("z"), 2);
+	BOOST_CHECK(!st.empty());
+	BOOST_CHECK_EQUAL(st.size(), 3);
+	BOOST_CHECK(st.declared("x"));
+	BOOST_CHECK(st.declared(0));
+	BOOST_CHECK(st.declared("y"));
+	BOOST_CHECK(st.declared(1));
+	BOOST_CHECK(st.declared("z"));
+	BOOST_CHECK(st.declared(2));
+	BOOST_CHECK_EQUAL(st.id("x"), 0);
+	BOOST_CHECK_EQUAL(st.name(0), "x");
+	BOOST_CHECK_EQUAL(st.id("y"), 1);
+	BOOST_CHECK_EQUAL(st.name(1), "y");
+	BOOST_CHECK_EQUAL(st.id("z"), 2);
+	BOOST_CHECK_EQUAL(st.name(2), "z");
 
-			assert(st.declare("z") == 2);
-			assert(!st.empty());
-			assert(st.size() == 3);
-			assert(st.declared("x"));
-			assert(st.declared(0));
-			assert(st.declared("y"));
-			assert(st.declared(1));
-			assert(st.declared("z"));
-			assert(st.declared(2));
-			assert(st.id("x") == 0);
-			assert(st.name(0) == "x");
-			assert(st.id("y") == 1);
-			assert(st.name(1) == "y");
-			assert(st.id("z") == 2);
-			assert(st.name(2) == "z");
+	SymbolTable<string,long long int> cp1 = st;
+	BOOST_CHECK(!cp1.empty());
+	BOOST_CHECK_EQUAL(cp1.declare("z"), 2);	// should have no effect
+	BOOST_CHECK_EQUAL(cp1.size(), 3);
+	BOOST_CHECK(cp1.declared("x"));
+	BOOST_CHECK(cp1.declared(0));
+	BOOST_CHECK(cp1.declared("y"));
+	BOOST_CHECK(cp1.declared(1));
+	BOOST_CHECK(cp1.declared("z"));
+	BOOST_CHECK(cp1.declared(2));
+	BOOST_CHECK_EQUAL(cp1.id("x"), 0);
+	BOOST_CHECK_EQUAL(cp1.name(0), "x");
+	BOOST_CHECK_EQUAL(cp1.id("y"), 1);
+	BOOST_CHECK_EQUAL(cp1.name(1), "y");
+	BOOST_CHECK_EQUAL(cp1.id("z"), 2);
+	BOOST_CHECK_EQUAL(cp1.name(2), "z");
+	BOOST_CHECK_EQUAL(cp1.undeclare("z"), 2);
+	BOOST_CHECK_EQUAL(cp1.undeclare("y"), 1);
 
-			SymbolTable<string,long long int> cp1 = st;
-			assert(!cp1.empty());
-			assert(cp1.declare("z") == 2);	// should have no effect
-			assert(cp1.size() == 3);
-			assert(cp1.declared("x"));
-			assert(cp1.declared(0));
-			assert(cp1.declared("y"));
-			assert(cp1.declared(1));
-			assert(cp1.declared("z"));
-			assert(cp1.declared(2));
-			assert(cp1.id("x") == 0);
-			assert(cp1.name(0) == "x");
-			assert(cp1.id("y") == 1);
-			assert(cp1.name(1) == "y");
-			assert(cp1.id("z") == 2);
-			assert(cp1.name(2) == "z");
-			assert(cp1.undeclare("z") == 2);
-			assert(cp1.undeclare("y") == 1);
+	SymbolTable<string,long long int> cp2;
+	BOOST_CHECK(cp2.empty());
+	cp2 = st;
+	BOOST_CHECK(!cp2.empty());
+	BOOST_CHECK_EQUAL(cp2.declare("z"), 2);	// assert no aliasing
+	BOOST_CHECK_EQUAL(cp2.size(), 3);
+	BOOST_CHECK(cp2.declared("x"));
+	BOOST_CHECK(cp2.declared(0));
+	BOOST_CHECK(cp2.declared("y"));
+	BOOST_CHECK(cp2.declared(1));
+	BOOST_CHECK(cp2.declared("z"));
+	BOOST_CHECK(cp2.declared(2));
+	BOOST_CHECK_EQUAL(cp2.id("x"), 0);
+	BOOST_CHECK_EQUAL(cp2.name(0), "x");
+	BOOST_CHECK_EQUAL(cp2.id("y"), 1);
+	BOOST_CHECK_EQUAL(cp2.name(1), "y");
+	BOOST_CHECK_EQUAL(cp2.id("z"), 2);
+	BOOST_CHECK_EQUAL(cp2.name(2), "z");
+	BOOST_CHECK_EQUAL(cp2.undeclare("z"), 2);
+	BOOST_CHECK_EQUAL(cp2.undeclare("y"), 1);
+	BOOST_CHECK_EQUAL(cp2.undeclare("x"), 0);
 
-			SymbolTable<string,long long int> cp2;
-			assert(cp2.empty());
-			cp2 = st;
-			assert(!cp2.empty());
-			assert(cp2.declare("z") == 2);	// assert no aliasing
-			assert(cp2.size() == 3);
-			assert(cp2.declared("x"));
-			assert(cp2.declared(0));
-			assert(cp2.declared("y"));
-			assert(cp2.declared(1));
-			assert(cp2.declared("z"));
-			assert(cp2.declared(2));
-			assert(cp2.id("x") == 0);
-			assert(cp2.name(0) == "x");
-			assert(cp2.id("y") == 1);
-			assert(cp2.name(1) == "y");
-			assert(cp2.id("z") == 2);
-			assert(cp2.name(2) == "z");
-			assert(cp2.undeclare("z") == 2);
-			assert(cp2.undeclare("y") == 1);
-			assert(cp2.undeclare("x") == 0);
+	cp2 = std::move(cp1);
+	BOOST_CHECK(!cp2.empty());
+	BOOST_CHECK_EQUAL(cp2.size(), 1);
+	BOOST_CHECK(cp2.declared("x"));
+	BOOST_CHECK(cp2.declared(0));
+	BOOST_CHECK(!cp2.declared("y"));
+	BOOST_CHECK(!cp2.declared(1));
+	BOOST_CHECK(!cp2.declared("z"));
+	BOOST_CHECK(!cp2.declared(2));
+	BOOST_CHECK_EQUAL(cp2.id("x"), 0);
+	BOOST_CHECK_EQUAL(cp2.name(0), "x");
+	BOOST_CHECK_EQUAL(cp2.undeclare("x"), 0);
 
-			cp2 = std::move(cp1);
-			assert(!cp2.empty());
-			assert(cp2.size() == 1);
-			assert(cp2.declared("x"));
-			assert(cp2.declared(0));
-			assert(!cp2.declared("y"));
-			assert(!cp2.declared(1));
-			assert(!cp2.declared("z"));
-			assert(!cp2.declared(2));
-			assert(cp2.id("x") == 0);
-			assert(cp2.name(0) == "x");
-			assert(cp2.undeclare("x") == 0);
+	BOOST_CHECK_EQUAL(st.undeclare("z"), 2);
+	BOOST_CHECK(!st.empty());
+	BOOST_CHECK_EQUAL(st.size(), 2);
+	BOOST_CHECK(st.declared("x"));
+	BOOST_CHECK(st.declared(0));
+	BOOST_CHECK(st.declared("y"));
+	BOOST_CHECK(st.declared(1));
+	BOOST_CHECK(!st.declared("z"));
+	BOOST_CHECK(!st.declared(2));
+	BOOST_CHECK_EQUAL(st.id("x"), 0);
+	BOOST_CHECK_EQUAL(st.name(0), "x");
+	BOOST_CHECK_EQUAL(st.id("y"), 1);
+	BOOST_CHECK_EQUAL(st.name(1), "y");
 
-			assert(st.undeclare("z") == 2);
-			assert(!st.empty());
-			assert(st.size() == 2);
-			assert(st.declared("x"));
-			assert(st.declared(0));
-			assert(st.declared("y"));
-			assert(st.declared(1));
-			assert(!st.declared("z"));
-			assert(!st.declared(2));
-			assert(st.id("x") == 0);
-			assert(st.name(0) == "x");
-			assert(st.id("y") == 1);
-			assert(st.name(1) == "y");
-
-			st.clear();
-			assert(st.empty());
-			assert(st.size() == 0);
-			assert(!st.declared("x"));
-			assert(!st.declared(0));
-			assert(!st.declared("y"));
-			assert(!st.declared(1));
-			assert(!st.declared("z"));
-			assert(!st.declared(2));
-			assert(!st.declared(-1));
-		} // end function testSymbolTable
-
-	} // end namespace Common
-
-} // end namespace Symbolic
-
-int main()
-{
-	Symbolic::Common::runTestSuite();
-
-	return 0;
-}
+	st.clear();
+	BOOST_CHECK(st.empty());
+	BOOST_CHECK_EQUAL(st.size(), 0);
+	BOOST_CHECK(!st.declared("x"));
+	BOOST_CHECK(!st.declared(0));
+	BOOST_CHECK(!st.declared("y"));
+	BOOST_CHECK(!st.declared(1));
+	BOOST_CHECK(!st.declared("z"));
+	BOOST_CHECK(!st.declared(2));
+	BOOST_CHECK(!st.declared(-1));
+} // end test case

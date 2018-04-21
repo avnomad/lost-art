@@ -815,7 +815,7 @@ namespace Symbolic
 					qi::on_error<qi::fail>
 					(
 						expression, errorStream << val("Parse error: \"") << construct<std::string>(_1, _2) << "\"!\n"
-												<< val("Here:         ") << construct<std::string>(bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
+												<< val("Here:         ") << construct<std::string>(phoenix::bind(std::distance<ForwardIterator>,_1,_3),'-') << "^\n"
 												<< "Expected a " << _4 << ".\n"
 					);
 				} // end Syntax constructor

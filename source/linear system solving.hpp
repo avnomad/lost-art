@@ -24,6 +24,7 @@
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
 
 #include <cassert>
 
@@ -96,7 +97,7 @@ namespace LinearSystem
 		} // end Properties constructor
 
 		// operators
-		bool operator==(const Properties &other)
+		bool operator==(const Properties &other) const
 		{
 			return this->nEquations == other.nEquations && this->nVariables == other.nVariables
 				&& this->nIndependentEquations == other.nIndependentEquations && this->nUnknownConstants == other.nUnknownConstants
@@ -105,6 +106,25 @@ namespace LinearSystem
 		} // end function operator==
 
 	}; // end struct Properties
+
+	std::ostream &operator<<(std::ostream &output, const Properties &properties)
+	{
+		std::ostringstream buffer; // to group all output so that it can be formatted. (e.g. using std::setw and std::right)
+
+		buffer << "Properties(nEquations=" << properties.nEquations << ", nVariables=" << properties.nVariables
+			   << ", nIndependentEquations=" << properties.nIndependentEquations << ", nUnknownConstants=" << properties.nUnknownConstants
+			   << ", freeVariables=[";
+
+		for(auto freeVariable : properties.freeVariables) // TODO: don't print trailing ", "
+			buffer << freeVariable << ", ";
+		buffer << "], boundUnknownConstants=[";
+		for(auto boundUnknownConstant : properties.boundUnknownConstants) // TODO: don't print trailing ", "
+			buffer << boundUnknownConstant << ", ";
+
+		buffer << "], isImpossible=" << std::boolalpha << properties.isImpossible << ", hasUniqueSolution=" << properties.hasUniqueSolution << ")";
+
+		return output << buffer.str();
+	}
 
 
 	/** Takes the augmented matrix A|b of a linear system of equations in reduced
