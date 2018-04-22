@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(500,500);
 	glutInitWindowPosition(700,160);
-	glutCreateWindow("LostArt Test Application");
+	glutCreateWindow("Untitled Application");
 
 	// glew initialization
 	glewInit();

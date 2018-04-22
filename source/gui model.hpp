@@ -1152,10 +1152,11 @@ namespace GUIModel
 				// initialize buttons
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Load",buttonTextHeight),[this](){load(tbFileName.text());});
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Save",buttonTextHeight),[this](){save(tbFileName.text());});
+				// TODO: allow customizable header and executable names
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Compile",buttonTextHeight),
-					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.h");}); // TODO: allow different output name
+					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.hpp", "build");});
 				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),
-					[this](){run("start \"Generated Application\" \"..\\Debug\\Win32\\Generated Application.exe\"");}); // TODO: allow different executable name
+					[this](){run("build");});
 
 				// initialize controls
 				controls.push_back(control_type(0,0,0,0,borderSize,"Screen",controlTextHeight)); // emplace_back can't take 6+ arguments yet...
@@ -1409,7 +1410,7 @@ namespace GUIModel
 			} // end method outputOpenGLCppApp
 
 			template<typename RationalType, typename AppCoordType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
-			void compile(const std::string &headerName) const
+			void compile(const std::string &headerName, const std::string &buildDirectoryName) const
 			{
 				auto systemMatrix = generateSystemMatrix<RationalType,IDType,NameType>();
 
@@ -1436,14 +1437,15 @@ namespace GUIModel
 					outputCppApp<RationalType,AppCoordType>(base,offset,output);
 					output.close();
 
-					std::system("devenv \"..\\GUI Builder.sln\" /Clean \"Debug|Win32\" /Project \"Generated Application\"");
-					std::system("devenv \"..\\GUI Builder.sln\" /Build \"Debug|Win32\" /Project \"Generated Application\"");
+					std::system(("cmake -E make_directory \""+buildDirectoryName+"\"").c_str());
+					std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake .. ").c_str());
+					std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake --build .").c_str());
 				} // end if
 			} // end method compile
 
-			void run(const std::string &executableName) const
+			void run(const std::string &buildDirectoryName) const
 			{
-				std::system(executableName.c_str());
+				std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake --build . --target run").c_str());
 			} // end method run
 
 			// UI

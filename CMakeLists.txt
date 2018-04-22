@@ -56,3 +56,8 @@ add_executable(lost-art ${SOURCES})
 set_target_properties(lost-art PROPERTIES RUNTIME_OUTPUT_DIRECTORY binaries)
 target_compile_options(lost-art PRIVATE -pthread)
 target_link_libraries(lost-art -pthread ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
+
+# Resources
+configure_file(templates/CMakeLists.txt binaries/CMakeLists.txt COPYONLY) # the fist file needs to be named...
+configure_file(templates/glut-application.cpp binaries/ COPYONLY) # ... for the directory to be created.
+configure_file(source/geometry.hpp binaries/ COPYONLY)
