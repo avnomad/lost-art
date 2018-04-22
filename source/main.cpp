@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 	glewInit();
 
 	// OpenGL initialization
-	glColor3f(1.0,0.75,0.0);	// gold
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_MULTISAMPLE);

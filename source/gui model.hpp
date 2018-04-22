@@ -20,6 +20,7 @@
 #define GUI_MODEL_H
 
 #include <map>
+#include <array>
 #include <tuple>
 #include <vector>
 #include <string>
@@ -1105,6 +1106,11 @@ namespace GUIModel
 			static const int constraintTextHeight = 7;
 			static const int constraintThickness = 7;
 
+			// Colors
+			std::array<float,4> buttonColour = {{0.94, 0.9, 0.55, 1.0}}; // khaki
+			std::array<float,4> controlColour = {{1.0, 0.75, 0.0, 1.0}};	// gold
+			std::array<float,4> constraintColour = {{0.0, 0.5, 0.0, 1.0}}; // dark green
+
 			// TODO: change vector to list for faster operations, updating ConstraintEndPoints.
 			std::vector<control_type> controls;
 			std::vector<constraint_type> constraints;
@@ -1458,31 +1464,40 @@ namespace GUIModel
 			void render() const
 			{
 				// render controls
-				for(const auto &control : controls)
-					control.render();
+				glPushAttrib(GL_CURRENT_BIT);
+					glColor4fv(controlColour.data());
+					for(const auto &control : controls)
+						control.render();
+				glPopAttrib();
 
 				// render constraints
-				for(const auto &constraint : constraints)
-					constraint.render();
+				glPushAttrib(GL_CURRENT_BIT);
+					glColor4fv(constraintColour.data());
+					for(const auto &constraint : constraints)
+						constraint.render();
+				glPopAttrib();
 
 				// render buttons (buttons should be in front)
-				for(const auto &button : buttons)
-					button.first.render();
+				glPushAttrib(GL_CURRENT_BIT);
+					glColor4fv(buttonColour.data());
+					for(const auto &button : buttons)
+						button.first.render();
 
-				// render text boxes (text boxes as well)
-				tbFileName.render();
+					// render text boxes (text boxes as well)
+					tbFileName.render();
 
-				if(selectedPart)
-					selectedPart->render();
+					if(selectedPart)
+						selectedPart->render();
 
-				if(caret)
-					caret->render();
+					if(caret)
+						caret->render();
 
-				if(endPoint1)
-					endPoint1->render();
+					if(endPoint1)
+						endPoint1->render();
 
-				if(endPoint2)
-					endPoint2->render();
+					if(endPoint2)
+						endPoint2->render();
+				glPopAttrib();
 			} // end method render
 
 			void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
