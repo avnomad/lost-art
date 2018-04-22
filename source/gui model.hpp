@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <thread>
 #include <cstdlib>
 #include <utility>
 #include <fstream>
@@ -1437,15 +1438,19 @@ namespace GUIModel
 					outputCppApp<RationalType,AppCoordType>(base,offset,output);
 					output.close();
 
-					std::system(("cmake -E make_directory \""+buildDirectoryName+"\"").c_str());
-					std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake .. ").c_str());
-					std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake --build .").c_str());
+					std::thread([buildDirectoryName](){
+						std::system(("cmake -E make_directory \""+buildDirectoryName+"\"").c_str());
+						std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake .. ").c_str());
+						std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake --build .").c_str());
+					}).detach();
 				} // end if
 			} // end method compile
 
 			void run(const std::string &buildDirectoryName) const
 			{
-				std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake --build . --target run").c_str());
+				std::thread([buildDirectoryName](){
+					std::system(("cmake -E chdir \""+buildDirectoryName+"\" cmake --build . --target run").c_str());
+				}).detach();
 			} // end method run
 
 			// UI

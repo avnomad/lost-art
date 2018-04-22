@@ -33,10 +33,4 @@ target_compile_options(untitled-application PRIVATE -pthread)
 target_link_libraries(untitled-application -pthread ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
 
 # Run target
-if(CMAKE_HOST_WIN32) # Host-specific prefixes and suffixes to run command in the background.
-	set(PREFIX start)
-else()
-	set(SUFFIX &)
-endif()
-
-add_custom_target(run COMMAND ${PREFIX} untitled-application ${SUFFIX} USES_TERMINAL)
+add_custom_target(run COMMAND untitled-application USES_TERMINAL)

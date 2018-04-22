@@ -21,7 +21,8 @@ project(LostArt LANGUAGES CXX)
 enable_testing()
 
 set(CMAKE_CXX_STANDARD 14)
-add_compile_options(-Wno-logical-op-parentheses)
+add_compile_options(-pthread -Wno-logical-op-parentheses)
+link_libraries(-pthread)
 
 # Locate dependencies
 find_package(Boost REQUIRED)
@@ -54,8 +55,7 @@ aux_source_directory("source" SOURCES) # CMake won't automatically detect new fi
 add_executable(lost-art ${SOURCES})
 
 set_target_properties(lost-art PROPERTIES RUNTIME_OUTPUT_DIRECTORY binaries)
-target_compile_options(lost-art PRIVATE -pthread)
-target_link_libraries(lost-art -pthread ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
+target_link_libraries(lost-art ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
 
 # Resources
 configure_file(templates/CMakeLists.txt binaries/CMakeLists.txt COPYONLY) # the fist file needs to be named...
