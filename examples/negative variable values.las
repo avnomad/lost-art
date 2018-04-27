@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	Two controls of the same height and constant width are arranged
+	next to each other so that they divide the empty space between
+	and around them evenly in both directions.
+
+	The variable 'a' representing the width of the empty space will
+	take negative values if window width becomes too small to fit
+	both controls.
+-->
 <gui-model>
 	<controls>
 		<control>

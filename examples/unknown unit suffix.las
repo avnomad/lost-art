@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	Three controls are connected with constraints.
+
+	Some constant distances use a unit suffix for the
+	wrong physical quantity, while others don't have a
+	unit at all. Both will result in compile-time
+	error messages.
+-->
 <gui-model>
 	<controls>
 		<control>

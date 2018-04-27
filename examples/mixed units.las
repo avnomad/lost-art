@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	Two controls of fixed size have fixed positions relative
+	to the window and each other.
+
+	Some of the distances are expressed in pixels, while
+	others in millimeters.
+-->
 <gui-model>
 	<controls>
 		<control>
@@ -14,10 +21,10 @@
 		</control>
 		<control>
 			<sides>
-				<left>52.53802</left>
-				<bottom>101.6</bottom>
-				<right>118.8276</right>
-				<top>52.21111</top>
+				<left>39.5698433</left>
+				<bottom>225.987518</bottom>
+				<right>105.859421</right>
+				<top>176.598633</top>
 			</sides>
 			<borderSize>2</borderSize>
 			<name>control0</name>
@@ -25,10 +32,10 @@
 		</control>
 		<control>
 			<sides>
-				<left>181.2386</left>
-				<bottom>220.4861</bottom>
-				<right>241.8865</right>
-				<top>163.3361</top>
+				<left>163.677521</left>
+				<bottom>160.566071</bottom>
+				<right>224.325424</right>
+				<top>103.416092</top>
 			</sides>
 			<borderSize>2</borderSize>
 			<name>control1</name>
@@ -47,22 +54,8 @@
 				<control>0</control>
 				<side>left</side>
 			</second-end-point>
-			<first-local-side>84.08889</first-local-side>
-			<second-local-side>91.08889</second-local-side>
-		</constraint>
-		<constraint>
-			<text>20mm</text>
-			<text-height>7</text-height>
-			<first-end-point>
-				<control>0</control>
-				<side>bottom</side>
-			</first-end-point>
-			<second-end-point>
-				<control>1</control>
-				<side>top</side>
-			</second-end-point>
-			<first-local-side>78.12787</first-local-side>
-			<second-local-side>85.12787</second-local-side>
+			<first-local-side>198.043884</first-local-side>
+			<second-local-side>205.043884</second-local-side>
 		</constraint>
 		<constraint>
 			<text>100px</text>
@@ -75,8 +68,8 @@
 				<control>1</control>
 				<side>left</side>
 			</second-end-point>
-			<first-local-side>107.2722</first-local-side>
-			<second-local-side>114.2722</second-local-side>
+			<first-local-side>169.332199</first-local-side>
+			<second-local-side>176.332214</second-local-side>
 		</constraint>
 		<constraint>
 			<text>50px</text>
@@ -89,8 +82,8 @@
 				<control>1</control>
 				<side>bottom</side>
 			</second-end-point>
-			<first-local-side>128.0214</first-local-side>
-			<second-local-side>135.0213</second-local-side>
+			<first-local-side>106.137581</first-local-side>
+			<second-local-side>113.137451</second-local-side>
 		</constraint>
 		<constraint>
 			<text>100mm</text>
@@ -103,8 +96,8 @@
 				<control>2</control>
 				<side>left</side>
 			</second-end-point>
-			<first-local-side>142.9028</first-local-side>
-			<second-local-side>149.9028</second-local-side>
+			<first-local-side>96.0902939</first-local-side>
+			<second-local-side>103.090294</second-local-side>
 		</constraint>
 		<constraint>
 			<text>50mm</text>
@@ -117,8 +110,22 @@
 				<control>2</control>
 				<side>bottom</side>
 			</second-end-point>
-			<first-local-side>161.8714</first-local-side>
-			<second-local-side>168.8714</second-local-side>
+			<first-local-side>224.550949</first-local-side>
+			<second-local-side>231.550949</second-local-side>
+		</constraint>
+		<constraint>
+			<text>20mm</text>
+			<text-height>7</text-height>
+			<first-end-point>
+				<control>0</control>
+				<side>top</side>
+			</first-end-point>
+			<second-end-point>
+				<control>1</control>
+				<side>bottom</side>
+			</second-end-point>
+			<first-local-side>69.6068344</first-local-side>
+			<second-local-side>76.6068497</second-local-side>
 		</constraint>
 		<constraint>
 			<text>20px</text>
@@ -128,25 +135,25 @@
 				<side>bottom</side>
 			</first-end-point>
 			<second-end-point>
-				<control>0</control>
+				<control>1</control>
 				<side>top</side>
 			</second-end-point>
-			<first-local-side>210.1781</first-local-side>
-			<second-local-side>217.1781</second-local-side>
+			<first-local-side>190.91658</first-local-side>
+			<second-local-side>197.91658</second-local-side>
 		</constraint>
 		<constraint>
 			<text>30px</text>
 			<text-height>7</text-height>
 			<first-end-point>
-				<control>0</control>
-				<side>right</side>
+				<control>2</control>
+				<side>left</side>
 			</first-end-point>
 			<second-end-point>
-				<control>2</control>
+				<control>1</control>
 				<side>right</side>
 			</second-end-point>
-			<first-local-side>185.6889</first-local-side>
-			<second-local-side>192.6889</second-local-side>
+			<first-local-side>135.857086</first-local-side>
+			<second-local-side>142.857086</second-local-side>
 		</constraint>
 	</constraints>
 </gui-model>

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	Two squares of fixed size are anchored at constant
+	distances relative to different corners of the window.
+
+	Both quotients and fractional parts are used to
+	represent rational numbers.
+-->
 <gui-model>
 	<controls>
 		<control>

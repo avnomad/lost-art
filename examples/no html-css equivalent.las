@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	Two controls of equal height and proportional width are
+	placed next to each other so that they leave gaps of
+	constant size to the left and right and between them.
+	Their height is 1/4 of the window height, as is their
+	distance from window's top.
+
+	This traditionally very hard to do with just HTML and
+	CSS (no JavaScript).
+-->
 <gui-model>
 	<controls>
 		<control>
@@ -15,7 +25,7 @@
 		<control>
 			<sides>
 				<left>21.96041</left>
-				<bottom>139.5574</bottom>
+				<bottom>155.976</bottom>
 				<right>92.86873</right>
 				<top>107.25</top>
 			</sides>
@@ -63,20 +73,6 @@
 			</second-end-point>
 			<first-local-side>47.96145</first-local-side>
 			<second-local-side>54.96145</second-local-side>
-		</constraint>
-		<constraint>
-			<text>a</text>
-			<text-height>7</text-height>
-			<first-end-point>
-				<control>2</control>
-				<side>bottom</side>
-			</first-end-point>
-			<second-end-point>
-				<control>0</control>
-				<side>top</side>
-			</second-end-point>
-			<first-local-side>120.4573</first-local-side>
-			<second-local-side>127.4573</second-local-side>
 		</constraint>
 		<constraint>
 			<text>2a</text>
@@ -149,7 +145,7 @@
 			<second-local-side>118.4296</second-local-side>
 		</constraint>
 		<constraint>
-			<text>b</text>
+			<text>2b</text>
 			<text-height>7</text-height>
 			<first-end-point>
 				<control>2</control>
@@ -161,6 +157,34 @@
 			</second-end-point>
 			<first-local-side>111.562</first-local-side>
 			<second-local-side>118.562</second-local-side>
+		</constraint>
+		<constraint>
+			<text>a</text>
+			<text-height>7</text-height>
+			<first-end-point>
+				<control>2</control>
+				<side>top</side>
+			</first-end-point>
+			<second-end-point>
+				<control>2</control>
+				<side>bottom</side>
+			</second-end-point>
+			<first-local-side>207.6375</first-local-side>
+			<second-local-side>214.6375</second-local-side>
+		</constraint>
+		<constraint>
+			<text>a</text>
+			<text-height>7</text-height>
+			<first-end-point>
+				<control>0</control>
+				<side>top</side>
+			</first-end-point>
+			<second-end-point>
+				<control>2</control>
+				<side>bottom</side>
+			</second-end-point>
+			<first-local-side>120.4573</first-local-side>
+			<second-local-side>127.4573</second-local-side>
 		</constraint>
 	</constraints>
 </gui-model>

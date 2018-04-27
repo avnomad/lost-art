@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+	A single rectangle is centered horizontally and vertically and
+	spans exactly half the window's width and height.
+
+	The same set of constraints applies on each axis, and they
+	are expressed in two different but equivalent ways.
+-->
 <gui-model>
 	<controls>
 		<control>
