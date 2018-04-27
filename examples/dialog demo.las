@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	A dialog box similar to what is commonly displayed if an attempt is
+	made to close an editing program with outstanding changes.
+
+	* The dialog and both buttons have the golden aspect ratio.
+	* The dialog and its contents are centred in their container.
+	* The 'OK' button is left-aligned with respect to the label, while
+	  the 'Cancel' button is right-aligned.
+	* Dimensions are specified in millimetres to be device independent.
+	* Buttons are large enough to be pressed by finger on a mobile device.
+-->
 <gui-model>
 	<controls>
 		<control>
