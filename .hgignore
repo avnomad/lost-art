@@ -2,3 +2,5 @@ syntax: glob
 private/*
 build/*
 generated/*
+.kdev4/*
+LostArt.kdev4
