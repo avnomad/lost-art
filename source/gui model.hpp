@@ -1026,16 +1026,29 @@ namespace GUIModel
 			*    Member Types    *
 			*********************/
 		public:
-			using property_tree_type = boost::property_tree::ptree;
+			// parameters
 			using coordinate_type = CoordinateType;
 			using text_type = TextType;
-			using char_type = typename TextType::value_type;
 
+			// components
 			using control_type = Control<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType>;
 			using constraint_type = Constraint<geometry::Rectangle<CoordinateType>,std::vector<control_type>,std::ratio<1,2>,std::ratio<1,2>,std::ratio<1>,TextType>;
 			using button_type = Button<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,TextType>;
 			using text_box_type = TextBox<geometry::Rectangle<CoordinateType>,std::ratio<-1>,std::ratio<2>,std::ratio<1>,TextType>;
 
+			// containers
+			using control_container_type = std::vector<control_type>;
+			using constraint_container_type = std::vector<constraint_type>;
+			using button_container_type = std::vector<std::pair<button_type,std::function<void()>>>;
+
+			// iterators
+			using control_iterator = typename control_container_type::iterator;
+			using constraint_iterator = typename constraint_container_type::iterator;
+			using button_iterator = typename button_container_type::iterator;
+
+			// shorthands
+			using property_tree_type = boost::property_tree::ptree;
+			using char_type = typename TextType::value_type;
 			using end_point_type = typename constraint_type::EndPoint;
 			using side_type = typename end_point_type::side_type;
 
@@ -1056,26 +1069,26 @@ namespace GUIModel
 			static const int constraintThickness = 7;
 
 			// Colors
-			std::array<float,4> buttonColour = {{0.94, 0.9, 0.55, 1.0}}; // khaki
-			std::array<float,4> controlColour = {{1.0, 0.75, 0.0, 1.0}};	// gold
-			std::array<float,4> constraintColour = {{0.0, 0.5, 0.0, 1.0}}; // dark green
+			std::array<float,4> buttonColour = {{0.94f, 0.9f, 0.55f, 1.0f}}; // khaki
+			std::array<float,4> controlColour = {{1.0f, 0.75f, 0.0f, 1.0f}};	// gold
+			std::array<float,4> constraintColour = {{0.0f, 0.5f, 0.0f, 1.0f}}; // dark green
 
 			// TODO: change vector to list for faster operations, updating ConstraintEndPoints.
-			std::vector<control_type> controls;
-			std::vector<constraint_type> constraints;
-			std::vector<std::pair<button_type,std::function<void()>>> buttons;
+			control_container_type controls;
+			constraint_container_type constraints;
+			button_container_type buttons;
 			text_box_type tbFileName;
 
-			typename decltype(buttons)::iterator highlightedButton;
-			typename decltype(buttons)::iterator pressedButton;
+			button_iterator highlightedButton;
+			button_iterator pressedButton;
 
-			typename decltype(controls)::reverse_iterator highlightedControl;
-			typename decltype(controls)::reverse_iterator selectedControl;
-			typename decltype(controls)::reverse_iterator focusedControl;
+			typename control_container_type::reverse_iterator highlightedControl;
+			typename control_container_type::reverse_iterator selectedControl;
+			typename control_container_type::reverse_iterator focusedControl;
 
-			typename decltype(constraints)::iterator highlightedConstraint;
-			typename decltype(constraints)::iterator selectedConstraint;
-			typename decltype(constraints)::iterator focusedConstraint;
+			constraint_iterator highlightedConstraint;
+			constraint_iterator selectedConstraint;
+			constraint_iterator focusedConstraint;
 
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
 
@@ -1158,7 +1171,7 @@ namespace GUIModel
 				caret = nullptr; // TODO: change to only become null if not pointing to text box.
 			} // end method clear
 
-			auto eraseControl(typename decltype(controls)::iterator control)
+			auto eraseControl(control_iterator control)
 			{
 				size_t index = control - controls.begin();
 				auto result = controls.erase(control);
@@ -1177,7 +1190,7 @@ namespace GUIModel
 				return result;
 			} // end method eraseControl
 
-			auto eraseConstraint(typename decltype(constraints)::iterator constraint)
+			auto eraseConstraint(constraint_iterator constraint)
 			{
 				return constraints.erase(constraint);
 			} // end method eraseConstraint
