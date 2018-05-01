@@ -17,7 +17,8 @@
  */
 
 #include "geometry.hpp"
-using namespace geometry;
+using geometry::RefRectangle;
+using geometry::RectangleSide;
 
 #define BOOST_TEST_MODULE Geometry
 #include <boost/test/included/unit_test.hpp>
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_CASE(Test_RectangleSize)
 
 BOOST_AUTO_TEST_CASE(Test_Rectangle)
 {
-	Rectangle<int> recti(-2,5,3,8);
+	geometry::Rectangle<int> recti(-2,5,3,8);
 	BOOST_CHECK_EQUAL(recti.left(), -2);
 	BOOST_CHECK_EQUAL(recti.right(), 3);
 	BOOST_CHECK_EQUAL(recti.bottom(), 5);
@@ -53,8 +54,8 @@ BOOST_AUTO_TEST_CASE(Test_Rectangle)
 	BOOST_CHECK_EQUAL(recti.width(), 2);
 	BOOST_CHECK_EQUAL(recti.height(), 4);
 
-	Rectangle<float> rectf(-2.0,5.0,3.0,8.0);
-	BOOST_CHECK_EQUAL(rectf.sides()[size_t(Rectangle<float>::Side::TOP)], 8.0);
+	geometry::Rectangle<float> rectf(-2.0,5.0,3.0,8.0);
+	BOOST_CHECK_EQUAL(rectf.sides()[size_t(geometry::Rectangle<float>::Side::TOP)], 8.0);
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_RefRectangle)
@@ -73,7 +74,7 @@ BOOST_AUTO_TEST_CASE(Test_RefRectangle)
 	BOOST_CHECK_EQUAL(y, 7);
 	BOOST_CHECK_EQUAL(refrecti.width(), 1);
 	BOOST_CHECK_EQUAL(refrecti.height(), 2);
-	refrecti.side(geometry::RefRectangle<int,false,true,false,false,true>::Side::BOTTOM) = 4;
+	refrecti.side(RefRectangle<int,false,true,false,false,true>::Side::BOTTOM) = 4;
 	BOOST_CHECK_EQUAL(refrecti.bottom(), 4);
 	BOOST_CHECK_EQUAL(x, -1);
 	BOOST_CHECK_EQUAL(y, 7);
@@ -91,5 +92,5 @@ BOOST_AUTO_TEST_CASE(Test_RefRectangle)
 	BOOST_CHECK_EQUAL(refrecti.top(), 10);
 
 	RefRectangle<float> refrectf(-2.0,5.0,3.0,8.0);
-	BOOST_CHECK_EQUAL(refrectf.side(Rectangle<float>::Side::TOP), 8.0);
+	BOOST_CHECK_EQUAL(refrectf.side(geometry::Rectangle<float>::Side::TOP), 8.0);
 } // end test case

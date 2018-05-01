@@ -42,26 +42,11 @@ namespace Symbolic
 
 	namespace FreeForms
 	{
-		// Using and namespace declarations to ease development with Spirit
+		// namespace declarations to ease development with Spirit
 		namespace qi = boost::spirit::qi;
 		namespace ascii = boost::spirit::ascii;
 		namespace lex = boost::spirit::lex;
 		namespace phoenix = boost::phoenix;
-		using qi::rule;
-		using qi::_val;
-		using qi::_r1;
-		using qi::_1;
-		using qi::_2;
-		using qi::_3;
-		using qi::_4;
-		using qi::eps;
-		using qi::int_;
-		using phoenix::val;
-		using phoenix::ref;
-		using phoenix::bind;
-		using phoenix::construct;
-		using phoenix::new_;
-		using ascii::space_type;
 
 		namespace OpTags
 		{
@@ -733,7 +718,7 @@ namespace Symbolic
 						= identifier | rationalLiteral
 						| '(' | ')' | '+' | '-' | '*' | '/' | '^'
 						| whiteSpace[lex::_pass = lex::pass_flags::pass_ignore]
-						| illegalCharacter[errorStream << val("Ignoring invalid character '") << *lex::_start << "' in input!\n"
+						| illegalCharacter[errorStream << phoenix::val("Ignoring invalid character '") << *lex::_start << "' in input!\n"
 											, lex::_pass = lex::pass_flags::pass_ignore];
 							// should be pass_fail but spirit parser loops forever on failure...
 				} // end Grammar constructor
@@ -781,12 +766,12 @@ namespace Symbolic
 				} prefixOperator; // end struct PrefixOperator
 
 				// Non-Terminals
-				rule<ForwardIterator,attribute_signature> start;
-				rule<ForwardIterator,attribute_signature> expression;
-				rule<ForwardIterator,attribute_signature> term;
-				rule<ForwardIterator,attribute_signature> factor;
-				rule<ForwardIterator,attribute_signature> prefix;
-				rule<ForwardIterator,attribute_signature> primary;
+				qi::rule<ForwardIterator,attribute_signature> start;
+				qi::rule<ForwardIterator,attribute_signature> expression;
+				qi::rule<ForwardIterator,attribute_signature> term;
+				qi::rule<ForwardIterator,attribute_signature> factor;
+				qi::rule<ForwardIterator,attribute_signature> prefix;
+				qi::rule<ForwardIterator,attribute_signature> primary;
 
 				// Rules
 				/** A Syntax object should not outlive the std::ostream and
@@ -796,6 +781,17 @@ namespace Symbolic
 				Syntax(const Grammar<Lexer> &g, std::ostream &errorStream)
 					:Syntax::base_type(start)
 				{
+					using qi::_val;
+					using qi::_r1;
+					using qi::_1;
+					using qi::_2;
+					using qi::_3;
+					using qi::_4;
+					using qi::eps;
+					using phoenix::val;
+					using phoenix::bind;
+					using phoenix::construct;
+
 					start = expression(_r1)[_val = _1] | eps[_val = val(nullptr)];
 					expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(_1,_val,_2)];
 					term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(_1,_val,_2)];

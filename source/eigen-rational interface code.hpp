@@ -60,6 +60,11 @@ namespace Eigen
 		{
 			return boost::rational<I>(std::numeric_limits<I>::min(),1);
 		} // end function lowest
+
+		static int digits10()
+		{
+			return std::numeric_limits<boost::rational<I>>::digits10;
+		} // end function digits10
 	}; // end struct NumTraits
 
 	// Eigen didn't document it but I still needed to specialize this class...
