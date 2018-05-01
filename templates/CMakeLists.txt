@@ -20,6 +20,12 @@ project("Untitled Application" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# Compiler-specific options
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+	add_compile_options(-pthread)
+	link_libraries(-pthread)
+endif()
+
 # Locate dependencies
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
@@ -29,8 +35,7 @@ include_directories(SYSTEM ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLUT_INC
 
 # Binaries
 add_executable(untitled-application glut-application.cpp)
-target_compile_options(untitled-application PRIVATE -pthread)
-target_link_libraries(untitled-application -pthread ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
+target_link_libraries(untitled-application ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
 
 # Run target
 add_custom_target(run COMMAND untitled-application USES_TERMINAL)
