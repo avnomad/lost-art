@@ -797,10 +797,10 @@ namespace Symbolic
 					:Syntax::base_type(start)
 				{
 					start = expression(_r1)[_val = _1] | eps[_val = val(nullptr)];
-					expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(indirectCall,_1,_val,_2)];
-					term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(indirectCall,_1,_val,_2)];
-					factor = (prefixOperator > factor(_r1))[_val = bind(indirectCall,_1,_2)] | prefix(_r1)[_val = _1];
-					prefix = (primary(_r1) >> exponentiationOperator >> prefix(_r1))[_val = bind(indirectCall,_2,_1,_3)] | primary(_r1)[_val = _1];	// parses more expressions
+					expression = term(_r1)[_val = _1] > *(additiveOperator > term(_r1))[_val = bind(_1,_val,_2)];
+					term = factor(_r1)[_val = _1] > *(multiplicativeOperator > factor(_r1))[_val = bind(_1,_val,_2)];
+					factor = (prefixOperator > factor(_r1))[_val = bind(_1,_2)] | prefix(_r1)[_val = _1];
+					prefix = (primary(_r1) >> exponentiationOperator >> prefix(_r1))[_val = bind(_2,_1,_3)] | primary(_r1)[_val = _1];	// parses more expressions
 					primary = g.rationalLiteral[_val = bind(stringToRational,_1)] // than I can currently bring to canonical form
 							| g.identifier[_val = bind(createVariable,_1,_r1)]	// but I should issue proper error messages from transformation routines.
 							| '(' > expression(_r1)[_val = _1] > ')';
@@ -833,16 +833,6 @@ namespace Symbolic
 				{
 					return new BinaryNode<Operator>(std::unique_ptr<AbstractNode>(leftSubExpression),std::unique_ptr<AbstractNode>(rightSubExpression));
 				} // end function binaryCombine
-
-				static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *),AbstractNode *arg)
-				{
-					return f(arg);
-				} // end function inderectCall
-
-				static AbstractNode *indirectCall(AbstractNode *(*f)(AbstractNode *,AbstractNode *),AbstractNode *arg1, AbstractNode *arg2)
-				{
-					return f(arg1,arg2);
-				} // end function indirectCall
 
 				static AbstractNode *createVariable(const NameType &name, symbol_table_type *symbolTable)
 				{
