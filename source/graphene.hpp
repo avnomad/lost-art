@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include <algorithm>
+#include <type_traits>
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -485,9 +486,18 @@ namespace graphene
 
 			/** The base type should be Movable
 			 */
-			template<typename BaseType, bool allowHorizontal = true, bool allowVertical = true, typename CoordinateType = typename BaseType::coordinate_type>
+			template<typename BaseType, typename allowHorizontal = std::true_type, typename allowVertical = std::true_type, typename CoordinateType = typename BaseType::coordinate_type>
 			class HVMovable : public BaseType
 			{
+				/**********************
+				*    Concept Check    *
+				**********************/
+
+				static_assert(std::is_same<allowHorizontal, std::true_type>() || std::is_same<allowHorizontal, std::false_type>(),
+					"allowHorizontal must be either std::true_type or std::false_type!");
+				static_assert(std::is_same<allowVertical, std::true_type>() || std::is_same<allowVertical, std::false_type>(),
+					"allowVertical must be either std::true_type or std::false_type!");
+
 				/*********************
 				*    Member Types    *
 				*********************/
@@ -507,7 +517,7 @@ namespace graphene
 			public:
 				void move(CoordinateType xOffset, CoordinateType yOffset)
 				{
-					BaseType::move(allowHorizontal?xOffset:0 , allowVertical?yOffset:0);
+					BaseType::move(allowHorizontal()?xOffset:0 , allowVertical()?yOffset:0);
 				} // end method move
 			}; // end class HVMovable
 
@@ -924,7 +934,7 @@ namespace graphene
 
 		/** BaseType should be Rectangular and SizedText, TextEngineType should be default constructible
 		 */
-		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename Margin = typename BaseType::margin, typename CoordinateType = typename BaseType::coordinate_type>
+		template<typename BaseType, typename Margin = typename BaseType::margin, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class BoxedAdaptableSizeText : public BaseType
 		{
 			/*********************
@@ -1058,7 +1068,7 @@ namespace graphene
 
 		/** BaseType should be Rectangular and SizedName, TextEngineType should be default constructible
 		 */
-		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename Margin = typename BaseType::margin, typename CoordinateType = typename BaseType::coordinate_type>
+		template<typename BaseType, typename Margin = typename BaseType::margin, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class BoxedAdaptableSizeName : public BaseType
 		{
 			/*********************
@@ -1108,7 +1118,7 @@ namespace graphene
 		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
 		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
 		 */
-		template<typename BaseType, template<typename CoordinateType, bool horizontal, bool vertical, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
+		template<typename BaseType, template<typename CoordinateType, typename horizontal, typename vertical, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
 			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
@@ -1130,24 +1140,24 @@ namespace graphene
 
 			struct concrete_return_type
 			{
-				using       bottom_left  =       ConcretePartTemplate<CoordinateType, true, true,false, true, true,false,false>;
-				using const_bottom_left  = const ConcretePartTemplate<CoordinateType, true, true, true, true, true,false,false>;
-				using       left         =       ConcretePartTemplate<CoordinateType, true,false,false, true,false,false,false>;
-				using const_left         = const ConcretePartTemplate<CoordinateType, true,false, true, true,false,false,false>;
-				using       top_left     =       ConcretePartTemplate<CoordinateType, true, true,false, true,false,false, true>;
-				using const_top_left     = const ConcretePartTemplate<CoordinateType, true, true, true, true,false,false, true>;
-				using       bottom       =       ConcretePartTemplate<CoordinateType,false, true,false,false, true,false,false>;
-				using const_bottom       = const ConcretePartTemplate<CoordinateType,false, true, true,false, true,false,false>;
-				using       center       =       ConcretePartTemplate<CoordinateType, true, true,false, true, true, true, true>;
-				using const_center       = const ConcretePartTemplate<CoordinateType, true, true, true, true, true, true, true>;
-				using       top          =       ConcretePartTemplate<CoordinateType,false, true,false,false,false,false, true>;
-				using const_top          = const ConcretePartTemplate<CoordinateType,false, true, true,false,false,false, true>;
-				using       bottom_right =       ConcretePartTemplate<CoordinateType, true, true,false,false, true, true,false>;
-				using const_bottom_right = const ConcretePartTemplate<CoordinateType, true, true, true,false, true, true,false>;
-				using       right        =       ConcretePartTemplate<CoordinateType, true,false,false,false,false, true,false>;
-				using const_right        = const ConcretePartTemplate<CoordinateType, true,false, true,false,false, true,false>;
-				using       top_right    =       ConcretePartTemplate<CoordinateType, true, true,false,false,false, true, true>;
-				using const_top_right    = const ConcretePartTemplate<CoordinateType, true, true, true,false,false, true, true>;
+				using       bottom_left  =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true,false,false>;
+				using const_bottom_left  = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true,false,false>;
+				using       left         =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false, true,false,false,false>;
+				using const_left         = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true, true,false,false,false>;
+				using       top_left     =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true,false,false, true>;
+				using const_top_left     = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true,false,false, true>;
+				using       bottom       =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false, true,false,false>;
+				using const_bottom       = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false, true,false,false>;
+				using       center       =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true, true, true>;
+				using const_center       = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true, true, true>;
+				using       top          =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false,false,false, true>;
+				using const_top          = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false,false,false, true>;
+				using       bottom_right =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false, true, true,false>;
+				using const_bottom_right = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false, true, true,false>;
+				using       right        =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false,false,false, true,false>;
+				using const_right        = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true,false,false, true,false>;
+				using       top_right    =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false,false, true, true>;
+				using const_top_right    = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false,false, true, true>;
 			}; // end struct concrete_return_type
 
 			/****************
@@ -1225,10 +1235,14 @@ namespace graphene
 		 *  expose text traits via the supplied TextConceptMap. CharType should be a (preferably smart) pointer type.
 		 *	ConcreteCharTemplate instantiations should be constructible from a reference to *this, an index and an instance of CoordinateType.
 		 */
-		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type,
-			typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
-			typename ConcreteCharType = typename BaseType::concrete_char_type, typename ConstConcreteCharType = typename BaseType::const_concrete_char_type,
-			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
+		template<typename BaseType, typename TextConceptMap,
+			typename CharType = typename BaseType::char_type,
+			typename ConstCharType = typename BaseType::const_char_type,
+			typename ConcreteCharType = typename BaseType::concrete_char_type,
+			typename ConstConcreteCharType = typename BaseType::const_concrete_char_type,
+			typename IndexType = typename BaseType::index_type,
+			typename FontEngineType = typename BaseType::font_engine_type,
+			typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiCharBorderedRectangle : public BaseType
 		{
 			/*********************
@@ -1742,7 +1756,7 @@ namespace graphene
 				/** Renders a caret as a vertical line. Deprecated
 				 */
 				// TODO: remove and compose from smaller frames when able to present IndirectCaret as rectangle
-				template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type, typename Width = typename BaseType::width>
+				template<typename BaseType, typename TextConceptMap, typename Width = typename BaseType::width, typename FontEngineType = typename BaseType::font_engine_type>
 				class IndirectCaret : public BaseType
 				{
 					/*********************
@@ -2529,96 +2543,57 @@ namespace graphene
 	 */
 	namespace DSEL
 	{
-		// Had to workaround many VS2012 and gcc bugs related to decltype. The std::common_type<decltype(...)>::type workaround
-		// didn't work in the base list context.
-		// TODO: Create a real DSEL when decltype becomes available. Include conditionals and sequences.
-		struct Omit {};
+		// TODO: Create a real DSEL using overloaded operators and/or macros. Include conditionals and sequences.
 
-		// TODO: specialize only for type parameters and force frames to use compile-time boolean types?
+		/**
+		 * Wraps a single frame with its parameters.
+		 */
+		template<template<typename...> class Template, typename... Arguments>
+		struct Frame {};
 
-		// Substitute specializations
-		template<class BaseType, class FrameType> struct Substitute;
+		/**
+		 * Takes care of nesting frames and filling-in default arguments.
+		 */
+		template<typename... Frames>
+		struct ProcessFrames;
 
-		// types only
-		template<class BaseType, template<class, class...> class FrameType, class... Types>
-		struct Substitute<BaseType, FrameType<Omit, Types...>>
-		{using type = FrameType<BaseType, Types...>;};
-
-		// base + booleans
-		template<class BaseType, template<class, bool, bool...> class FrameType, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, Booleans...>>
-		{using type = FrameType<BaseType, Booleans...>;};
-
-		// base + 1 type + booleans
-		template<class BaseType, template<class, class, bool, bool...> class FrameType, class T1, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, T1, Booleans...>>
-		{using type = FrameType<BaseType, T1, Booleans...>;};
-
-		// base + 2 types + booleans
-		template<class BaseType, template<class, class, class, bool, bool...> class FrameType, class T1, class T2, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, T1, T2, Booleans...>>
-		{using type = FrameType<BaseType, T1, T2, Booleans...>;};
-
-		// base + 3 types + booleans
-		template<class BaseType, template<class, class, class, class, bool, bool...> class FrameType, class T1, class T2, class T3, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, T1, T2, T3, Booleans...>>
-		{using type = FrameType<BaseType, T1, T2, T3, Booleans...>;};
-
-		// base + 4 types + booleans
-		template<class BaseType, template<class, class, class, class, class, bool, bool...> class FrameType, class T1, class T2, class T3, class T4, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, T1, T2, T3, T4, Booleans...>>
-		{using type = FrameType<BaseType, T1, T2, T3, T4, Booleans...>;};
-
-		// base + bool + 1 type + booleans
-		template<class BaseType, template<class, bool, class, bool...> class FrameType, bool b1, class T1, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, T1, Booleans...>>
-		{using type = FrameType<BaseType, b1, T1, Booleans...>;};
-
-		// base + bool + 2 types + booleans
-		template<class BaseType, template<class, bool, class, class, bool...> class FrameType, bool b1,class T1, class T2, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, Booleans...>>
-		{using type = FrameType<BaseType, b1, T1, T2, Booleans...>;};
-
-		// base + bool + 3 types + booleans
-		template<class BaseType, template<class, bool, class, class, class, bool...> class FrameType, bool b1, class T1, class T2, class T3, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, T3, Booleans...>>
-		{using type = FrameType<BaseType, b1, T1, T2, T3, Booleans...>;};
-
-		// base + bool + 4 types + booleans
-		template<class BaseType, template<class, bool, class, class, class, class, bool...> class FrameType, bool b1, class T1, class T2, class T3, class T4, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, T1, T2, T3, T4, Booleans...>>
-		{using type = FrameType<BaseType, b1, T1, T2, T3, T4, Booleans...>;};
-
-		// base + 2 booleans + 1 type + booleans
-		template<class BaseType, template<class, bool, bool, class, bool...> class FrameType, bool b1, bool b2, class T1, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, Booleans...>>
-		{using type = FrameType<BaseType, b1, b2, T1, Booleans...>;};
-
-		// base + 2 booleans + 2 types + booleans
-		template<class BaseType, template<class, bool, bool, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, Booleans...>>
-		{using type = FrameType<BaseType, b1, b2, T1, T2, Booleans...>;};
-
-		// base + 2 booleans + 3 types + booleans
-		template<class BaseType, template<class, bool, bool, class, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, class T3, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, T3, Booleans...>>
-		{using type = FrameType<BaseType, b1, b2, T1, T2, T3, Booleans...>;};
-
-		// base + 2 booleans + 4 types + booleans
-		template<class BaseType, template<class, bool, bool, class, class, class, class, bool...> class FrameType, bool b1, bool b2, class T1, class T2, class T3, class T4, bool... Booleans>
-		struct Substitute<BaseType, FrameType<Omit, b1, b2, T1, T2, T3, T4, Booleans...>>
-		{using type = FrameType<BaseType, b1, b2, T1, T2, T3, T4, Booleans...>;};
-
-		// FrameStack specializations
-		template<class BaseType = Omit, class... Frames> struct FrameStack;
-
-		template<class BaseType, class FrameType, class... Rest>
-		struct FrameStack<BaseType, FrameType, Rest...>
-		{using type = typename FrameStack<typename Substitute<BaseType,FrameType>::type, Rest...>::type;};
-
-		template<class BaseType>
-		struct FrameStack<BaseType>
+		// recursion base
+		template<typename BaseType>
+		struct ProcessFrames<BaseType>
 		{using type = BaseType;};
+
+		// recursion step
+		template<typename BaseType, template<typename...> class Template, typename... Arguments, typename... Frames>
+		struct ProcessFrames<BaseType, DSEL::Frame<Template, Arguments...>, Frames...>
+		{using type = typename ProcessFrames<Template<BaseType, Arguments...>, Frames...>::type;};
+
+		/**
+		 * Represents a complete frame stack.
+		 */
+		template<typename... Frames>
+		struct FrameStack : public ProcessFrames<Frames...>::type
+		{
+			// Member types
+			using base_type = typename ProcessFrames<Frames...>::type;
+
+			// Constructors
+			FrameStack() = default;
+			using base_type::base_type;
+		}; // end struct FrameStack
+
+		/**
+		 * Represents a complete frame stack using the curiously-recurring template pattern.
+		 */
+		template<template<typename...> class Template, typename... Arguments>
+		struct CRFrameStack : public Template<Arguments..., CRFrameStack<Template, Arguments...>>
+		{
+			// Member types
+			using base_type = Template<Arguments..., CRFrameStack<Template, Arguments...>>;
+
+			// Constructors
+			CRFrameStack() = default;
+			using base_type::base_type;
+		}; // end struct CRFrameStack
 	} // end namespace DSEL
 
 	/** The intention is to let the client easily combine frames to create controls as needed.
@@ -2631,16 +2606,16 @@ namespace graphene
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		using ButtonBase = typename DSEL::FrameStack<
+		using ButtonBase = DSEL::FrameStack<
 			RectangleType,
-			Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
-			Frames::Pressable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-			Frames::Highlightable<DSEL::Omit,Button<RectangleType,BorderSize,Margin,TextType>>,
-			Frames::Textual<DSEL::Omit,TextType>,
-			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
-			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>,
-			Frames::EventHandling::TwoStagePressable<DSEL::Omit,typename RectangleType::coordinate_type>
-		>::type;
+			DSEL::Frame<Frames::UniformlyBordered, typename RectangleType::coordinate_type>,
+			DSEL::Frame<Frames::Pressable, Button<RectangleType, BorderSize, Margin, TextType>>,
+			DSEL::Frame<Frames::Highlightable, Button<RectangleType, BorderSize, Margin, TextType>>,
+			DSEL::Frame<Frames::Textual, TextType>,
+			DSEL::Frame<Frames::SizedText, FunctionObjects::GlutStrokeFontEngine>,
+			DSEL::Frame<Frames::BoxedAdaptableSizeText,Margin>,
+			DSEL::Frame<Frames::EventHandling::TwoStagePressable>
+		>;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		using ButtonRenderableBase =
@@ -2692,29 +2667,29 @@ namespace graphene
 
 
 		template<typename CoordinateType>
-		using IShapePart = typename DSEL::FrameStack<
+		using IShapePart = DSEL::FrameStack<
 			Bases::Empty,
-			Bases::Destructible<DSEL::Omit>,
-			Bases::Movable<DSEL::Omit,CoordinateType>,
-			Bases::Containing<DSEL::Omit,CoordinateType>,
-			Bases::Renderable<DSEL::Omit>
-		>::type;
+			DSEL::Frame<Bases::Destructible>,
+			DSEL::Frame<Bases::Movable, CoordinateType>,
+			DSEL::Frame<Bases::Containing>,
+			DSEL::Frame<Bases::Renderable>
+		>;
 
-		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		using ControlPartBase = typename DSEL::FrameStack<
+		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		using ControlPartBase = DSEL::FrameStack<
 			IShapePart<CoordinateType>,
-			Bases::Rectangular<DSEL::Omit,CoordinateType>,
-			Frames::Movable::Rectangular<DSEL::Omit,CoordinateType>,
-			Frames::Movable::HVMovable<DSEL::Omit,horizontallyMovable,verticallyMovable,CoordinateType>,
-			Frames::Renderable::Colorblind::FilledRectangle<DSEL::Omit>,
-			Frames::Renderable::Stippled<DSEL::Omit>,
-			Frames::Renderable::Colorblind::InversedColor<DSEL::Omit>,
-			Frames::Adapting::Rectangular<DSEL::Omit,geometry::RefRectangle<CoordinateType,constant,leftRef,bottomRef,rightRef,topRef>>
-		>::type;
+			DSEL::Frame<Bases::Rectangular>,
+			DSEL::Frame<Frames::Movable::Rectangular>,
+			DSEL::Frame<Frames::Movable::HVMovable, horizontallyMovable, verticallyMovable>,
+			DSEL::Frame<Frames::Renderable::Colorblind::FilledRectangle>,
+			DSEL::Frame<Frames::Renderable::Stippled>,
+			DSEL::Frame<Frames::Renderable::Colorblind::InversedColor>,
+			DSEL::Frame<Frames::Adapting::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
+		>;
 
 		/** Const instances should be constant and non-const instances should be non constant
 		 */
-		template<typename CoordinateType, bool horizontallyMovable, bool verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 		class ControlPart : public ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>
 		{
 			/*********************
@@ -2744,32 +2719,33 @@ namespace graphene
 		template<typename CoordinateType, typename TextType = std::string>
 		class IControl : public DSEL::FrameStack<
 			Bases::Empty,
-			Bases::Destructible<DSEL::Omit>,
-			Bases::Rectangular<DSEL::Omit,CoordinateType>,
-			Bases::Containing<DSEL::Omit,CoordinateType>,
-			Bases::Movable<DSEL::Omit,CoordinateType>,
-			Bases::UniformlyBordered<DSEL::Omit,CoordinateType>,
-			Bases::Textual<DSEL::Omit,TextType>,
-			Bases::SizedText<DSEL::Omit,CoordinateType>,
-			Bases::Selectable<DSEL::Omit,IControl<CoordinateType,TextType>>,
-			Bases::Highlightable<DSEL::Omit,IControl<CoordinateType,TextType>>,
-			Bases::MultiPart<DSEL::Omit,std::unique_ptr<IShapePart<CoordinateType>>,std::unique_ptr<const IShapePart<CoordinateType>>,CoordinateType>,
-			Bases::Renderable<DSEL::Omit>
-		>::type{}; // poor man's template alias
+			DSEL::Frame<Bases::Destructible>,
+			DSEL::Frame<Bases::Rectangular, CoordinateType>,
+			DSEL::Frame<Bases::Containing>,
+			DSEL::Frame<Bases::Movable>,
+			DSEL::Frame<Bases::UniformlyBordered>,
+			DSEL::Frame<Bases::Textual, TextType>,
+			DSEL::Frame<Bases::SizedText>,
+			DSEL::Frame<Bases::Selectable, IControl<CoordinateType,TextType>>,
+			DSEL::Frame<Bases::Highlightable, IControl<CoordinateType,TextType>>,
+			DSEL::Frame<Bases::MultiPart, std::unique_ptr<      IShapePart<CoordinateType>>,
+										  std::unique_ptr<const IShapePart<CoordinateType>>>,
+			DSEL::Frame<Bases::Renderable>
+		>{}; // poor man's template alias
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		using ControlBase =
-			Frames::MultiPartBorderedRectangle<typename DSEL::FrameStack<
-				IControl<typename RectangleType::coordinate_type,TextType>,
-				Frames::Adapting::Rectangular<DSEL::Omit,RectangleType>,
-				Frames::UniformlyBordered<DSEL::Omit,typename RectangleType::coordinate_type>,
-				Frames::Selectable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>/*Control<RectangleType,BorderSize,Margin,TextType>*/>,
-				Frames::Highlightable<DSEL::Omit,IControl<typename RectangleType::coordinate_type,TextType>>,
-				Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
-				Frames::Textual<DSEL::Omit,TextType>,
-				Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
-				Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
-			>::type,ControlPart>;
+			Frames::MultiPartBorderedRectangle<DSEL::FrameStack<
+				IControl<typename RectangleType::coordinate_type, TextType>,
+				DSEL::Frame<Frames::Adapting::Rectangular, RectangleType>,
+				DSEL::Frame<Frames::UniformlyBordered>,
+				DSEL::Frame<Frames::Selectable, IControl<typename RectangleType::coordinate_type, TextType>/*Control<RectangleType,BorderSize,Margin,TextType>*/>,
+				DSEL::Frame<Frames::Highlightable, IControl<typename RectangleType::coordinate_type, TextType>>,
+				DSEL::Frame<Frames::Movable::Rectangular>,
+				DSEL::Frame<Frames::Textual, TextType>,
+				DSEL::Frame<Frames::SizedText, FunctionObjects::GlutStrokeFontEngine>,
+				DSEL::Frame<Frames::BoxedAdaptableSizeText, Margin>
+			>,ControlPart>;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
 		using ControlRenderableBase =
@@ -2868,13 +2844,13 @@ namespace graphene
 		}; // end class Paragraph
 
 		template<typename RectangleType, typename Margin, typename TextType>
-		using LabelBase = typename DSEL::FrameStack<
+		using LabelBase = DSEL::FrameStack<
 			RectangleType,
-			Frames::Movable::Rectangular<DSEL::Omit,typename RectangleType::coordinate_type>,
-			Frames::Textual<DSEL::Omit,TextType>,
-			Frames::SizedText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,typename RectangleType::coordinate_type>,
-			Frames::BoxedAdaptableSizeText<DSEL::Omit,FunctionObjects::GlutStrokeFontEngine,Margin,typename RectangleType::coordinate_type>
-		>::type;
+			DSEL::Frame<Frames::Movable::Rectangular>,
+			DSEL::Frame<Frames::Textual, TextType>,
+			DSEL::Frame<Frames::SizedText, FunctionObjects::GlutStrokeFontEngine>,
+			DSEL::Frame<Frames::BoxedAdaptableSizeText, Margin>
+		>;
 
 		template<typename RectangleType, typename Margin, typename TextType = std::string>
 		using LabelRenderableBase =
