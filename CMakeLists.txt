@@ -73,3 +73,6 @@ set_target_properties(lost-art PROPERTIES RUNTIME_OUTPUT_DIRECTORY binaries)
 configure_file(templates/CMakeLists.txt binaries/CMakeLists.txt COPYONLY) # the fist file needs to be named...
 configure_file(templates/glut-application.cpp binaries/ COPYONLY) # ... for the directory to be created.
 configure_file(source/geometry.hpp binaries/ COPYONLY)
+
+# Run target
+add_custom_target(run COMMAND lost-art WORKING_DIRECTORY binaries USES_TERMINAL)
