@@ -46,3 +46,105 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	BOOST_CHECK_EQUAL(button.textHeight(), 12);
 	// TODO: check textWidth. What is the correct result?
 } // end test case
+
+BOOST_AUTO_TEST_CASE(Test_Constructors)
+{
+	using geometry::Rectangle;
+	using namespace graphene;
+	using namespace graphene::Frames;
+	using namespace graphene::DSEL;
+
+	// Mostly force classes and constructors to be instantiated to catch compile-time errors.
+
+	// Adapting::Rectangular
+	Adapting::Rectangular<Bases::Empty, Rectangle<int>> r1;
+	r1.top() = 2;
+	BOOST_CHECK_EQUAL(r1.top(), 2);
+	Adapting::Rectangular<Bases::Empty, Rectangle<int>> r2(1,2,3,4);
+	BOOST_CHECK_EQUAL(r2.left(), 1);
+	BOOST_CHECK_EQUAL(r2.bottom(), 2);
+	BOOST_CHECK_EQUAL(r2.right(), 3);
+	BOOST_CHECK_EQUAL(r2.top(), 4);
+
+	// KeyboardAndMouseStub
+	FrameStack<
+		Bases::Empty,
+		Frame<Bases::EventHandling::KeyboardAndMouse, float>,
+		Frame<EventHandling::KeyboardAndMouseStub>
+	> knm1;
+	FrameStack<
+		Bases::Empty,
+		Frame<Bases::EventHandling::KeyboardAndMouse, int>,
+		Frame<Adapting::Rectangular, Rectangle<int>>,
+		Frame<EventHandling::KeyboardAndMouseStub>
+	> knm2(-1, -2, -3, -4);
+	BOOST_CHECK_EQUAL(knm2.left(), -1);
+	BOOST_CHECK_EQUAL(knm2.bottom(), -2);
+	BOOST_CHECK_EQUAL(knm2.right(), -3);
+	BOOST_CHECK_EQUAL(knm2.top(), -4);
+	FrameStack<
+		Rectangle<int>,
+		Frame<Bases::EventHandling::KeyboardAndMouse>,
+		Frame<EventHandling::KeyboardAndMouseStub>
+	> knm3(-1, -2, -3, -4);
+	BOOST_CHECK_EQUAL(knm3.left(), -1);
+	BOOST_CHECK_EQUAL(knm3.bottom(), -2);
+	BOOST_CHECK_EQUAL(knm3.right(), -3);
+	BOOST_CHECK_EQUAL(knm3.top(), -4);
+	FrameStack<
+		Rectangle<int>,
+		Frame<Bases::EventHandling::KeyboardAndMouse>,
+		Frame<EventHandling::KeyboardAndMouseStub>
+	> knm4(4,3,2,1);
+
+	// Movable::Rectangular
+	FrameStack<
+		Bases::Empty,
+		Frame<Adapting::Rectangular, Rectangle<float>>,
+		Frame<Movable::Rectangular>
+	> mr1;
+	mr1.top() = 2;
+	BOOST_CHECK_EQUAL(mr1.top(), 2);
+	FrameStack<
+		Bases::Empty,
+		Frame<Adapting::Rectangular, Rectangle<float>>,
+		Frame<Movable::Rectangular>
+	> mr2(1,2,3,4);
+	BOOST_CHECK_EQUAL(mr2.left(), 1);
+	BOOST_CHECK_EQUAL(mr2.bottom(), 2);
+	BOOST_CHECK_EQUAL(mr2.right(), 3);
+	BOOST_CHECK_EQUAL(mr2.top(), 4);
+
+	// HVMovable
+	FrameStack<
+		Bases::Empty,
+		Frame<Adapting::Rectangular, Rectangle<float>>,
+		Frame<Movable::Rectangular>,
+		Frame<Movable::HVMovable>
+	> hvm1;
+	hvm1.top() = 2;
+	BOOST_CHECK_EQUAL(hvm1.top(), 2);
+	FrameStack<
+		Bases::Empty,
+		Frame<Adapting::Rectangular, Rectangle<float>>,
+		Frame<Movable::Rectangular>,
+		Frame<Movable::HVMovable>
+	> hvm2(1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm2.left(), 1);
+	BOOST_CHECK_EQUAL(hvm2.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm2.right(), 3);
+	BOOST_CHECK_EQUAL(hvm2.top(), 4);
+
+	// Focusable
+	Focusable<CRFrameStack<Bases::Focusable, Rectangle<float>>> f1;
+	Focusable<CRFrameStack<Bases::Focusable, Rectangle<float>>> f2(1.0f,2.0f,3.0f,4.0f);
+	BOOST_CHECK_EQUAL(f2.left(), 1.0f);
+	BOOST_CHECK_EQUAL(f2.bottom(), 2.0f);
+	BOOST_CHECK_EQUAL(f2.right(), 3.0f);
+	BOOST_CHECK_EQUAL(f2.top(), 4.0f);
+	Focusable<CRFrameStack<Bases::Focusable, Rectangle<float>>> f3(true, 1.5f,2.5f,3.5f,4.5f);
+	BOOST_CHECK_EQUAL(f3.left(), 1.5f);
+	BOOST_CHECK_EQUAL(f3.bottom(), 2.5f);
+	BOOST_CHECK_EQUAL(f3.right(), 3.5f);
+	BOOST_CHECK_EQUAL(f3.top(), 4.5f);
+} // end test case

@@ -48,6 +48,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 
+			// Constructors
+		public:
+			Destructible() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual ~Destructible() = default;
@@ -59,6 +64,11 @@ namespace graphene
 			// Member Types
 		public:
 			using base_type = BaseType;
+
+			// Constructors
+		public:
+			Renderable() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -73,6 +83,11 @@ namespace graphene
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
+			// Constructors
+		public:
+			Movable() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual void move(CoordinateType xOffset, CoordinateType yOffset) = 0;
@@ -85,6 +100,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
+
+			// Constructors
+		public:
+			Rectangular() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -112,6 +132,11 @@ namespace graphene
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
+			// Constructors
+		public:
+			Containing() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual bool contains(CoordinateType x, CoordinateType y) const = 0;
@@ -124,6 +149,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using pointer_type = PointerType;
+
+			// Constructors
+		public:
+			Pointing() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -139,6 +169,11 @@ namespace graphene
 			using base_type = BaseType;
 			using index_type = IndexType;
 
+			// Constructors
+		public:
+			Indexing() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual IndexType &index() = 0;
@@ -152,6 +187,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
+
+			// Constructors
+		public:
+			Offset() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -169,6 +209,11 @@ namespace graphene
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
 
+			// Constructors
+		public:
+			Selectable() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual FrameStackType &select() = 0;
@@ -184,6 +229,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
+
+			// Constructors
+		public:
+			Pressable() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -201,6 +251,11 @@ namespace graphene
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
 
+			// Constructors
+		public:
+			Highlightable() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual FrameStackType &highlight() = 0;
@@ -216,6 +271,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
+
+			// Constructors
+		public:
+			Focusable() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -233,6 +293,11 @@ namespace graphene
 			using base_type = BaseType;
 			using border_size_type = BorderSizeType;
 
+			// Constructors
+		public:
+			UniformlyBordered() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual BorderSizeType &borderSize() = 0;
@@ -246,6 +311,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using text_type = TextType;
+
+			// Constructors
+		public:
+			Textual() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -264,6 +334,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
+
+			// Constructors
+		public:
+			SizedText() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -290,6 +365,11 @@ namespace graphene
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
+			// Constructors
+		public:
+			AdaptableSizeText() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual std::pair<CoordinateType,CoordinateType> effectiveTextSize() const = 0;
@@ -303,6 +383,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using name_type = NameType;
+
+			// Constructors
+		public:
+			Named() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -321,6 +406,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
+
+			// Constructors
+		public:
+			SizedName() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -347,6 +437,11 @@ namespace graphene
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
+			// Constructors
+		public:
+			AdaptableSizeName() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual std::pair<CoordinateType,CoordinateType> effectiveNameSize() const = 0;
@@ -365,6 +460,11 @@ namespace graphene
 			using part_type = PartType;
 			using const_part_type = ConstPartType;
 			using coordinate_type = CoordinateType;
+
+			// Constructors
+		public:
+			MultiPart() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -388,6 +488,11 @@ namespace graphene
 			using index_type = IndexType;
 			using coordinate_type = CoordinateType;
 
+			// Constructors
+		public:
+			MultiChar() = default;
+			using BaseType::BaseType;
+
 			// Methods
 		public:
 			virtual CharType charUnderPoint(CoordinateType x, CoordinateType y) = 0;
@@ -403,6 +508,11 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using char_type = CharType;
+
+			// Constructors
+		public:
+			CaretLike() = default;
+			using BaseType::BaseType;
 
 			// Methods
 		public:
@@ -432,6 +542,11 @@ namespace graphene
 			public:
 				using base_type = BaseType;
 				using coordinate_type = CoordinateType;
+
+				// Constructors
+			public:
+				KeyboardAndMouse() = default;
+				using BaseType::BaseType;
 
 				// Methods
 			public:
@@ -469,6 +584,8 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
+				Rectangular() = default;
+
 				using BaseType::BaseType;
 
 				/****************
@@ -509,6 +626,8 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
+				HVMovable() = default;
+
 				using BaseType::BaseType;
 
 				/****************
@@ -537,7 +656,22 @@ namespace graphene
 			*    Fields    *
 			***************/
 		private:
-			PointerType iPointer;
+			PointerType iPointer = nullptr;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Pointing() = default;
+
+			template<typename... ArgTypes>
+			Pointing(PointerType &&pointer, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iPointer(std::forward<PointerType>(pointer))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -570,6 +704,21 @@ namespace graphene
 		private:
 			IndexType iIndex;
 
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Indexing() = default;
+
+			template<typename... ArgTypes>
+			Indexing(IndexType &&index, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iIndex(std::forward<IndexType>(index))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
+
 			/****************
 			*    Methods    *
 			****************/
@@ -599,8 +748,25 @@ namespace graphene
 			*    Fields    *
 			***************/
 		private:
-			CoordinateType iXoffset;
-			CoordinateType iYoffset;
+			CoordinateType iXoffset = 0;
+			CoordinateType iYoffset = 0;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Offset() = default;
+
+			template<typename... ArgTypes>
+			Offset(CoordinateType &&xOffset, CoordinateType &&yOffset, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...),
+				 iXoffset(std::forward<CoordinateType>(xOffset)),
+				 iYoffset(std::forward<CoordinateType>(yOffset))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -634,18 +800,33 @@ namespace graphene
 			// the this pointer indeed points to a FrameStackType...
 			// Is there something wrong with VS2012 std::is_base_of?
 
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iSelected;
-
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			bool iSelected = false;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Selectable() = default;
+
+			template<typename... ArgTypes>
+			Selectable(bool selected, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iSelected(selected)
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -682,18 +863,33 @@ namespace graphene
 			// the this pointer indeed points to a FrameStackType...
 			// Is there something wrong with VS2012 std::is_base_of?
 
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iPressed;
-
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			bool iPressed = false;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Pressable() = default;
+
+			template<typename... ArgTypes>
+			Pressable(bool pressed, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iPressed(pressed)
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -729,18 +925,33 @@ namespace graphene
 			// the this pointer indeed points to a FrameStackType...
 			// Is there something wrong with VS2012 std::is_base_of?
 
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iHighlighted;
-
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			bool iHighlighted = false;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Highlightable() = default;
+
+			template<typename... ArgTypes>
+			Highlightable(bool highlighted, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iHighlighted(highlighted)
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -780,7 +991,7 @@ namespace graphene
 			*    Fields    *
 			***************/
 		private:
-			bool iFocused;
+			bool iFocused = false;
 
 			/*********************
 			*    Member Types    *
@@ -788,6 +999,21 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			Focusable() = default;
+
+			template<typename... ArgTypes>
+			Focusable(bool focused, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iFocused(focused)
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -819,18 +1045,33 @@ namespace graphene
 		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
 		class UniformlyBordered : public BaseType
 		{
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			BorderSizeType iBorderSize;
-
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
 			using base_type = BaseType;
 			using border_size_type = BorderSizeType;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			BorderSizeType iBorderSize = 0;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			UniformlyBordered() = default;
+
+			template<typename... ArgTypes>
+			UniformlyBordered(border_size_type &&borderSize, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iBorderSize(std::forward<border_size_type>(borderSize))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -850,6 +1091,13 @@ namespace graphene
 		template<typename BaseType, typename TextType = typename BaseType::text_type>
 		class Textual : public BaseType
 		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			using base_type = BaseType;
+			using text_type = TextType;
+
 			/***************
 			*    Fields    *
 			***************/
@@ -857,11 +1105,19 @@ namespace graphene
 			TextType iText;
 
 			/*********************
-			*    Member Types    *
+			*    Constructors    *
 			*********************/
 		public:
-			using base_type = BaseType;
-			using text_type = TextType;
+			Textual() = default;
+
+			template<typename... ArgTypes>
+			Textual(text_type &&text, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iText(std::forward<text_type>(text))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -883,12 +1139,6 @@ namespace graphene
 		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class SizedText : public BaseType
 		{
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			CoordinateType iTextHeight;
-
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -896,6 +1146,27 @@ namespace graphene
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 			using font_engine_type = FontEngineType;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			CoordinateType iTextHeight;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			SizedText() = default;
+
+			template<typename... ArgTypes>
+			SizedText(CoordinateType &&textHeight, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iTextHeight(std::forward<CoordinateType>(textHeight))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -950,6 +1221,8 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
+			BoxedAdaptableSizeText() = default;
+
 			using BaseType::BaseType;
 
 			/****************
@@ -984,6 +1257,13 @@ namespace graphene
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
 		class Named : public BaseType
 		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		public:
+			using base_type = BaseType;
+			using name_type = NameType;
+
 			/***************
 			*    Fields    *
 			***************/
@@ -991,11 +1271,19 @@ namespace graphene
 			NameType iName;
 
 			/*********************
-			*    Member Types    *
+			*    Constructors    *
 			*********************/
 		public:
-			using base_type = BaseType;
-			using name_type = NameType;
+			Named() = default;
+
+			template<typename... ArgTypes>
+			Named(NameType &&name, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iName(std::forward<NameType>(name))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -1017,12 +1305,6 @@ namespace graphene
 		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
 		class SizedName : public BaseType
 		{
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			CoordinateType iNameHeight;
-
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -1030,6 +1312,27 @@ namespace graphene
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 			using font_engine_type = FontEngineType;
+
+			/***************
+			*    Fields    *
+			***************/
+		private:
+			CoordinateType iNameHeight = 0;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			SizedName() = default;
+
+			template<typename... ArgTypes>
+			SizedName(CoordinateType &&nameHeight, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...), iNameHeight(std::forward<CoordinateType>(nameHeight))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -1072,12 +1375,6 @@ namespace graphene
 		class BoxedAdaptableSizeName : public BaseType
 		{
 			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			using BaseType::BaseType;
-
-			/*********************
 			*    Member Types    *
 			*********************/
 		public:
@@ -1085,6 +1382,14 @@ namespace graphene
 			using coordinate_type = CoordinateType;
 			using font_engine_type = FontEngineType;
 			using margin = Margin;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			BoxedAdaptableSizeName() = default;
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -1123,12 +1428,6 @@ namespace graphene
 		class MultiPartBorderedRectangle : public BaseType
 		{
 			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			using BaseType::BaseType;
-
-			/*********************
 			*    Member Types    *
 			*********************/
 		public:
@@ -1159,6 +1458,14 @@ namespace graphene
 				using       top_right    =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false,false, true, true>;
 				using const_top_right    = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false,false, true, true>;
 			}; // end struct concrete_return_type
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			MultiPartBorderedRectangle() = default;
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -1246,12 +1553,6 @@ namespace graphene
 		class MultiCharBorderedRectangle : public BaseType
 		{
 			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			using BaseType::BaseType;
-
-			/*********************
 			*    Member Types    *
 			*********************/
 		public:
@@ -1264,6 +1565,14 @@ namespace graphene
 			using index_type = IndexType;
 			using coordinate_type = CoordinateType;
 			// TODO: add template alias for ConcreteCharTemplate when implemented
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			MultiCharBorderedRectangle() = default;
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -1339,6 +1648,23 @@ namespace graphene
 		private:
 			TextConceptMap iTextConceptMap;
 			FontEngineType iFontEngine;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			IndirectCaretLike() = default;
+
+			template<typename... ArgTypes>
+			IndirectCaretLike(TextConceptMap &&textConceptMap, FontEngineType &&fontEngine, ArgTypes&&... args)
+				:base_type(std::forward<ArgTypes>(args)...),
+				 iTextConceptMap(std::forward<TextConceptMap>(textConceptMap)),
+				 iFontEngine(std::forward<FontEngineType>(fontEngine))
+			{
+				// empty body
+			}
+
+			using BaseType::BaseType;
 
 			/****************
 			*    Methods    *
@@ -1424,15 +1750,33 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				/** Default constructs the underlying RectangularType
+				/**
+				 * Default constructs base_type and the underlying RectangularType
 				 */
 				Rectangular() = default;
 
-				/** Forwards arguments to the underlying RectangularType constructor
+				/**
+				 * Initializes underlying RectangularType using a supplied rectangle
+				 * and forwards remaining arguments to base class constructor.
 				 */
-				template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
-				Rectangular(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
-					:iRectangle(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
+				template<typename... ArgTypes>
+				Rectangular(RectangleType &&rectangle, ArgTypes&&... args)
+					:base_type(std::forward<ArgTypes>(args)...), iRectangle(std::forward<RectangleType>(rectangle))
+				{
+					// empty body
+				}
+
+				/**
+				 * Default construct the underlying RectangularType forwarding arguments to base class constructors.
+				 */
+				using BaseType::BaseType;
+
+				/**
+				 * Forwards arguments to the underlying RectangularType constructor
+				 */
+				template<typename... ArgTypes>
+				Rectangular(ArgTypes&&... args)
+					:iRectangle(std::forward<ArgTypes>(args)...)
 				{
 					// empty body
 				} // end Rectangular constructor
@@ -2151,6 +2495,8 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
+				KeyboardAndMouseStub() = default;
+
 				using BaseType::BaseType;
 
 				/****************
@@ -2197,6 +2543,8 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
+				TwoStagePressable() = default;
+
 				using BaseType::BaseType;
 
 				/****************
@@ -2271,6 +2619,8 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
+				CaretLike() = default;
+
 				using BaseType::BaseType;
 
 				/****************
