@@ -2438,9 +2438,9 @@ namespace graphene
 				void render() const
 				{
 					if(UnaryPredicate()(*this))
-						TrueWrapper(*this).render();
+						reinterpret_cast<const TrueWrapper*>(static_cast<const BaseType*>(this))->render();
 					else
-						FalseWrapper(*this).render();
+						reinterpret_cast<const FalseWrapper*>(static_cast<const BaseType*>(this))->render();
 				} // end method render
 			}; // end class Conditional
 
@@ -2485,8 +2485,8 @@ namespace graphene
 			public:
 				void render() const
 				{
-					FirstWrapper(*this).render();
-					SecondWrapper(*this).render();
+					reinterpret_cast<const FirstWrapper*>(static_cast<const BaseType*>(this))->render();
+					reinterpret_cast<const SecondWrapper*>(static_cast<const BaseType*>(this))->render();
 				} // end method render
 			}; // end class Sequential
 
