@@ -179,18 +179,18 @@ namespace GUIModel
 			} // end ControlPart constructor
 		}; // end class ControlPart
 
-		template<typename CoordinateType, typename CharType>
+		template<typename CoordinateType, typename Const, typename CharType>
 		using ICaret = graphene::DSEL::FrameStack<
 			graphene::Bases::Empty,
 			graphene::DSEL::Frame<graphene::Bases::Destructible>,
-			graphene::DSEL::Frame<graphene::Bases::CaretLike, CharType>,
+			graphene::DSEL::Frame<graphene::Bases::CaretLike, Const, CharType>,
 			graphene::DSEL::Frame<graphene::Bases::EventHandling::KeyboardAndMouse, CoordinateType>, // TODO: handle in parent
 			graphene::DSEL::Frame<graphene::Bases::Renderable>
 		>;
 
-		template<typename CoordinateType, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
+		template<typename CoordinateType, typename Const, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
 		using CaretBase = graphene::DSEL::FrameStack<
-			ICaret<CoordinateType,CharType>,
+			ICaret<CoordinateType,Const,CharType>,
 			graphene::DSEL::Frame<graphene::Frames::Indexing, size_t>,
 			graphene::DSEL::Frame<graphene::Frames::Offset>,
 			graphene::DSEL::Frame<graphene::Frames::Pointing, PointedToType*>,
@@ -200,14 +200,14 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::IndirectCaret, TextConceptMap, Width>
 		>;
 
-		template<typename CoordinateType, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
-		class Caret : public CaretBase<CoordinateType, TextConceptMap, CharType, PointedToType, Width>
+		template<typename CoordinateType, typename Const, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
+		class Caret : public CaretBase<CoordinateType, Const, TextConceptMap, CharType, PointedToType, Width>
 		{
 			/*********************
 			*    Member Types    *
 			*********************/
 		public:
-			using base_type = CaretBase<CoordinateType, TextConceptMap, CharType, PointedToType, Width>;
+			using base_type = CaretBase<CoordinateType, Const, TextConceptMap, CharType, PointedToType, Width>;
 			using pointed_to_type = PointedToType;
 			using width = Width;
 
@@ -241,11 +241,11 @@ namespace GUIModel
 				graphene::DSEL::Frame<graphene::Frames::SizedName, graphene::FunctionObjects::GlutStrokeFontEngine>,
 				graphene::DSEL::Frame<graphene::Frames::BoxedAdaptableSizeName, Margin>,
 				graphene::DSEL::Frame<graphene::Frames::MultiCharBorderedRectangle, graphene::FunctionObjects::Named,
-					std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, typename TextType::value_type>>,
-					std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, typename TextType::value_type>>,
-						  Caret<typename RectangleType::coordinate_type, graphene::FunctionObjects::Named, typename TextType::value_type,
-								Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
-					const Caret<typename RectangleType::coordinate_type, graphene::FunctionObjects::Named, typename TextType::value_type,
+					std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
+					std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
+						  Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Named, typename TextType::value_type,
+									  Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
+					const Caret<typename RectangleType::coordinate_type, std::true_type,  graphene::FunctionObjects::Named, typename TextType::value_type,
 								const Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
 					size_t>
 			>, ControlPart, std::unique_ptr<      IShapePart<typename RectangleType::coordinate_type>>,
@@ -362,11 +362,11 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Frames::SizedText, graphene::FunctionObjects::GlutStrokeFontEngine>,
 			graphene::DSEL::Frame<graphene::Frames::BoxedAdaptableSizeText, Margin>,
 			graphene::DSEL::Frame<graphene::Frames::MultiCharBorderedRectangle, graphene::FunctionObjects::Textual,
-				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, typename TextType::value_type>>,
-				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, typename TextType::value_type>>,
-				      Caret<typename RectangleType::coordinate_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
+				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
+				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
+				      Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
 								  TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
-				const Caret<typename RectangleType::coordinate_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
+				const Caret<typename RectangleType::coordinate_type, std::true_type,  graphene::FunctionObjects::Textual, typename TextType::value_type,
 							const TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
 				size_t>
 		>;
@@ -529,11 +529,11 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Frames::SizedText, graphene::FunctionObjects::GlutStrokeFontEngine>,
 			graphene::DSEL::Frame<graphene::Frames::BoxedAdaptableSizeText, BorderSize>,
 			graphene::DSEL::Frame<graphene::Frames::MultiCharBorderedRectangle, graphene::FunctionObjects::Textual,
-				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, typename TextType::value_type>>,
-				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, typename TextType::value_type>>,
-					  Caret<typename RectangleType::coordinate_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
+				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
+				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
+					  Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
 								  Constraint<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>, CaretWidth>,
-				const Caret<typename RectangleType::coordinate_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
+				const Caret<typename RectangleType::coordinate_type, std::true_type,  graphene::FunctionObjects::Textual, typename TextType::value_type,
 							const Constraint<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>, CaretWidth>,
 				size_t>
 		>;
@@ -1100,7 +1100,7 @@ namespace GUIModel
 
 			std::unique_ptr<IShapePart<CoordinateType>> selectedPart;
 
-			std::unique_ptr<ICaret<CoordinateType,char_type>> caret;
+			std::unique_ptr<ICaret<CoordinateType, std::false_type, char_type>> caret;
 
 			coordinate_type lastX; // TODO: consider making lastPressX (this will require saving initial movable control position as well)
 			coordinate_type lastY;

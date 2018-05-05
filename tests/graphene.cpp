@@ -147,4 +147,71 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(f3.bottom(), 2.5f);
 	BOOST_CHECK_EQUAL(f3.right(), 3.5f);
 	BOOST_CHECK_EQUAL(f3.top(), 4.5f);
+
+	// Textual
+	FrameStack<
+		Bases::Empty,
+		Frame<Textual, std::string>
+	> t1("some string");
+	BOOST_CHECK_EQUAL(t1.text(), "some string");
+
+	const decltype(t1) t2("42");
+	BOOST_CHECK_EQUAL(t2.text(), "42");
+
+	// IndirectCaretLike
+	int argc = 0;
+	char *argv[] = {nullptr};
+	glutInit(&argc, argv); // GlutStrokeFontEngine requires GLUT to be initialized first:
+
+	FrameStack<
+		Bases::Empty,
+		Frame<Indexing, size_t>,
+		Frame<Pointing, decltype(t1)*>,
+		Frame<Offset, int>,
+		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
+	> icl1(-2,2,&t1,1);
+	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
+	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
+	BOOST_CHECK_EQUAL(icl1.pointer(), &t1);
+	BOOST_CHECK_EQUAL(icl1.index(), 1);
+	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "some string");
+
+	icl1.nextPosition();
+	icl1.prevPosition();
+	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
+	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
+	BOOST_CHECK_EQUAL(icl1.index(), 1);
+
+	icl1.firstPosition();
+	BOOST_CHECK_EQUAL(icl1.xOffset(), 0);
+	BOOST_CHECK_EQUAL(icl1.yOffset(), 2); // unchanged
+	BOOST_CHECK_EQUAL(icl1.index(), 0);
+	icl1.eraseNext();
+	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome string");
+	icl1.lastPosition();
+	icl1.erasePrev();
+	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome strin");
+
+	icl1.insert('-');
+	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome strin-");
+
+	FrameStack<
+		Bases::Empty,
+		Frame<Indexing, size_t>,
+		Frame<Pointing, decltype(t2)*>,
+		Frame<Offset, float>,
+		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
+	> icl2(1.0f,0.0f,&t2,1);
+	BOOST_CHECK_EQUAL(icl2.xOffset(), 1.0f);
+	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
+	BOOST_CHECK_EQUAL(icl2.pointer(), &t2);
+	BOOST_CHECK_EQUAL(icl2.index(), 1);
+	BOOST_CHECK_EQUAL(icl2.pointer()->text(), "42");
+
+	icl2.firstPosition();
+	icl2.nextPosition();
+	icl2.prevPosition();
+	BOOST_CHECK_EQUAL(icl2.xOffset(), 0.0f);
+	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
+	BOOST_CHECK_EQUAL(icl2.index(), 0);
 } // end test case

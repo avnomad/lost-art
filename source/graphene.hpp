@@ -501,8 +501,11 @@ namespace graphene
 			virtual ConstCharType charWithIndex(IndexType i) const = 0;
 		}; // end class MultiChar
 
-		template<typename BaseType, typename CharType = typename BaseType::char_type>
-		class CaretLike : public BaseType
+		template<typename BaseType, typename Const = std::false_type, typename CharType = typename BaseType::char_type>
+		class CaretLike;
+
+		template<typename BaseType, typename CharType>
+		class CaretLike<BaseType, std::true_type, CharType> : public BaseType
 		{
 			// Member Types
 		public:
@@ -522,6 +525,21 @@ namespace graphene
 			virtual void prevPosition() = 0;
 			virtual void firstPosition() = 0;
 			virtual void lastPosition() = 0;
+		}; // end class CaretLike
+
+		template<typename BaseType, typename CharType>
+		class CaretLike<BaseType, std::false_type, CharType> : public CaretLike<BaseType, std::true_type, CharType>
+		{
+			// Member Types
+			using base = CaretLike<BaseType, std::true_type, CharType>;
+
+			// Constructors
+		public:
+			CaretLike() = default;
+			using base::base;
+
+			// Methods
+		public:
 			virtual void eraseNext() = 0;
 			virtual void erasePrev() = 0;
 			virtual void insert(CharType character) = 0;
@@ -1631,9 +1649,22 @@ namespace graphene
 #undef charWithIndexMacro
 		}; // end class MultiCharBorderedRectangle
 
-		template<typename BaseType, typename TextConceptMap, typename FontEngineType = typename BaseType::font_engine_type, typename CharType = typename BaseType::char_type>
-		class IndirectCaretLike : public BaseType
+		template<typename BaseType, typename TextConceptMap,
+			typename FontEngineType = typename BaseType::font_engine_type,
+			typename CharType = typename BaseType::char_type>
+		class MutIndirectCaretLike;
+
+		template<typename BaseType, typename TextConceptMap,
+			typename FontEngineType = typename BaseType::font_engine_type,
+			typename CharType = typename BaseType::char_type>
+		class ConstIndirectCaretLike : public BaseType
 		{
+			/****************
+			*    Friends    *
+			****************/
+
+			friend class MutIndirectCaretLike<BaseType, TextConceptMap, FontEngineType, CharType>;
+
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -1653,10 +1684,10 @@ namespace graphene
 			*    Constructors    *
 			*********************/
 		public:
-			IndirectCaretLike() = default;
+			ConstIndirectCaretLike() = default;
 
 			template<typename... ArgTypes>
-			IndirectCaretLike(TextConceptMap &&textConceptMap, FontEngineType &&fontEngine, ArgTypes&&... args)
+			ConstIndirectCaretLike(TextConceptMap &&textConceptMap, FontEngineType &&fontEngine, ArgTypes&&... args)
 				:base_type(std::forward<ArgTypes>(args)...),
 				 iTextConceptMap(std::forward<TextConceptMap>(textConceptMap)),
 				 iFontEngine(std::forward<FontEngineType>(fontEngine))
@@ -1702,26 +1733,58 @@ namespace graphene
 				this->xOffset() = iFontEngine.stringWidth(iTextConceptMap.text(*this->pointer()));
 			} // end method lastPosition
 
+		}; // end class ConstIndirectCaretLike
+
+		template<typename BaseType, typename TextConceptMap, typename FontEngineType, typename CharType>
+		class MutIndirectCaretLike : public ConstIndirectCaretLike<BaseType, TextConceptMap, FontEngineType, CharType>
+		{
+			/*********************
+			*    Member Types    *
+			*********************/
+		private:
+			using base = ConstIndirectCaretLike<BaseType, TextConceptMap, FontEngineType, CharType>;
+
+			/*********************
+			*    Constructors    *
+			*********************/
+		public:
+			MutIndirectCaretLike() = default;
+			using base::base;
+
+			/****************
+			*    Methods    *
+			****************/
+		public:
 			void eraseNext()
 			{
-				iTextConceptMap.text(*this->pointer()).erase(this->index(),1);
+				this->iTextConceptMap.text(*this->pointer()).erase(this->index(),1);
 			} // end method eraseNext
 
 			void erasePrev()
 			{
 				if(this->index() > 0)
 				{
-					prevPosition();
-					eraseNext();
+					this->prevPosition();
+					this->eraseNext();
 				} // end if
 			} // end method erasePrev
 
 			void insert(CharType character)
 			{
-				iTextConceptMap.text(*this->pointer()).insert(this->index(),1,character);
-				nextPosition();
+				this->iTextConceptMap.text(*this->pointer()).insert(this->index(),1,character);
+				this->nextPosition();
 			} // end method insert
-		}; // end class IndirectCaretLike
+
+		}; // end class MutIndirectCaretLike
+
+		template<typename BaseType, typename TextConceptMap,
+			typename FontEngineType = typename BaseType::font_engine_type,
+			typename CharType = typename BaseType::char_type>
+		using IndirectCaretLike = typename std::conditional<
+			std::is_const<typename std::pointer_traits<typename BaseType::pointer_type>::element_type>::value,
+			ConstIndirectCaretLike<BaseType, TextConceptMap, FontEngineType, CharType>,
+			MutIndirectCaretLike<BaseType, TextConceptMap, FontEngineType, CharType>
+		>::type;
 
 		/** These are intended primarily to adapt geometric types that are unaware of frame architecture,
 		 *	in order to present them as frames.
