@@ -214,6 +214,16 @@ namespace graphene
 			Selectable() = default;
 			using BaseType::BaseType;
 
+			// Destructor
+		public:
+			virtual ~Selectable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Selectable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Selectable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
+
 			// Methods
 		public:
 			virtual FrameStackType &select() = 0;
@@ -234,6 +244,16 @@ namespace graphene
 		public:
 			Pressable() = default;
 			using BaseType::BaseType;
+
+			// Destructor
+		public:
+			virtual ~Pressable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Pressable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Pressable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
 
 			// Methods
 		public:
@@ -256,6 +276,16 @@ namespace graphene
 			Highlightable() = default;
 			using BaseType::BaseType;
 
+			// Destructor
+		public:
+			virtual ~Highlightable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Highlightable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Highlightable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
+
 			// Methods
 		public:
 			virtual FrameStackType &highlight() = 0;
@@ -276,6 +306,16 @@ namespace graphene
 		public:
 			Focusable() = default;
 			using BaseType::BaseType;
+
+			// Destructor
+		public:
+			virtual ~Focusable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Focusable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Focusable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
 
 			// Methods
 		public:
@@ -624,9 +664,9 @@ namespace graphene
 			template<typename BaseType, typename allowHorizontal = std::true_type, typename allowVertical = std::true_type, typename CoordinateType = typename BaseType::coordinate_type>
 			class HVMovable : public BaseType
 			{
-				/**********************
-				*    Concept Check    *
-				**********************/
+				/***********************
+				*    Concept Checks    *
+				***********************/
 
 				static_assert(std::is_same<allowHorizontal, std::true_type>() || std::is_same<allowHorizontal, std::false_type>(),
 					"allowHorizontal must be either std::true_type or std::false_type!");
@@ -811,13 +851,15 @@ namespace graphene
 			} // end method yOffset
 		}; // end class Offset
 
+		/**
+		 * Adds state and methods to make a stack frame 'selectable'.
+		 *
+		 * It is an error to instantiate a stack frame that contains Frame<Selectable, FrameStackType>,
+		 * but doesn't include a complete FrameStackType sub-stack at the top.
+		 */
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Selectable : public BaseType
 		{
-			// must test that FrameStackType is indeed a subclass of Selectable and that
-			// the this pointer indeed points to a FrameStackType...
-			// Is there something wrong with VS2012 std::is_base_of?
-
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -846,6 +888,18 @@ namespace graphene
 
 			using BaseType::BaseType;
 
+			/*******************
+			*    Destructor    *
+			*******************/
+		public:
+			~Selectable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Selectable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Selectable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
+
 			/****************
 			*    Methods    *
 			****************/
@@ -853,13 +907,13 @@ namespace graphene
 			FrameStackType &select()
 			{
 				iSelected = true;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method select
 
 			FrameStackType &deselect()
 			{
 				iSelected = false;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method deselect
 
 			bool &selected()
@@ -873,14 +927,15 @@ namespace graphene
 			} // end method selected
 		}; // end class Selectable
 
-
+		/**
+		 * Adds state and methods to make a stack frame 'pressable'.
+		 *
+		 * It is an error to instantiate a stack frame that contains Frame<Pressable, FrameStackType>,
+		 * but doesn't include a complete FrameStackType sub-stack at the top.
+		 */
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Pressable : public BaseType
 		{
-			// must test that FrameStackType is indeed a subclass of Pressable and that
-			// the this pointer indeed points to a FrameStackType...
-			// Is there something wrong with VS2012 std::is_base_of?
-
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -909,6 +964,18 @@ namespace graphene
 
 			using BaseType::BaseType;
 
+			/*******************
+			*    Destructor    *
+			*******************/
+		public:
+			~Pressable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Pressable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Pressable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
+
 			/****************
 			*    Methods    *
 			****************/
@@ -916,13 +983,13 @@ namespace graphene
 			FrameStackType &press()
 			{
 				iPressed = true;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method press
 
 			FrameStackType &depress()
 			{
 				iPressed = false;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method depress
 
 			bool &pressed()
@@ -936,13 +1003,15 @@ namespace graphene
 			} // end method pressed
 		}; // end class Pressable
 
+		/**
+		 * Adds state and methods to make a stack frame 'highlightable'.
+		 *
+		 * It is an error to instantiate a stack frame that contains Frame<Highlightable, FrameStackType>,
+		 * but doesn't include a complete FrameStackType sub-stack at the top.
+		 */
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Highlightable : public BaseType
 		{
-			// must test that FrameStackType is indeed a subclass of Highlightable and that
-			// the this pointer indeed points to a FrameStackType...
-			// Is there something wrong with VS2012 std::is_base_of?
-
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -971,6 +1040,18 @@ namespace graphene
 
 			using BaseType::BaseType;
 
+			/*******************
+			*    Destructor    *
+			*******************/
+		public:
+			~Highlightable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Highlightable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Highlightable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
+
 			/****************
 			*    Methods    *
 			****************/
@@ -978,13 +1059,13 @@ namespace graphene
 			FrameStackType &highlight()
 			{
 				iHighlighted = true;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method highlight
 
 			FrameStackType &dehighlight()
 			{
 				iHighlighted = false;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method dehighlight
 
 			bool &highlighted()
@@ -998,13 +1079,15 @@ namespace graphene
 			} // end method highlighted
 		}; // end class Highlightable
 
+		/**
+		 * Adds state and methods to make a stack frame 'focusable'.
+		 *
+		 * It is an error to instantiate a stack frame that contains Frame<Focusable, FrameStackType>,
+		 * but doesn't include a complete FrameStackType sub-stack at the top.
+		 */
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
 		class Focusable : public BaseType
 		{
-			// must test that FrameStackType is indeed a subclass of Focusable and that
-			// the this pointer indeed points to a FrameStackType...
-			// Is there something wrong with VS2012 std::is_base_of?
-
 			/***************
 			*    Fields    *
 			***************/
@@ -1033,6 +1116,18 @@ namespace graphene
 
 			using BaseType::BaseType;
 
+			/*******************
+			*    Destructor    *
+			*******************/
+		public:
+			~Focusable()
+			{
+				// workaround because is_base_of can't work with incomplete types
+				static_assert(std::is_base_of<Focusable, FrameStackType>()
+						   || std::is_base_of<FrameStackType, Focusable>(),
+							  "This class and FrameStackType must be connected by inheritance!");
+			} // end destructor
+
 			/****************
 			*    Methods    *
 			****************/
@@ -1040,13 +1135,13 @@ namespace graphene
 			FrameStackType &focus()
 			{
 				iFocused = true;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method focus
 
 			FrameStackType &unfocus()
 			{
 				iFocused = false;
-				return *static_cast<FrameStackType *>(this); // can be dangerous without check...
+				return *static_cast<FrameStackType *>(this);
 			} // end method unfocus
 
 			bool &focused()
@@ -2303,6 +2398,15 @@ namespace graphene
 			template<typename BaseType, typename TrueWrapper, typename FalseWrapper, typename UnaryPredicate>
 			class Conditional : public BaseType
 			{
+				/***********************
+				*    Concept Checks    *
+				***********************/
+
+				static_assert(std::is_base_of<BaseType, TrueWrapper>() && std::is_base_of<BaseType, FalseWrapper>(),
+					"Wrappers must derive from base type!");
+				static_assert(sizeof(BaseType) == sizeof(TrueWrapper) && sizeof(BaseType) == sizeof(FalseWrapper),
+					"Wrappers must not add extra members!");
+
 				/*********************
 				*    Member Types    *
 				*********************/
@@ -2343,6 +2447,15 @@ namespace graphene
 			template<typename BaseType, typename FirstWrapper, typename SecondWrapper> // TODO: use variadic templates when available
 			class Sequential : public BaseType
 			{
+				/***********************
+				*    Concept Checks    *
+				***********************/
+
+				static_assert(std::is_base_of<BaseType, FirstWrapper>() && std::is_base_of<BaseType, SecondWrapper>(),
+					"Wrappers must derive from base type!");
+				static_assert(sizeof(BaseType) == sizeof(FirstWrapper) && sizeof(BaseType) == sizeof(SecondWrapper),
+					"Wrappers must not add extra members!");
+
 				/*********************
 				*    Member Types    *
 				*********************/
