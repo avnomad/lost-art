@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 		Frame<Pointing, decltype(t1)*>,
 		Frame<Offset, int>,
 		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
-	> icl1(-2,2,&t1,1);
+	> icl1(-2,2,&t1,1); // TODO: IndirectCaretLike constructor shouldn't allow arbitrary offsets, but instead set them based on index.
 	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
 	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
 	BOOST_CHECK_EQUAL(icl1.pointer(), &t1);
@@ -214,4 +214,35 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(icl2.xOffset(), 0.0f);
 	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
 	BOOST_CHECK_EQUAL(icl2.index(), 0);
+
+	// EventHandling::CaretLike
+	EventHandling::CaretLike<decltype(icl1)> ehcl1(-2,2,&t1,1);
+	BOOST_CHECK_EQUAL(ehcl1.xOffset(), -2);
+	BOOST_CHECK_EQUAL(ehcl1.yOffset(), 2);
+	BOOST_CHECK_EQUAL(ehcl1.pointer(), &t1);
+	BOOST_CHECK_EQUAL(ehcl1.index(), 1);
+	BOOST_CHECK_EQUAL(ehcl1.pointer()->text(), "ome strin-");
+
+	ehcl1.keyboardNonAscii(Bases::EventHandling::NonAsciiKey::HOME, true, 0, 0);
+	BOOST_CHECK_EQUAL(ehcl1.xOffset(), 0);
+	BOOST_CHECK_EQUAL(ehcl1.yOffset(), 2); // unchanged
+	BOOST_CHECK_EQUAL(ehcl1.index(), 0);
+
+	ehcl1.keyboardAscii(0x7f, true, 0, 0);
+	BOOST_CHECK_EQUAL(ehcl1.pointer()->text(), "me strin-");
+
+	EventHandling::CaretLike<decltype(icl2)> ehcl2(1.0f,0.0f,&t2,1);
+	BOOST_CHECK_EQUAL(ehcl2.xOffset(), 1.0f);
+	BOOST_CHECK_EQUAL(ehcl2.yOffset(), 0.0f);
+	BOOST_CHECK_EQUAL(ehcl2.pointer(), &t2);
+	BOOST_CHECK_EQUAL(ehcl2.index(), 1);
+	BOOST_CHECK_EQUAL(ehcl2.pointer()->text(), "42");
+
+	ehcl2.keyboardNonAscii(Bases::EventHandling::NonAsciiKey::HOME, true, 0, 0);
+	BOOST_CHECK_EQUAL(ehcl2.xOffset(), 0.0f);
+	BOOST_CHECK_EQUAL(ehcl2.yOffset(), 0.0f); // unchanged
+	BOOST_CHECK_EQUAL(ehcl2.index(), 0);
+
+	ehcl2.keyboardAscii(0x7f, true, 0, 0);
+	BOOST_CHECK_EQUAL(ehcl2.pointer()->text(), "42"); // unchanged
 } // end test case

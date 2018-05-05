@@ -2669,7 +2669,7 @@ namespace graphene
 			/** BaseType must conform to the CaretLike interface.
 			 */
 			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-			class CaretLike : public BaseType
+			class ConstCaretLike : public BaseType
 			{
 				/*********************
 				*    Member Types    *
@@ -2682,7 +2682,7 @@ namespace graphene
 				*    Constructors    *
 				*********************/
 			public:
-				CaretLike() = default;
+				ConstCaretLike() = default;
 
 				using BaseType::BaseType;
 
@@ -2692,21 +2692,7 @@ namespace graphene
 			public:
 				void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
 				{
-					if(down) // ignore up events
-					{
-						switch(code)
-						{
-						case 0x7f: // delete key
-							this->eraseNext();
-							return;
-						case '\b': // backspace key
-							this->erasePrev();
-							return;
-						default:
-							this->insert(code);
-							return;
-						} // end switch
-					} // end if
+					// TODO: consider printing a warning message instead of just ignoring key strokes.
 				} // end method keyboardAscii
 
 				void keyboardNonAscii(Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
@@ -2735,7 +2721,58 @@ namespace graphene
 						} // end switch
 					} // end if
 				} // end method keyboardNonAscii
-			}; // end class CaretLike
+			}; // end class ConstCaretLike
+
+			/** BaseType must conform to the CaretLike interface.
+			 */
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			class MutCaretLike : public ConstCaretLike<BaseType, CoordinateType>
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			private:
+				using base = ConstCaretLike<BaseType, CoordinateType>;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				MutCaretLike() = default;
+
+				using base::base;
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void keyboardAscii(unsigned char code, bool down, CoordinateType x, CoordinateType y)
+				{
+					if(down) // ignore up events
+					{
+						switch(code)
+						{
+						case 0x7f: // delete key
+							this->eraseNext();
+							return;
+						case '\b': // backspace key
+							this->erasePrev();
+							return;
+						default:
+							this->insert(code);
+							return;
+						} // end switch
+					} // end if
+				} // end method keyboardAscii
+
+			}; // end class MutCaretLike
+
+			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
+			using CaretLike = typename std::conditional<
+				std::is_const<typename std::pointer_traits<typename BaseType::pointer_type>::element_type>::value,
+				ConstCaretLike<BaseType, CoordinateType>,
+				MutCaretLike<BaseType, CoordinateType>
+			>::type;
 
 		} // end namespace EventHandling
 
