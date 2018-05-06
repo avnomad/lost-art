@@ -32,7 +32,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <algorithm>
+#include <exception>
 #include <stdexcept>
+#include <functional>
 #include <type_traits>
 
 #include <cassert>
@@ -906,6 +908,22 @@ namespace GUIModel
 			} // end method parse
 		}; // end class Constraint
 
+
+		/**
+		 * Invokes the supplied function on the supplied arguments and prints any exceptions to the standard error stream.
+		 *
+		 * The return value and type are those of the invoked function if no exceptions are thrown.
+		 */
+		template<typename Function, typename... Arguments>
+		decltype(auto) reportExceptions(Function &&function, Arguments &&...arguments)
+		{
+			try {
+				return std::forward<Function>(function)(std::forward<Arguments>(arguments)...);
+			} catch(const std::exception &exception) {
+				std::cerr << "Error: " << exception.what() << std::endl;
+			} // end catch
+		} // end method reportExceptions
+
 		// TODO: split button and control handling code and move them into separate classes. ButtonManager?
 		// TODO: split Model class into frames.
 		template<typename CoordinateType, typename TextType = std::string>
@@ -1504,7 +1522,7 @@ namespace GUIModel
 					{
 						if(pressedButton != buttons.end() && pressedButton->first.pressed())
 						{
-							pressedButton->second();
+							reportExceptions(pressedButton->second);
 							pressedButton->first.depress();
 						} // end if
 						pressedButton = buttons.end();
