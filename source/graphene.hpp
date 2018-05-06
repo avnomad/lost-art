@@ -39,75 +39,63 @@ namespace graphene
 
 	namespace Bases
 	{
-		class Empty {};
+		struct Empty {};
 
 		template<typename BaseType>
-		class Destructible : public BaseType
+		struct Destructible : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 
 			// Constructors
-		public:
 			Destructible() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual ~Destructible() = default;
-		}; // end class Destructible
+		}; // end struct Destructible
 
 		template<typename BaseType>
-		class Renderable : public BaseType
+		struct Renderable : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 
 			// Constructors
-		public:
 			Renderable() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual void render() const = 0;
-		}; // end class Renderable
+		}; // end struct Renderable
 
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class Movable : public BaseType
+		struct Movable : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			Movable() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual void move(CoordinateType xOffset, CoordinateType yOffset) = 0;
-		}; // end class Movable
+		}; // end struct Movable
 
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class Rectangular : public BaseType
+		struct Rectangular : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			Rectangular() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual CoordinateType &left() = 0;
 			virtual const CoordinateType &left() const = 0;
 			virtual CoordinateType &bottom() = 0;
@@ -122,266 +110,229 @@ namespace graphene
 
 			virtual CoordinateType width() const = 0;
 			virtual CoordinateType height() const = 0;
-		}; // end class Rectangular
+		}; // end struct Rectangular
 
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class Containing : public BaseType
+		struct Containing : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			Containing() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual bool contains(CoordinateType x, CoordinateType y) const = 0;
-		}; // end class Containing
+		}; // end struct Containing
 
 		template<typename BaseType, typename PointerType = typename BaseType::pointer_type>
-		class Pointing : public BaseType
+		struct Pointing : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using pointer_type = PointerType;
 
 			// Constructors
-		public:
 			Pointing() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual PointerType &pointer() = 0;
 			virtual const PointerType &pointer() const = 0;
-		}; // end class Pointing
+		}; // end struct Pointing
 
 		template<typename BaseType, typename IndexType = typename BaseType::index_type>
-		class Indexing : public BaseType
+		struct Indexing : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using index_type = IndexType;
 
 			// Constructors
-		public:
 			Indexing() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual IndexType &index() = 0;
 			virtual const IndexType &index() const = 0;
-		}; // end class Indexing
+		}; // end struct Indexing
 
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class Offset : public BaseType
+		struct Offset : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			Offset() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual CoordinateType &xOffset() = 0;
 			virtual const CoordinateType &xOffset() const = 0;
 			virtual CoordinateType &yOffset() = 0;
 			virtual const CoordinateType &yOffset() const = 0;
-		}; // end class Offset
+		}; // end struct Offset
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Selectable : public BaseType
+		struct Selectable : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
 
 			// Constructors
-		public:
 			Selectable() = default;
 			using BaseType::BaseType;
 
 			// Destructor
-		public:
 			virtual ~Selectable()
 			{
 				// workaround because is_base_of can't work with incomplete types
 				static_assert(std::is_base_of<Selectable, FrameStackType>()
 						   || std::is_base_of<FrameStackType, Selectable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
+							  "This struct and FrameStackType must be connected by inheritance!");
 			} // end destructor
 
 			// Methods
-		public:
 			virtual FrameStackType &select() = 0;
 			virtual FrameStackType &deselect() = 0;
 			virtual bool &selected() = 0;
 			virtual const bool &selected() const = 0;
-		}; // end class Selectable
+		}; // end struct Selectable
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Pressable : public BaseType
+		struct Pressable : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
 
 			// Constructors
-		public:
 			Pressable() = default;
 			using BaseType::BaseType;
 
 			// Destructor
-		public:
 			virtual ~Pressable()
 			{
 				// workaround because is_base_of can't work with incomplete types
 				static_assert(std::is_base_of<Pressable, FrameStackType>()
 						   || std::is_base_of<FrameStackType, Pressable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
+							  "This struct and FrameStackType must be connected by inheritance!");
 			} // end destructor
 
 			// Methods
-		public:
 			virtual FrameStackType &press() = 0;
 			virtual FrameStackType &depress() = 0;
 			virtual bool &pressed() = 0;
 			virtual const bool &pressed() const = 0;
-		}; // end class Pressable
+		}; // end struct Pressable
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Highlightable : public BaseType
+		struct Highlightable : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
 
 			// Constructors
-		public:
 			Highlightable() = default;
 			using BaseType::BaseType;
 
 			// Destructor
-		public:
 			virtual ~Highlightable()
 			{
 				// workaround because is_base_of can't work with incomplete types
 				static_assert(std::is_base_of<Highlightable, FrameStackType>()
 						   || std::is_base_of<FrameStackType, Highlightable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
+							  "This struct and FrameStackType must be connected by inheritance!");
 			} // end destructor
 
 			// Methods
-		public:
 			virtual FrameStackType &highlight() = 0;
 			virtual FrameStackType &dehighlight() = 0;
 			virtual bool &highlighted() = 0;
 			virtual const bool &highlighted() const = 0;
-		}; // end class Highlightable
+		}; // end struct Highlightable
 
 		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Focusable : public BaseType
+		struct Focusable : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using frame_stack_type = FrameStackType;
 
 			// Constructors
-		public:
 			Focusable() = default;
 			using BaseType::BaseType;
 
 			// Destructor
-		public:
 			virtual ~Focusable()
 			{
 				// workaround because is_base_of can't work with incomplete types
 				static_assert(std::is_base_of<Focusable, FrameStackType>()
 						   || std::is_base_of<FrameStackType, Focusable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
+							  "This struct and FrameStackType must be connected by inheritance!");
 			} // end destructor
 
 			// Methods
-		public:
 			virtual FrameStackType &focus() = 0;
 			virtual FrameStackType &unfocus() = 0;
 			virtual bool &focused() = 0;
 			virtual const bool &focused() const = 0;
-		}; // end class Focusable
+		}; // end struct Focusable
 
 		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
-		class UniformlyBordered : public BaseType
+		struct UniformlyBordered : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using border_size_type = BorderSizeType;
 
 			// Constructors
-		public:
 			UniformlyBordered() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual BorderSizeType &borderSize() = 0;
 			virtual const BorderSizeType &borderSize() const = 0;
-		}; // end class UniformlyBordered
+		}; // end struct UniformlyBordered
 
 		template<typename BaseType, typename TextType = typename BaseType::text_type>
-		class Textual : public BaseType
+		struct Textual : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using text_type = TextType;
 
 			// Constructors
-		public:
 			Textual() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual TextType &text() = 0;
 			virtual const TextType &text() const = 0;
-		}; // end class Textual
+		}; // end struct Textual
 
 		/** SizedText instances have a fixed 'natural' aspect ratio, so changing the height,
 		 *	actually changes the width as well. Some frame stacks, may interpret  text sizes, as
 		 *	preferred instead of mandatory.
 		 */
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class SizedText : public BaseType
+		struct SizedText : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			SizedText() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual CoordinateType &textHeight() = 0;
 			virtual const CoordinateType &textHeight() const = 0;
 			// TODO: add support for setting the text width using properties, and perhaps the ability
@@ -391,69 +342,60 @@ namespace graphene
 			virtual void setTextWidth(const CoordinateType &value) = 0; // deprecated
 			// TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio
 			// and add preferred width, height read-only properties.
-		}; // end class SizedText
+		}; // end struct SizedText
 
 		/** This frame is intended for use in frame stacks that use textHeight/textWidth as a
 		 *	"preferred" size and need another method to return the actual text height/width.
 		 *	The first pair member is the width and the second the height.
 		 */
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class AdaptableSizeText : public BaseType
+		struct AdaptableSizeText : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			AdaptableSizeText() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual std::pair<CoordinateType,CoordinateType> effectiveTextSize() const = 0;
 			virtual std::pair<CoordinateType,CoordinateType> effectiveTextCharSize(size_t index) const = 0;
-		}; // end class AdaptableSizeText
+		}; // end struct AdaptableSizeText
 
 		template<typename BaseType, typename NameType = typename BaseType::name_type>
-		class Named : public BaseType
+		struct Named : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using name_type = NameType;
 
 			// Constructors
-		public:
 			Named() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual NameType &name() = 0;
 			virtual const NameType &name() const = 0;
-		}; // end class Named
+		}; // end struct Named
 
 		/** SizedName instances have a fixed 'natural' aspect ratio, so changing the height,
 		 *	actually changes the width as well. Some frame stacks, may interpret  name sizes, as
 		 *	preferred instead of mandatory.
 		 */
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class SizedName : public BaseType
+		struct SizedName : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			SizedName() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual CoordinateType &nameHeight() = 0;
 			virtual const CoordinateType &nameHeight() const = 0;
 			// TODO: add support for setting the name width using properties, and perhaps the ability
@@ -463,54 +405,48 @@ namespace graphene
 			virtual void setNameWidth(const CoordinateType &value) = 0; // deprecated
 			// TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio
 			// and add preferred width, height read-only properties.
-		}; // end class SizedName
+		}; // end struct SizedName
 
 		/** This frame is intended for use in frame stacks that use nameHeight/nameWidth as a
 		 *	"preferred" size and need another method to return the actual name height/width.
 		 *	The first pair member is the width and the second the height.
 		 */
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		class AdaptableSizeName : public BaseType
+		struct AdaptableSizeName : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			AdaptableSizeName() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual std::pair<CoordinateType,CoordinateType> effectiveNameSize() const = 0;
 			virtual std::pair<CoordinateType,CoordinateType> effectiveNameCharSize(size_t index) const = 0;
-		}; // end class AdaptableSizeName
+		}; // end struct AdaptableSizeName
 
 		/** If a MultiPart is also Containing then partUnderPoint(x,y) should return a value designating "no part"
 		 *	if and only if contains(x,y) returns false.
 		 */
 		template<typename BaseType, typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
-		class MultiPart : public BaseType
+		struct MultiPart : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using part_type = PartType;
 			using const_part_type = ConstPartType;
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			MultiPart() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual PartType partUnderPoint(CoordinateType x, CoordinateType y) = 0;
 			virtual ConstPartType partUnderPoint(CoordinateType x, CoordinateType y) const = 0;
-		}; // end class MultiPart
+		}; // end struct MultiPart
 
 		/** If a MultiChar is also Containing then charUnderPoint(x,y) should return a value designating "no part"
 		 *	if and only if contains(x,y) returns false.
@@ -518,10 +454,9 @@ namespace graphene
 		// TODO: perhaps find a better name to disambiguate with char?
 		template<typename BaseType, typename CharType = typename BaseType::char_type, typename ConstCharType = typename BaseType::const_char_type,
 			typename IndexType = typename BaseType::index_type, typename CoordinateType = typename BaseType::coordinate_type>
-		class MultiChar : public BaseType
+		struct MultiChar : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using char_type = CharType;
 			using const_char_type = ConstCharType;
@@ -529,85 +464,75 @@ namespace graphene
 			using coordinate_type = CoordinateType;
 
 			// Constructors
-		public:
 			MultiChar() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			virtual CharType charUnderPoint(CoordinateType x, CoordinateType y) = 0;
 			virtual ConstCharType charUnderPoint(CoordinateType x, CoordinateType y) const = 0;
 			virtual CharType charWithIndex(IndexType i) = 0;
 			virtual ConstCharType charWithIndex(IndexType i) const = 0;
-		}; // end class MultiChar
+		}; // end struct MultiChar
 
 		template<typename BaseType, typename Const = std::false_type, typename CharType = typename BaseType::char_type>
-		class CaretLike;
+		struct CaretLike;
 
 		template<typename BaseType, typename CharType>
-		class CaretLike<BaseType, std::true_type, CharType> : public BaseType
+		struct CaretLike<BaseType, std::true_type, CharType> : BaseType
 		{
 			// Member Types
-		public:
 			using base_type = BaseType;
 			using char_type = CharType;
 
 			// Constructors
-		public:
 			CaretLike() = default;
 			using BaseType::BaseType;
 
 			// Methods
-		public:
 			// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
 			// TODO: consider arguments like wraparound:bool
 			virtual void nextPosition() = 0;
 			virtual void prevPosition() = 0;
 			virtual void firstPosition() = 0;
 			virtual void lastPosition() = 0;
-		}; // end class CaretLike
+		}; // end struct CaretLike
 
 		template<typename BaseType, typename CharType>
-		class CaretLike<BaseType, std::false_type, CharType> : public CaretLike<BaseType, std::true_type, CharType>
+		struct CaretLike<BaseType, std::false_type, CharType> : CaretLike<BaseType, std::true_type, CharType>
 		{
 			// Member Types
 			using base = CaretLike<BaseType, std::true_type, CharType>;
 
 			// Constructors
-		public:
 			CaretLike() = default;
 			using base::base;
 
 			// Methods
-		public:
 			virtual void eraseNext() = 0;
 			virtual void erasePrev() = 0;
 			virtual void insert(CharType character) = 0;
-		}; // end class CaretLike
+		}; // end struct CaretLike
 
 		namespace EventHandling
 		{
-			enum class NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,
+			enum struct NonAsciiKey: unsigned{F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,PAGE_UP,PAGE_DOWN,
 				HOME,END,LEFT,RIGHT,UP,DOWN,INSERT,L_SHIFT,R_SHIFT,L_ALT,R_ALT,L_CTRL,R_CTRL,NUM_LOCK};
 
 			/** Controls implementing this interface should document whether they expect to receive all
 			 *	mouse events or only the ones that happen above them.
 			 */
 			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-			class KeyboardAndMouse : public BaseType
+			struct KeyboardAndMouse : BaseType
 			{
 				// Member Types
-			public:
 				using base_type = BaseType;
 				using coordinate_type = CoordinateType;
 
 				// Constructors
-			public:
 				KeyboardAndMouse() = default;
 				using BaseType::BaseType;
 
 				// Methods
-			public:
 				virtual void keyboardAscii(unsigned char charCode, bool down, CoordinateType x, CoordinateType y) = 0;
 				virtual void keyboardNonAscii(NonAsciiKey key, bool down, CoordinateType x, CoordinateType y) = 0;
 				virtual void mouseButton(unsigned button, bool down, CoordinateType x, CoordinateType y) = 0;
@@ -615,7 +540,7 @@ namespace graphene
 				virtual void mouseEnter(CoordinateType x, CoordinateType y) = 0;
 				virtual void mouseMove(CoordinateType x, CoordinateType y) = 0;
 				virtual void mouseExit(CoordinateType x, CoordinateType y) = 0;
-			}; // end class KeyboardAndMouse
+			}; // end struct KeyboardAndMouse
 
 		} // end namespace EventHandling
 
