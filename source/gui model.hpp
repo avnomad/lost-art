@@ -69,7 +69,7 @@ namespace GUIModel
 
 	namespace Controls
 	{
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
+		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> struct Button;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		using ButtonBase = graphene::DSEL::FrameStack<
@@ -99,36 +99,12 @@ namespace GUIModel
 				graphene::FunctionObjects::Pressed>;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class Button : public ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>
+		struct Button : public ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>
 		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
 			using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-			using coordinate_type = typename Button::coordinate_type;
-			using rectangle_type = RectangleType ;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
 			Button() = default;
-
-			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
-					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->text() = text;
-				this->textHeight() = textHeight;
-				this->pressed() = pressed;
-				this->highlighted() = highlighted;
-			} // end Button constructor
-		}; // end class Button
+			using base_type::base_type;
+		}; // end struct Button
 
 		template<typename CoordinateType>
 		using IShapePart = graphene::DSEL::FrameStack<
@@ -140,8 +116,10 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Bases::Renderable>
 		>;
 
+		/** Const instances should be constant and non-const instances should be non-constant
+		 */
 		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		using ControlPartBase = graphene::DSEL::FrameStack<
+		using ControlPart = graphene::DSEL::FrameStack<
 			IShapePart<CoordinateType>,
 			graphene::DSEL::Frame<graphene::Frames::Movable::Rectangular>,
 			graphene::DSEL::Frame<graphene::Frames::Movable::HVMovable, horizontallyMovable, verticallyMovable>,
@@ -150,34 +128,6 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>,
 			graphene::DSEL::Frame<graphene::Frames::Adapting::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
 		>;
-
-		/** Const instances should be constant and non-const instances should be non-constant
-		 */
-		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		class ControlPart : public ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>;
-			using rectangle_type = typename ControlPart::rectangle_type;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			ControlPart() = default;
-
-			/** Forwards arguments to the underlying RectangularType constructor
-			 */
-			template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
-			ControlPart(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
-				:base_type(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
-			{
-				// empty body
-			} // end ControlPart constructor
-		}; // end class ControlPart
 
 		template<typename CoordinateType, typename Const, typename CharType>
 		using ICaret = graphene::DSEL::FrameStack<
@@ -188,43 +138,17 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Bases::Renderable>
 		>;
 
-		template<typename CoordinateType, typename Const, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
-		using CaretBase = graphene::DSEL::FrameStack<
+		template<typename CoordinateType, typename Const, typename TextConceptMap, typename CharType, typename PointerType, typename Width>
+		using Caret = graphene::DSEL::FrameStack<
 			ICaret<CoordinateType,Const,CharType>,
 			graphene::DSEL::Frame<graphene::Frames::Indexing, size_t>,
 			graphene::DSEL::Frame<graphene::Frames::Offset>,
-			graphene::DSEL::Frame<graphene::Frames::Pointing, PointedToType*>,
+			graphene::DSEL::Frame<graphene::Frames::Pointing, PointerType>,
 			graphene::DSEL::Frame<graphene::Frames::IndirectCaretLike, TextConceptMap, graphene::FunctionObjects::GlutStrokeFontEngine>,
 			graphene::DSEL::Frame<graphene::Frames::EventHandling::KeyboardAndMouseStub>, // TODO: remove...
 			graphene::DSEL::Frame<graphene::Frames::EventHandling::CaretLike>, // ...and handle in parent
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::IndirectCaret, TextConceptMap, Width>
 		>;
-
-		template<typename CoordinateType, typename Const, typename TextConceptMap, typename CharType, typename PointedToType, typename Width>
-		class Caret : public CaretBase<CoordinateType, Const, TextConceptMap, CharType, PointedToType, Width>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = CaretBase<CoordinateType, Const, TextConceptMap, CharType, PointedToType, Width>;
-			using pointed_to_type = PointedToType;
-			using width = Width;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Caret() = default;
-
-			Caret(PointedToType *pointer, size_t index, CoordinateType xOffset)
-			{
-				this->pointer() = pointer;
-				this->index() = index;
-				this->xOffset() = xOffset;
-				this->yOffset() = 0;
-			} // end Caret constructor
-		}; // end class Caret
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string>	class Control;
 
@@ -244,9 +168,9 @@ namespace GUIModel
 					std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
 					std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
 						  Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Named, typename TextType::value_type,
-									  Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
+									  Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>*, CaretWidth>,
 					const Caret<typename RectangleType::coordinate_type, std::true_type,  graphene::FunctionObjects::Named, typename TextType::value_type,
-								const Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
+								const Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>*, CaretWidth>,
 					size_t>
 			>, ControlPart, std::unique_ptr<      IShapePart<typename RectangleType::coordinate_type>>,
 							std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>>;
@@ -297,22 +221,7 @@ namespace GUIModel
 			 */
 			Control() = default;
 
-			/** Construct a Control with the specified properties.
-			 */
-			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
-					TextType name, coordinate_type nameHeight, bool selected = false, bool highlighted = false, bool focused = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->name() = name;
-				this->nameHeight() = nameHeight;
-				this->selected() = selected;
-				this->highlighted() = highlighted;
-				this->focused() = focused;
-			} // end Control constructor
+			using base_type::base_type;
 
 			// TODO: consider serializing selected and other user interaction states.
 			Control(const property_tree_type &tree, bool selected = false, bool highlighted = false, bool focused = false)
@@ -349,7 +258,7 @@ namespace GUIModel
 			} // end method operator property_tree_type
 		}; // end class Control
 
-		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string> class TextBox;
+		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType = std::string> struct TextBox;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
 		using TextBoxBase = graphene::DSEL::FrameStack<
@@ -365,9 +274,9 @@ namespace GUIModel
 				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
 				      Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
-								  TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
+								  TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>*, CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type, std::true_type,  graphene::FunctionObjects::Textual, typename TextType::value_type,
-							const TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>, CaretWidth>,
+							const TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>*, CaretWidth>,
 				size_t>
 		>;
 
@@ -389,40 +298,12 @@ namespace GUIModel
 				graphene::FunctionObjects::Focused>;
 
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
-		class TextBox : public TextBoxRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>
+		struct TextBox : public TextBoxRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>
 		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
 			using base_type = TextBoxRenderableBase<RectangleType, BorderSize, Margin, CaretWidth, TextType>;
-			using coordinate_type = typename TextBox::coordinate_type;
-			using rectangle_type = RectangleType;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			/** Construct an uninitialized TextBox.
-			 */
 			TextBox() = default;
-
-			/** Construct a TextBox with the specified properties.
-			 */
-			TextBox(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
-					TextType text, coordinate_type textHeight, bool focused = false, bool highlighted = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->text() = text;
-				this->textHeight() = textHeight;
-				this->focused() = focused;
-				this->highlighted() = highlighted;
-			} // end TextBox constructor
-		}; // end class TextBox
+			using base_type::base_type;
+		}; // end struct TextBox
 
 		// TODO: rework design of ConstraintEndPoint
 		template<typename ControlContainerType>
@@ -532,14 +413,14 @@ namespace GUIModel
 				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
 					  Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Textual, typename TextType::value_type,
-								  Constraint<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>, CaretWidth>,
+								  Constraint<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>*, CaretWidth>,
 				const Caret<typename RectangleType::coordinate_type, std::true_type,  graphene::FunctionObjects::Textual, typename TextType::value_type,
-							const Constraint<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>, CaretWidth>,
+							const Constraint<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>*, CaretWidth>,
 				size_t>
 		>;
 
 		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
-		using ConstaintBase =
+		using ConstraintRenderableBase =
 			graphene::Frames::Renderable::Sequential<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
 				graphene::Frames::Renderable::Conditional<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>,
 					graphene::Frames::Renderable::Colorblind::FilledRectangle<ConstraintBase<RectangleType,ControlContainerType,BorderSize,LineWidth,CaretWidth,TextType>>,
@@ -556,7 +437,7 @@ namespace GUIModel
 
 		// TODO: decompose Constraint to frames
 		template<typename RectangleType, typename ControlContainerType, typename BorderSize, typename LineWidth, typename CaretWidth, typename TextType>
-		class Constraint : public ConstaintBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>
+		class Constraint : public ConstraintRenderableBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>
 		{
 			/*********************
 			*    Member Types    *
@@ -571,7 +452,7 @@ namespace GUIModel
 				RationalType rhsConstant;
 			}; // end struct ParseResult
 
-			using base_type = ConstaintBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>;
+			using base_type = ConstraintRenderableBase<RectangleType, ControlContainerType, BorderSize, LineWidth, CaretWidth, TextType>;
 			using rectangle_type = RectangleType;
 			using control_container_type = ControlContainerType;
 			using coordinate_type = typename RectangleType::coordinate_type;
@@ -1124,20 +1005,20 @@ namespace GUIModel
 			/** Construct an empty Model.
 			 */
 			Model()
-				:tbFileName(0,0,0,0,borderSize,"last session.las",textBoxTextHeight),
+				:tbFileName(textBoxTextHeight,"last session.las",borderSize,0,0,0,0),
 				controlIndex(0),firstResize(true),createOnMove(false),inConstraintAddMode(false)
 			{
 				// initialize buttons
-				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Load",buttonTextHeight),[this](){load(tbFileName.text());});
-				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Save",buttonTextHeight),[this](){save(tbFileName.text());});
+				buttons.emplace_back(button_type(buttonTextHeight,"Load",borderSize,0,0,0,0),[this](){load(tbFileName.text());});
+				buttons.emplace_back(button_type(buttonTextHeight,"Save",borderSize,0,0,0,0),[this](){save(tbFileName.text());});
 				// TODO: allow customizable header and executable names
-				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Compile",buttonTextHeight),
+				buttons.emplace_back(button_type(buttonTextHeight,"Compile",borderSize,0,0,0,0),
 					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.hpp", "build");});
-				buttons.emplace_back(button_type(0,0,0,0,borderSize,"Run",buttonTextHeight),
+				buttons.emplace_back(button_type(buttonTextHeight,"Run",borderSize,0,0,0,0),
 					[this](){run("build");});
 
 				// initialize controls
-				controls.emplace_back(0,0,0,0,borderSize,"Screen",controlTextHeight);
+				controls.emplace_back(controlTextHeight,"Screen",borderSize,0,0,0,0);
 
 				// initialize pointers and iterators
 				highlightedButton = buttons.end();
@@ -1654,7 +1535,7 @@ namespace GUIModel
 						unfocusAll();
 						if(highlightedControl != controls.rend())
 							highlightedControl->dehighlight();
-						controls.emplace_back(x,y,x,y,borderSize,"control"+std::to_string(controlIndex++),controlTextHeight);
+						controls.emplace_back(controlTextHeight,"control"+std::to_string(controlIndex++),borderSize,x,y,x,y);
 						(focusedControl = highlightedControl = selectedControl = controls.rbegin())->highlight().select().focus();
 						selectedPart = selectedControl->partUnderPoint(x,y); // TODO: guarantee this will be a corner
 						caret = focusedControl->charUnderPoint(x,y);
@@ -1763,6 +1644,10 @@ namespace GUIModel
 		const int Model<CoordinateType,TextType>::borderSize;
 		template<typename CoordinateType, typename TextType>
 		const int Model<CoordinateType,TextType>::controlTextHeight;
+		template<typename CoordinateType, typename TextType>
+		const int Model<CoordinateType,TextType>::buttonTextHeight;
+		template<typename CoordinateType, typename TextType>
+		const int Model<CoordinateType,TextType>::textBoxTextHeight;
 		template<typename CoordinateType, typename TextType>
 		const int Model<CoordinateType,TextType>::constraintTextHeight;
 

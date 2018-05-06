@@ -35,9 +35,9 @@ BOOST_AUTO_TEST_CASE(Test_Constraint_Parser)
 	Model<int> model;
 
 	// TODO: revert to test only relative frame.
-	model.controls.emplace_back(Model<int>::control_type(0,0,100,100,1,"screen",10));
-	model.controls.emplace_back(Model<int>::control_type(20,20,80,80,1,"control1",10));
-	model.controls.emplace_back(Model<int>::control_type(0,0,50,50,1,"control2",10));
+	model.controls.emplace_back(Model<int>::control_type(10,"screen",1,0,0,100,100));
+	model.controls.emplace_back(Model<int>::control_type(10,"control1",1,20,20,80,80));
+	model.controls.emplace_back(Model<int>::control_type(10,"control2",1,0,0,50,50));
 
 	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,0,RectangleSide::LEFT,1,RectangleSide::LEFT,0,0,"2.3a + 2mm",10));
 	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,0,RectangleSide::RIGHT,1,RectangleSide::RIGHT,0,0,"2/3a + 3.55b + 2px + mm",10));

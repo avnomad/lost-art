@@ -722,9 +722,10 @@ namespace graphene
 		public:
 			Pointing() = default;
 
-			template<typename... ArgTypes>
-			Pointing(PointerType &&pointer, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iPointer(std::forward<PointerType>(pointer))
+			template<typename PointerArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<PointerType, PointerArgType &&>::value, void>::type>
+			Pointing(PointerArgType &&pointer, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iPointer(std::forward<PointerArgType>(pointer))
 			{
 				// empty body
 			}
@@ -768,9 +769,10 @@ namespace graphene
 		public:
 			Indexing() = default;
 
-			template<typename... ArgTypes>
-			Indexing(IndexType &&index, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iIndex(std::forward<IndexType>(index))
+			template<typename IndexArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<IndexType, IndexArgType &&>::value, void>::type>
+			Indexing(IndexArgType &&index, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iIndex(std::forward<IndexArgType>(index))
 			{
 				// empty body
 			}
@@ -815,11 +817,13 @@ namespace graphene
 		public:
 			Offset() = default;
 
-			template<typename... ArgTypes>
-			Offset(CoordinateType &&xOffset, CoordinateType &&yOffset, ArgTypes&&... args)
+			template<typename XCoordinateArgType, typename YCoordinateArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<CoordinateType, XCoordinateArgType &&>::value, void>::type,
+				typename = typename std::enable_if<std::is_constructible<CoordinateType, YCoordinateArgType &&>::value, void>::type>
+			Offset(XCoordinateArgType &&xOffset, YCoordinateArgType &&yOffset, ArgTypes &&...args)
 				:base_type(std::forward<ArgTypes>(args)...),
-				 iXoffset(std::forward<CoordinateType>(xOffset)),
-				 iYoffset(std::forward<CoordinateType>(yOffset))
+				 iXoffset(std::forward<XCoordinateArgType>(xOffset)),
+				 iYoffset(std::forward<YCoordinateArgType>(yOffset))
 			{
 				// empty body
 			}
@@ -880,11 +884,11 @@ namespace graphene
 			Selectable() = default;
 
 			template<typename... ArgTypes>
-			Selectable(bool selected, ArgTypes&&... args)
+			Selectable(bool selected, ArgTypes &&...args)
 				:base_type(std::forward<ArgTypes>(args)...), iSelected(selected)
 			{
 				// empty body
-			}
+			} // end constructor
 
 			using BaseType::BaseType;
 
@@ -956,11 +960,11 @@ namespace graphene
 			Pressable() = default;
 
 			template<typename... ArgTypes>
-			Pressable(bool pressed, ArgTypes&&... args)
+			Pressable(bool pressed, ArgTypes &&...args)
 				:base_type(std::forward<ArgTypes>(args)...), iPressed(pressed)
 			{
 				// empty body
-			}
+			} // end constructor
 
 			using BaseType::BaseType;
 
@@ -1032,11 +1036,11 @@ namespace graphene
 			Highlightable() = default;
 
 			template<typename... ArgTypes>
-			Highlightable(bool highlighted, ArgTypes&&... args)
+			Highlightable(bool highlighted, ArgTypes &&...args)
 				:base_type(std::forward<ArgTypes>(args)...), iHighlighted(highlighted)
 			{
 				// empty body
-			}
+			} // end constructor
 
 			using BaseType::BaseType;
 
@@ -1108,11 +1112,11 @@ namespace graphene
 			Focusable() = default;
 
 			template<typename... ArgTypes>
-			Focusable(bool focused, ArgTypes&&... args)
+			Focusable(bool focused, ArgTypes &&...args)
 				:base_type(std::forward<ArgTypes>(args)...), iFocused(focused)
 			{
 				// empty body
-			}
+			} // end constructor
 
 			using BaseType::BaseType;
 
@@ -1177,9 +1181,10 @@ namespace graphene
 		public:
 			UniformlyBordered() = default;
 
-			template<typename... ArgTypes>
-			UniformlyBordered(border_size_type &&borderSize, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iBorderSize(std::forward<border_size_type>(borderSize))
+			template<typename BorderSizeArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<BorderSizeType, BorderSizeArgType &&>::value, void>::type>
+			UniformlyBordered(BorderSizeArgType &&borderSize, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iBorderSize(std::forward<BorderSizeArgType>(borderSize))
 			{
 				// empty body
 			}
@@ -1223,9 +1228,10 @@ namespace graphene
 		public:
 			Textual() = default;
 
-			template<typename... ArgTypes>
-			Textual(text_type &&text, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iText(std::forward<text_type>(text))
+			template<typename TextArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<TextType, TextArgType &&>::value, void>::type>
+			Textual(TextArgType &&text, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iText(std::forward<TextArgType>(text))
 			{
 				// empty body
 			}
@@ -1272,9 +1278,10 @@ namespace graphene
 		public:
 			SizedText() = default;
 
-			template<typename... ArgTypes>
-			SizedText(CoordinateType &&textHeight, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iTextHeight(std::forward<CoordinateType>(textHeight))
+			template<typename TextHeightArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<CoordinateType, TextHeightArgType &&>::value,void>::type>
+			SizedText(TextHeightArgType &&textHeight, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iTextHeight(std::forward<TextHeightArgType>(textHeight))
 			{
 				// empty body
 			}
@@ -1390,9 +1397,10 @@ namespace graphene
 		public:
 			Named() = default;
 
-			template<typename... ArgTypes>
-			Named(NameType &&name, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iName(std::forward<NameType>(name))
+			template<typename NameArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<NameType, NameArgType &&>::value, void>::type>
+			Named(NameArgType &&name, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iName(std::forward<NameArgType>(name))
 			{
 				// empty body
 			}
@@ -1439,9 +1447,10 @@ namespace graphene
 		public:
 			SizedName() = default;
 
-			template<typename... ArgTypes>
-			SizedName(CoordinateType &&nameHeight, ArgTypes&&... args)
-				:base_type(std::forward<ArgTypes>(args)...), iNameHeight(std::forward<CoordinateType>(nameHeight))
+			template<typename NameHeightArgType, typename... ArgTypes,
+				typename = typename std::enable_if<std::is_constructible<CoordinateType, NameHeightArgType &&>::value, void>::type>
+			SizedName(NameHeightArgType &&nameHeight, ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...), iNameHeight(std::forward<NameHeightArgType>(nameHeight))
 			{
 				// empty body
 			}
@@ -1713,7 +1722,7 @@ namespace graphene
 					for( ; i < textConceptMap.text(*this).size() ; fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[i]), ++i)\
 						if(fontX <= fontCharLeft + fontEngine.charWidth(textConceptMap.text(*this)[i])/2)\
 							break;\
-					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointed_to_type*>(this),i,fontCharLeft));\
+					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
 															/* TODO: check that this indeed points to that type */\
 				}\
 				else\
@@ -1738,7 +1747,7 @@ namespace graphene
 				coordinate_type fontCharLeft = 0;\
 				for(IndexType c = 0 ; c < i ; ++c)\
 					fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[c]);\
-				return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointed_to_type*>(this),i,fontCharLeft));\
+				return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
 			} // end method charWithIndex
 
 			charWithIndexMacro(     CharType,     ConcreteCharType,/* omit */)
@@ -1784,7 +1793,7 @@ namespace graphene
 			ConstIndirectCaretLike() = default;
 
 			template<typename... ArgTypes>
-			ConstIndirectCaretLike(TextConceptMap &&textConceptMap, FontEngineType &&fontEngine, ArgTypes&&... args)
+			ConstIndirectCaretLike(TextConceptMap textConceptMap, FontEngineType fontEngine, ArgTypes&&... args)
 				:base_type(std::forward<ArgTypes>(args)...),
 				 iTextConceptMap(std::forward<TextConceptMap>(textConceptMap)),
 				 iFontEngine(std::forward<FontEngineType>(fontEngine))
@@ -1919,9 +1928,10 @@ namespace graphene
 				 * Initializes underlying RectangularType using a supplied rectangle
 				 * and forwards remaining arguments to base class constructor.
 				 */
-				template<typename... ArgTypes>
-				Rectangular(RectangleType &&rectangle, ArgTypes&&... args)
-					:base_type(std::forward<ArgTypes>(args)...), iRectangle(std::forward<RectangleType>(rectangle))
+				template<typename RectangleArgType, typename... ArgTypes,
+					typename = typename std::enable_if<std::is_constructible<RectangleType, RectangleArgType &&>::value, void>::type>
+				Rectangular(RectangleArgType &&rectangle, ArgTypes &&...args)
+					:base_type(std::forward<ArgTypes>(args)...), iRectangle(std::forward<RectangleArgType>(rectangle))
 				{
 					// empty body
 				}
@@ -1934,8 +1944,9 @@ namespace graphene
 				/**
 				 * Forwards arguments to the underlying RectangularType constructor
 				 */
-				template<typename... ArgTypes>
-				Rectangular(ArgTypes&&... args)
+				template<typename... ArgTypes,
+					typename = typename std::enable_if<std::is_constructible<RectangleType, ArgTypes &&...>::value,	void>::type>
+				Rectangular(ArgTypes &&...args)
 					:iRectangle(std::forward<ArgTypes>(args)...)
 				{
 					// empty body
@@ -3160,299 +3171,6 @@ namespace graphene
 			using base_type::base_type;
 		}; // end struct CRFrameStack
 	} // end namespace DSEL
-
-	/** The intention is to let the client easily combine frames to create controls as needed.
-	 *	But my compiler does not support inheriting constructors, so the created controls would only
-	 *	be default constructible. To workaround that in the common case, I specialize common control
-	 *	types and add constructors to them.
-	 */
-	namespace Controls
-	{
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		using ButtonBase = DSEL::FrameStack<
-			RectangleType,
-			DSEL::Frame<Frames::UniformlyBordered, typename RectangleType::coordinate_type>,
-			DSEL::Frame<Frames::Pressable, Button<RectangleType, BorderSize, Margin, TextType>>,
-			DSEL::Frame<Frames::Highlightable, Button<RectangleType, BorderSize, Margin, TextType>>,
-			DSEL::Frame<Frames::Textual, TextType>,
-			DSEL::Frame<Frames::SizedText, FunctionObjects::GlutStrokeFontEngine>,
-			DSEL::Frame<Frames::BoxedAdaptableSizeText,Margin>,
-			DSEL::Frame<Frames::EventHandling::TwoStagePressable>
-		>;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		using ButtonRenderableBase =
-			Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-				Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-					Frames::Renderable::Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-					Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-				Frames::Renderable::Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-					Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-						Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-					Frames::Renderable::Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-						Frames::Renderable::Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-					FunctionObjects::Highlighted>,
-				FunctionObjects::Pressed>;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		class Button : public ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-			using coordinate_type = typename Button::coordinate_type;
-			using rectangle_type = RectangleType;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Button() = default;
-
-			Button(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
-					TextType text, coordinate_type textHeight, bool pressed = false, bool highlighted = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->text() = text;
-				this->textHeight() = textHeight;
-				this->pressed() = pressed;
-				this->highlighted() = highlighted;
-			} // end Button constructor
-		}; // end class Button
-
-
-		template<typename CoordinateType>
-		using IShapePart = DSEL::FrameStack<
-			Bases::Empty,
-			DSEL::Frame<Bases::Destructible>,
-			DSEL::Frame<Bases::Movable, CoordinateType>,
-			DSEL::Frame<Bases::Containing>,
-			DSEL::Frame<Bases::Renderable>
-		>;
-
-		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		using ControlPartBase = DSEL::FrameStack<
-			IShapePart<CoordinateType>,
-			DSEL::Frame<Bases::Rectangular>,
-			DSEL::Frame<Frames::Movable::Rectangular>,
-			DSEL::Frame<Frames::Movable::HVMovable, horizontallyMovable, verticallyMovable>,
-			DSEL::Frame<Frames::Renderable::Colorblind::FilledRectangle>,
-			DSEL::Frame<Frames::Renderable::Stippled>,
-			DSEL::Frame<Frames::Renderable::Colorblind::InversedColor>,
-			DSEL::Frame<Frames::Adapting::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
-		>;
-
-		/** Const instances should be constant and non-const instances should be non constant
-		 */
-		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
-		class ControlPart : public ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = ControlPartBase<CoordinateType, horizontallyMovable, verticallyMovable, constant, leftRef, bottomRef, rightRef, topRef>;
-			using rectangle_type = typename ControlPart::rectangle_type;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			ControlPart() = default;
-
-			/** Forwards arguments to the underlying RectangularType constructor
-			 */
-			template<typename LeftType, typename BottomType, typename RightType, typename TopType> // TODO: use variadic templates or inheriting constructors when available
-			ControlPart(LeftType &&left, BottomType &&bottom, RightType &&right, TopType &&top)
-				:base_type(std::forward<LeftType>(left),std::forward<BottomType>(bottom),std::forward<RightType>(right),std::forward<TopType>(top))
-			{
-				// empty body
-			} // end ControlPart constructor
-
-		}; // end class ControlPart
-
-		template<typename CoordinateType, typename TextType = std::string>
-		class IControl : public DSEL::FrameStack<
-			Bases::Empty,
-			DSEL::Frame<Bases::Destructible>,
-			DSEL::Frame<Bases::Rectangular, CoordinateType>,
-			DSEL::Frame<Bases::Containing>,
-			DSEL::Frame<Bases::Movable>,
-			DSEL::Frame<Bases::UniformlyBordered>,
-			DSEL::Frame<Bases::Textual, TextType>,
-			DSEL::Frame<Bases::SizedText>,
-			DSEL::Frame<Bases::Selectable, IControl<CoordinateType,TextType>>,
-			DSEL::Frame<Bases::Highlightable, IControl<CoordinateType,TextType>>,
-			DSEL::Frame<Bases::MultiPart, std::unique_ptr<      IShapePart<CoordinateType>>,
-										  std::unique_ptr<const IShapePart<CoordinateType>>>,
-			DSEL::Frame<Bases::Renderable>
-		>{}; // poor man's template alias
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-		using ControlBase =
-			Frames::MultiPartBorderedRectangle<DSEL::FrameStack<
-				IControl<typename RectangleType::coordinate_type, TextType>,
-				DSEL::Frame<Frames::Adapting::Rectangular, RectangleType>,
-				DSEL::Frame<Frames::UniformlyBordered>,
-				DSEL::Frame<Frames::Selectable, IControl<typename RectangleType::coordinate_type, TextType>/*Control<RectangleType,BorderSize,Margin,TextType>*/>,
-				DSEL::Frame<Frames::Highlightable, IControl<typename RectangleType::coordinate_type, TextType>>,
-				DSEL::Frame<Frames::Movable::Rectangular>,
-				DSEL::Frame<Frames::Textual, TextType>,
-				DSEL::Frame<Frames::SizedText, FunctionObjects::GlutStrokeFontEngine>,
-				DSEL::Frame<Frames::BoxedAdaptableSizeText, Margin>
-			>,ControlPart>;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
-		using ControlRenderableBase =
-			Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-				Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-					Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-					Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-				Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-						Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-						Frames::Renderable::Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-					FunctionObjects::Highlighted>,
-				FunctionObjects::Selected>;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
-		class Control : public ControlRenderableBase<RectangleType, BorderSize, Margin, TextType>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = ControlRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-			using coordinate_type = typename Control::coordinate_type;
-			using rectangle_type = RectangleType;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Control() = default;
-
-			Control(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
-					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->text() = text;
-				this->textHeight() = textHeight;
-				this->selected() = selected;
-				this->highlighted() = highlighted;
-			} // end Control constructor
-		}; // end class Control
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename LineSpacing, typename TextType = std::string>
-		using ParagraphBase =
-			Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-				Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-					Frames::Renderable::Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-					Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
-				Frames::Renderable::Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-						Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-					Frames::Renderable::Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-						Frames::Renderable::Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-						Frames::Renderable::Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-					FunctionObjects::Highlighted>,
-				FunctionObjects::Selected>;
-
-		template<typename RectangleType, typename BorderSize, typename Margin, typename LineSpacing, typename TextType = std::string>
-		class Paragraph : public ParagraphBase<RectangleType, BorderSize, Margin, LineSpacing, TextType>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = ParagraphBase<RectangleType, BorderSize, Margin, LineSpacing, TextType>;
-			using coordinate_type = typename Paragraph::coordinate_type;
-			using rectangle_type = RectangleType;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Paragraph() = default;
-
-			Paragraph(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, coordinate_type borderSize,
-					TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->borderSize() = borderSize;
-				this->text() = text;
-				this->textHeight() = textHeight;
-				this->selected() = selected;
-				this->highlighted() = highlighted;
-			} // end Paragraph constructor
-		}; // end class Paragraph
-
-		template<typename RectangleType, typename Margin, typename TextType>
-		using LabelBase = DSEL::FrameStack<
-			RectangleType,
-			DSEL::Frame<Frames::Movable::Rectangular>,
-			DSEL::Frame<Frames::Textual, TextType>,
-			DSEL::Frame<Frames::SizedText, FunctionObjects::GlutStrokeFontEngine>,
-			DSEL::Frame<Frames::BoxedAdaptableSizeText, Margin>
-		>;
-
-		template<typename RectangleType, typename Margin, typename TextType = std::string>
-		using LabelRenderableBase =
-			Frames::Renderable::Sequential<
-				LabelBase<RectangleType,Margin,TextType>,
-				Frames::Renderable::Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
-				Frames::Renderable::Colorblind::InversedColor<Frames::Renderable::Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>>;
-
-		template<typename RectangleType, typename Margin, typename TextType = std::string>
-		class Label : public LabelRenderableBase<RectangleType, Margin, TextType>
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = LabelRenderableBase<RectangleType, Margin, TextType>;
-			using coordinate_type = typename Label::coordinate_type;
-			using rectangle_type = RectangleType;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Label() = default;
-
-			Label(coordinate_type left, coordinate_type bottom, coordinate_type right, coordinate_type top, TextType text, coordinate_type textHeight)
-			{
-				this->left() = left;
-				this->bottom() = bottom;
-				this->right() = right;
-				this->top() = top;
-				this->text() = text;
-				this->textHeight() = textHeight;
-			} // end Label constructor
-		}; // end class Label
-
-	} // end namespace Controls
 
 	namespace EventAdaptors
 	{
