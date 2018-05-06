@@ -470,8 +470,8 @@ namespace graphene
 			// Methods
 			virtual CharType charUnderPoint(CoordinateType x, CoordinateType y) = 0;
 			virtual ConstCharType charUnderPoint(CoordinateType x, CoordinateType y) const = 0;
-			virtual CharType charWithIndex(IndexType i) = 0;
-			virtual ConstCharType charWithIndex(IndexType i) const = 0;
+			virtual CharType charAtIndex(IndexType i) = 0;
+			virtual ConstCharType charAtIndex(IndexType i) const = 0;
 		}; // end struct MultiChar
 
 		template<typename BaseType, typename Const = std::false_type, typename CharType = typename BaseType::char_type>
@@ -1660,24 +1660,24 @@ namespace graphene
 
 			/** IndexType is expected to be numeric and i should take values in [0,text().size()]
 			 */
-#define charWithIndexMacro(CharType,ConcreteCharType,Const) \
-			CharType charWithIndex(IndexType i) Const\
+#define charAtIndexMacro(CharType,ConcreteCharType,Const) \
+			CharType charAtIndex(IndexType i) Const\
 			{\
 				TextConceptMap textConceptMap;\
 				FontEngineType fontEngine;\
 				\
 				if(i > textConceptMap.text(*this).size())\
-					throw std::out_of_range("charWithIndex called with i outside the valid range of [0,text().size()].");\
+					throw std::out_of_range("charAtIndex called with i outside the valid range of [0,text().size()].");\
 				\
 				coordinate_type fontCharLeft = 0;\
 				for(IndexType c = 0 ; c < i ; ++c)\
 					fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[c]);\
 				return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
-			} // end method charWithIndex
+			} // end method charAtIndex
 
-			charWithIndexMacro(     CharType,     ConcreteCharType,/* omit */)
-			charWithIndexMacro(ConstCharType,ConstConcreteCharType,const     )
-#undef charWithIndexMacro
+			charAtIndexMacro(     CharType,     ConcreteCharType,/* omit */)
+			charAtIndexMacro(ConstCharType,ConstConcreteCharType,const     )
+#undef charAtIndexMacro
 		}; // end class MultiCharBorderedRectangle
 
 		template<typename BaseType, typename TextConceptMap,

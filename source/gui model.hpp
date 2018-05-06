@@ -649,31 +649,31 @@ namespace GUIModel
 				} // end else
 			} // end method charUnderPoint
 
-			typename base_type::char_type charWithIndex(typename base_type::index_type i)
+			typename base_type::char_type charAtIndex(typename base_type::index_type i)
 			{
 				if(isHorizontal())
-					return base_type::charWithIndex(i);
+					return base_type::charAtIndex(i);
 				else
 				{
-					auto caret = base_type::charWithIndex(i);
+					auto caret = base_type::charAtIndex(i);
 					caret.reset(new graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
 						*dynamic_cast<typename base_type::concrete_char_type*>(caret.get()))); // TODO: avoid cast
 					return std::move(caret);
 				} // end else
-			} // end method charWithIndex
+			} // end method charAtIndex
 
-			typename base_type::const_char_type charWithIndex(typename base_type::index_type i) const
+			typename base_type::const_char_type charAtIndex(typename base_type::index_type i) const
 			{
 				if(isHorizontal())
-					return base_type::charWithIndex(i);
+					return base_type::charAtIndex(i);
 				else
 				{
-					auto caret = base_type::charWithIndex(i);
+					auto caret = base_type::charAtIndex(i);
 					caret.reset(new const graphene::Frames::Renderable::Scaled<graphene::Frames::Renderable::Rotated<typename base_type::const_concrete_char_type,std::ratio<90>>,std::ratio<-1>,std::ratio<1>>(
 						*dynamic_cast<typename base_type::const_concrete_char_type*>(caret.get()))); // TODO: avoid cast
 					return std::move(caret);
 				} // end else
-			} // end method charWithIndex
+			} // end method charAtIndex
 
 			void render() const
 			{
@@ -1433,7 +1433,7 @@ namespace GUIModel
 										constraints.emplace_back(&controls,control1,side1,control2,side2,avg-0.5*constraintThickness,avg+0.5*constraintThickness,"",constraintTextHeight);
 										highlightedConstraint = constraints.end();
 										(selectedConstraint = focusedConstraint = constraints.end()-1)->select().focus(); // no constraint was highlighted
-										caret = focusedConstraint->charWithIndex(focusedConstraint->text().size());
+										caret = focusedConstraint->charAtIndex(focusedConstraint->text().size());
 
 										endPoint1 = nullptr;
 										endPoint2 = nullptr;
