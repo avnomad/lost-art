@@ -946,16 +946,16 @@ namespace GUIModel
 			***************/
 		public: // TODO: make private and add methods to manipulate...
 
-			static const int margin = 10; // in millimeters
-			static const int buttonHeight = 15;  // in millimeters
-			static const int buttonWidth = static_cast<int>(buttonHeight*1.61803)/* golden ratio */;  // in millimeters
+			static constexpr int margin = 10; // in millimeters
+			static constexpr int buttonHeight = 15;  // in millimeters
+			static constexpr int buttonWidth = static_cast<int>(buttonHeight*1.61803)/* golden ratio */;  // in millimeters
 
-			static const int borderSize = 2;
-			static const int buttonTextHeight = 10;
-			static const int textBoxTextHeight = buttonTextHeight;
-			static const int controlTextHeight = buttonTextHeight;
-			static const int constraintTextHeight = 7;
-			static const int constraintThickness = 7;
+			static constexpr int borderSize = 2;
+			static constexpr int buttonTextHeight = 10;
+			static constexpr int textBoxTextHeight = buttonTextHeight;
+			static constexpr int controlTextHeight = buttonTextHeight;
+			static constexpr int constraintTextHeight = 7;
+			static constexpr int constraintThickness = 7;
 
 			// Colors
 			std::array<float,4> buttonColour = {{0.94f, 0.9f, 0.55f, 1.0f}}; // khaki
@@ -1640,16 +1640,17 @@ namespace GUIModel
 			} // end method resize
 		}; // end class Model
 
+		// out-of-class initializations
 		template<typename CoordinateType, typename TextType>
-		const int Model<CoordinateType,TextType>::borderSize;
+		constexpr int Model<CoordinateType,TextType>::borderSize;
 		template<typename CoordinateType, typename TextType>
-		const int Model<CoordinateType,TextType>::controlTextHeight;
+		constexpr int Model<CoordinateType,TextType>::controlTextHeight;
 		template<typename CoordinateType, typename TextType>
-		const int Model<CoordinateType,TextType>::buttonTextHeight;
+		constexpr int Model<CoordinateType,TextType>::buttonTextHeight;
 		template<typename CoordinateType, typename TextType>
-		const int Model<CoordinateType,TextType>::textBoxTextHeight;
+		constexpr int Model<CoordinateType,TextType>::textBoxTextHeight;
 		template<typename CoordinateType, typename TextType>
-		const int Model<CoordinateType,TextType>::constraintTextHeight;
+		constexpr int Model<CoordinateType,TextType>::constraintTextHeight;
 
 	} // end namespace Controls
 

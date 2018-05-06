@@ -88,11 +88,11 @@ namespace Symbolic
 				} // end method setAssociativity
 			}; // end struct OpTraits
 
-			const priority_type noParenPriority = 0; // should be less than any other priority
-			const priority_type additivePriority = 5;
-			const priority_type multiplicativePriority = 7;
-			const priority_type unaryPriority = 9;
-			const priority_type exponentiationPriority = 11;
+			constexpr priority_type noParenPriority = 0; // should be less than any other priority
+			constexpr priority_type additivePriority = 5;
+			constexpr priority_type multiplicativePriority = 7;
+			constexpr priority_type unaryPriority = 9;
+			constexpr priority_type exponentiationPriority = 11;
 
 			inline bool needsParenthesis(OpTags::OpTraits parentTraits, OpTags::OpTraits thisTraits, Child thisChild)
 			{
@@ -222,7 +222,8 @@ namespace Symbolic
 			}; // end struct Extends
 
 			using extends_container = std::vector<Extends>; // I would like to make that a template parameter...
-			static const char quotientSymbol;
+			static constexpr  char quotientSymbol = '_'; // should consider using a nicer (Unicode) character...
+				// '_' is too low and '-' creates ambiguities with minus which must be resolved with extra parenthesis...
 
 			struct AbstractNode
 			{
@@ -871,8 +872,7 @@ namespace Symbolic
 
 		// out-of-class initializations
 		template<typename UIntType, typename NameType, typename IDType>
-		const char Expression<UIntType,NameType,IDType>::quotientSymbol = '_'; // should consider using a nicer (Unicode) character...
-				// '_' is too low and '-' creates ambiguities with minus which must be resolved with extra parenthesis...
+		constexpr char Expression<UIntType,NameType,IDType>::quotientSymbol;
 
 		class Relation;
 		class RelationSystem;

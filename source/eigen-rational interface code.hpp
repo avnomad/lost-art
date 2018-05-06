@@ -41,27 +41,27 @@ namespace Eigen
 			RequireInitialization = 1,
 		}; // end enum
 
-		static Real epsilon()
+		static constexpr Real epsilon()
 		{
 			return boost::rational<I>(std::numeric_limits<I>::max(),std::numeric_limits<I>::max()-1);
 		} // end function epsilon
 
-		static Real dummy_precision()
+		static constexpr Real dummy_precision()
 		{
 			return epsilon()*10000;
 		} // end function dummy_precision
 
-		static Real highest()
+		static constexpr Real highest()
 		{
 			return boost::rational<I>(std::numeric_limits<I>::max(),1);
 		} // end function highest
 
-		static Real lowest()
+		static constexpr Real lowest()
 		{
 			return boost::rational<I>(std::numeric_limits<I>::min(),1);
 		} // end function lowest
 
-		static int digits10()
+		static constexpr int digits10()
 		{
 			return std::numeric_limits<boost::rational<I>>::digits10;
 		} // end function digits10
@@ -73,7 +73,7 @@ namespace Eigen
 		template<typename I, typename NewType>
 		struct cast_impl<boost::rational<I>,NewType>
 		{
-			static inline NewType run(const boost::rational<I>& x)
+			static inline constexpr NewType run(const boost::rational<I>& x)
 			{
 				return boost::rational_cast<NewType>(x);
 			} // end function run
@@ -85,7 +85,7 @@ namespace Eigen
 namespace boost
 {
 	template<typename I>
-	double log(boost::rational<I> r)
+	constexpr double log(boost::rational<I> r)
 	{
 		return std::log(boost::rational_cast<double>(r));
 	} // end function log
