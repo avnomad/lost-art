@@ -1469,11 +1469,40 @@ namespace graphene
 			} // end method nameCharWidth
 		}; // end class BoxedAdaptableSizeName
 
-		/**	BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
-		 *	ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
+		template<template<typename ConcretePartCoordinateType, typename horizontal, typename vertical, bool constant,
+							bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
+				typename CoordinateType>
+		struct ConcreteReturnTypesBuilder
+		{
+			using       bottom_left  =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true,false,false>;
+			using const_bottom_left  = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true,false,false>;
+			using       left         =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false, true,false,false,false>;
+			using const_left         = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true, true,false,false,false>;
+			using       top_left     =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true,false,false, true>;
+			using const_top_left     = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true,false,false, true>;
+			using       bottom       =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false, true,false,false>;
+			using const_bottom       = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false, true,false,false>;
+			using       center       =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true, true, true>;
+			using const_center       = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true, true, true>;
+			using       top          =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false,false,false, true>;
+			using const_top          = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false,false,false, true>;
+			using       bottom_right =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false, true, true,false>;
+			using const_bottom_right = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false, true, true,false>;
+			using       right        =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false,false,false, true,false>;
+			using const_right        = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true,false,false, true,false>;
+			using       top_right    =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false,false, true, true>;
+			using const_top_right    = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false,false, true, true>;
+		}; // end struct ConcreteReturnTypesBuilder
+
+		/**
+		 * BaseType should be Rectangular, UniformlyBordered and Containing, and PartType should be a (preferably smart) pointer type.
+		 * ConcretePartTemplate instantiations should be constructible from 4 rectangle sides.
 		 */
-		template<typename BaseType, template<typename CoordinateType, typename horizontal, typename vertical, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
-			typename PartType = typename BaseType::part_type, typename ConstPartType = typename BaseType::const_part_type, typename CoordinateType = typename BaseType::coordinate_type>
+		template<typename BaseType,
+			typename ConcreteReturnTypes = typename BaseType::concrete_return_types,
+			typename PartType = typename BaseType::part_type,
+			typename ConstPartType = typename BaseType::const_part_type,
+			typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiPartBorderedRectangle : public BaseType
 		{
 			/*********************
@@ -1481,32 +1510,10 @@ namespace graphene
 			*********************/
 		public:
 			using base_type = BaseType;
+			using concrete_return_types = ConcreteReturnTypes;
 			using part_type = PartType;
 			using const_part_type = ConstPartType;
 			using coordinate_type = CoordinateType;
-			// TODO: add template alias for ConcretePartTemplate when implemented
-
-			struct concrete_return_type
-			{
-				using       bottom_left  =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true,false,false>;
-				using const_bottom_left  = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true,false,false>;
-				using       left         =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false, true,false,false,false>;
-				using const_left         = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true, true,false,false,false>;
-				using       top_left     =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true,false,false, true>;
-				using const_top_left     = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true,false,false, true>;
-				using       bottom       =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false, true,false,false>;
-				using const_bottom       = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false, true,false,false>;
-				using       center       =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true, true, true>;
-				using const_center       = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true, true, true>;
-				using       top          =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false,false,false, true>;
-				using const_top          = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false,false,false, true>;
-				using       bottom_right =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false, true, true,false>;
-				using const_bottom_right = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false, true, true,false>;
-				using       right        =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false,false,false, true,false>;
-				using const_right        = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true,false,false, true,false>;
-				using       top_right    =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false,false, true, true>;
-				using const_top_right    = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false,false, true, true>;
-			}; // end struct concrete_return_type
 
 			/*********************
 			*    Constructors    *
@@ -1536,45 +1543,45 @@ namespace graphene
 					{\
 						if(y <= bottom+borderSize)\
 						{\
-							return PartType(new typename concrete_return_type::const_##bottom_left(left,bottom,left+borderSize,bottom+borderSize));\
+							return PartType(new typename concrete_return_types::const_##bottom_left(left,bottom,left+borderSize,bottom+borderSize));\
 						}\
 						else if(y < top-borderSize)\
 						{\
-							return PartType(new typename concrete_return_type::const_##left(left,bottom+borderSize,left+borderSize,top-borderSize));\
+							return PartType(new typename concrete_return_types::const_##left(left,bottom+borderSize,left+borderSize,top-borderSize));\
 						}\
 						else /* top-borderSize <= y */\
 						{\
-							return PartType(new typename concrete_return_type::const_##top_left(left,top-borderSize,left+borderSize,top));\
+							return PartType(new typename concrete_return_types::const_##top_left(left,top-borderSize,left+borderSize,top));\
 						} /* end else */\
 					}\
 					else if(x < right-borderSize)\
 					{\
 						if(y <= bottom+borderSize)\
 						{\
-							return PartType(new typename concrete_return_type::const_##bottom(left+borderSize,bottom,right-borderSize,bottom+borderSize));\
+							return PartType(new typename concrete_return_types::const_##bottom(left+borderSize,bottom,right-borderSize,bottom+borderSize));\
 						}\
 						else if(y < top-borderSize)\
 						{\
-							return PartType(new typename concrete_return_type::const_##center(left,bottom,right,top));\
+							return PartType(new typename concrete_return_types::const_##center(left,bottom,right,top));\
 						}\
 						else /* top-borderSize <= y */\
 						{\
-							return PartType(new typename concrete_return_type::const_##top(left+borderSize,top-borderSize,right-borderSize,top));\
+							return PartType(new typename concrete_return_types::const_##top(left+borderSize,top-borderSize,right-borderSize,top));\
 						} /* end else */\
 					}\
 					else /* right-borderSize <= x */\
 					{\
 						if(y <= bottom+borderSize)\
 						{\
-							return PartType(new typename concrete_return_type::const_##bottom_right(right-borderSize,bottom,right,bottom+borderSize));\
+							return PartType(new typename concrete_return_types::const_##bottom_right(right-borderSize,bottom,right,bottom+borderSize));\
 						}\
 						else if(y < top-borderSize)\
 						{\
-							return PartType(new typename concrete_return_type::const_##right(right-borderSize,bottom+borderSize,right,top-borderSize));\
+							return PartType(new typename concrete_return_types::const_##right(right-borderSize,bottom+borderSize,right,top-borderSize));\
 						}\
 						else /* top-borderSize <= y */\
 						{\
-							return PartType(new typename concrete_return_type::const_##top_right(right-borderSize,top-borderSize,right,top));\
+							return PartType(new typename concrete_return_types::const_##top_right(right-borderSize,top-borderSize,right,top));\
 						} /* end else */\
 					} /* end else */\
 				}\
@@ -2080,7 +2087,7 @@ namespace graphene
 				 */
 				// TODO: Is silent scaling the best option?
 				// TODO: Add support for dynamic line spacing using SFINAE
-				template<typename BaseType, typename TextConceptMap, typename Margin = typename BaseType::margin, typename LineSpacing = typename BaseType::line_spacing>
+				template<typename BaseType, typename TextConceptMap, typename LineSpacing = typename BaseType::line_spacing, typename Margin = typename BaseType::margin>
 				class BoxedParagraph : public BaseType
 				{
 					/*********************
@@ -2380,8 +2387,8 @@ namespace graphene
 				} // end method render
 			}; // end class Conditional
 
-			template<typename BaseType, typename FirstWrapper, typename SecondWrapper> // TODO: use variadic templates when available
-			class Sequential : public BaseType
+			template<typename BaseType, typename FirstWrapper, typename SecondWrapper>
+			class Sequential : public BaseType // TODO: use variadic templates with fold expressions when available
 			{
 				/***********************
 				*    Concept Checks    *
@@ -3053,48 +3060,108 @@ namespace graphene
 		struct Frame {};
 
 		/**
-		 * Takes care of nesting frames and filling-in default arguments.
+		 * Wraps a conditional frame with its parameters.
+		 */
+		template<typename UnaryPredicate, typename TrueFrames, typename FalseFrames>
+		struct Condition {};
+
+		/**
+		 * Represents a renderable frame composed of a number of smaller renderable frames rendered in sequence.
+		 *
+		 * Only makes sense for 2 or more frame arguments.
 		 */
 		template<typename... Frames>
-		struct ProcessFrames;
-
-		// recursion base
-		template<typename BaseType>
-		struct ProcessFrames<BaseType>
-		{using type = BaseType;};
-
-		// recursion step
-		template<typename BaseType, template<typename...> class Template, typename... Arguments, typename... Frames>
-		struct ProcessFrames<BaseType, DSEL::Frame<Template, Arguments...>, Frames...>
-		{using type = typename ProcessFrames<Template<BaseType, Arguments...>, Frames...>::type;};
+		struct Sequence {};
 
 		/**
 		 * Represents a complete frame stack.
 		 */
-		template<typename... Frames>
-		struct FrameStack : public ProcessFrames<Frames...>::type
+		template<typename BaseType, typename... Frames>
+		struct FrameStack;
+
+		namespace Helpers
+		{
+			/**
+			 * Transforms a wrapper type (Frame, Condition, Sequence, FrameStack) to an actual frame substituting BaseType.
+			 */
+			template<typename BaseType, typename DSELType>
+			struct EvalDSELType;
+
+			/**
+			* Takes care of nesting frames and filling-in default arguments.
+			*/
+			template<typename... Frames>
+			struct ProcessFrames;
+
+			template<typename BaseType, template<typename...> class Template, typename... Arguments>
+			struct EvalDSELType<BaseType, Frame<Template, Arguments...>>
+			{using type = Template<BaseType, Arguments...>;};
+
+			template<typename BaseType, typename... Frames>
+			struct EvalDSELType<BaseType, FrameStack<Frames...>>
+			{using type = typename ProcessFrames<BaseType, Frames...>::type;};
+
+			template<typename BaseType, typename UnaryPredicate, typename TrueFrames, typename FalseFrames>
+			struct EvalDSELType<BaseType, Condition<UnaryPredicate, TrueFrames, FalseFrames>>
+			{using type = Frames::Renderable::Conditional<
+							BaseType,
+							typename EvalDSELType<BaseType,TrueFrames>::type,
+							typename EvalDSELType<BaseType,FalseFrames>::type,
+							UnaryPredicate>;
+			};
+
+			// recursion base
+			template<typename BaseType, typename FirstFrame, typename SecondFrame>
+			struct EvalDSELType<BaseType, Sequence<Frames::Renderable::Sequential<BaseType,FirstFrame,SecondFrame>>>
+			{using type = Frames::Renderable::Sequential<BaseType,FirstFrame,SecondFrame>;};
+
+			// recursion step
+			template<typename BaseType, typename FirstFrame, typename SecondFrame, typename... MoreFrames>
+			struct EvalDSELType<BaseType, Sequence<FirstFrame, SecondFrame, MoreFrames...>>
+			{using type = typename EvalDSELType<BaseType, Sequence<
+				Frames::Renderable::Sequential<
+					BaseType,
+					typename EvalDSELType<BaseType, FirstFrame>::type,
+					typename EvalDSELType<BaseType, SecondFrame>::type>,
+				MoreFrames...>>::type;
+			};
+
+			// recursion base
+			template<typename BaseType>
+			struct ProcessFrames<BaseType>
+			{using type = BaseType;};
+
+			// recursion step
+			template<typename BaseType, typename FirstFrame, typename... MoreFrames>
+			struct ProcessFrames<BaseType, FirstFrame, MoreFrames...>
+			{using type = typename ProcessFrames<typename EvalDSELType<BaseType, FirstFrame>::type, MoreFrames...>::type;};
+
+			template<typename BaseType, typename FrameStackType>
+			struct InjectFrameStackType : BaseType
+			{
+				// member types
+				using base_type = BaseType;
+				using frame_stack_type = FrameStackType;
+
+				// Constructors
+				InjectFrameStackType() = default;
+				using base_type::base_type;
+			};
+		} // end namespace Helpers
+
+		/**
+		 * Represents a complete frame stack.
+		 */
+		template<typename BaseType, typename... Frames>
+		struct FrameStack : Helpers::ProcessFrames<Helpers::InjectFrameStackType<BaseType, FrameStack<BaseType, Frames...>>, Frames...>::type
 		{
 			// Member types
-			using base_type = typename ProcessFrames<Frames...>::type;
+			using base_type = typename Helpers::ProcessFrames<Helpers::InjectFrameStackType<BaseType, FrameStack<BaseType, Frames...>>, Frames...>::type;
 
 			// Constructors
 			FrameStack() = default;
 			using base_type::base_type;
 		}; // end struct FrameStack
-
-		/**
-		 * Represents a complete frame stack using the curiously-recurring template pattern.
-		 */
-		template<template<typename...> class Template, typename... Arguments>
-		struct CRFrameStack : public Template<Arguments..., CRFrameStack<Template, Arguments...>>
-		{
-			// Member types
-			using base_type = Template<Arguments..., CRFrameStack<Template, Arguments...>>;
-
-			// Constructors
-			CRFrameStack() = default;
-			using base_type::base_type;
-		}; // end struct CRFrameStack
 	} // end namespace DSEL
 
 	namespace EventAdaptors

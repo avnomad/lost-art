@@ -26,44 +26,33 @@ using namespace Renderable;
 #include <boost/test/included/unit_test.hpp>
 
 // Declare frame stacks to verify they compile
-template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string> class Button;
 
-template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-using ButtonBase = FrameStack<
+template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
+using Button = FrameStack<
 	RectangleType,
 	Frame<UniformlyBordered, typename RectangleType::coordinate_type>,
-	Frame<Pressable, Button<RectangleType, BorderSize, Margin, TextType>>,
-	Frame<Highlightable, Button<RectangleType, BorderSize, Margin, TextType>>,
+	Frame<Pressable>,
+	Frame<Highlightable>,
 	Frame<Textual, TextType>,
 	Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
 	Frame<BoxedAdaptableSizeText, Margin>,
-	Frame<EventHandling::TwoStagePressable>
+	Frame<EventHandling::TwoStagePressable>,
+	Condition<FunctionObjects::Pressed,
+		Sequence<
+			Frame<Colorblind::FilledRectangle>,
+			FrameStack<
+				Frame<Colorblind::BoxedText, FunctionObjects::Textual>,
+				Frame<Colorblind::InversedColor>>>,
+		Condition<FunctionObjects::Highlighted,
+			Sequence<
+				Frame<Colorblind::BorderedRectangle, BorderSize>,
+				Frame<Colorblind::BoxedText, FunctionObjects::Textual>>,
+			Sequence<
+				Frame<Colorblind::BorderedRectangle, std::ratio<0>>,
+				Frame<Colorblind::BoxedText, FunctionObjects::Textual>>
+		>
+	>
 >;
-
-template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-using ButtonRenderableBase =
-	Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-		Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-			Colorblind::FilledRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>>,
-			Colorblind::InversedColor<Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-		Conditional<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-			Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-				Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-				Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-			Sequential<ButtonBase<RectangleType,BorderSize,Margin,TextType>,
-				Colorblind::BorderedRectangle<ButtonBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-				Colorblind::BoxedText<ButtonBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-			FunctionObjects::Highlighted>,
-		FunctionObjects::Pressed>;
-
-template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
-struct Button : public ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>
-{
-	Button() = default;
-	using base_type = ButtonRenderableBase<RectangleType, BorderSize, Margin, TextType>;
-	using base_type::base_type;
-}; // end class Button
-
 
 template<typename CoordinateType>
 using IShapePart = FrameStack<
@@ -89,7 +78,7 @@ using ControlPart = FrameStack<
 >;
 
 template<typename CoordinateType, typename TextType = std::string>
-class IControl : public FrameStack<
+using IControl = FrameStack<
 	Bases::Empty,
 	Frame<Bases::Destructible>,
 	Frame<Bases::Rectangular, CoordinateType>,
@@ -98,74 +87,84 @@ class IControl : public FrameStack<
 	Frame<Bases::UniformlyBordered, CoordinateType>,
 	Frame<Bases::Textual, TextType>,
 	Frame<Bases::SizedText>,
-	Frame<Bases::Selectable, IControl<CoordinateType,TextType>>,
-	Frame<Bases::Highlightable, IControl<CoordinateType,TextType>>,
+	Frame<Bases::Selectable>,
+	Frame<Bases::Highlightable>,
 	Frame<Bases::MultiPart, std::unique_ptr<      IShapePart<CoordinateType>>,
-									std::unique_ptr<const IShapePart<CoordinateType>>>,
+							std::unique_ptr<const IShapePart<CoordinateType>>>,
 	Frame<Bases::Renderable>
->{}; // poor man's template alias
+>;
+
+template<typename RectangleType, typename Margin, typename TextType = std::string>
+using ControlBase =	FrameStack<
+	IControl<typename RectangleType::coordinate_type, TextType>,
+	Frame<Adapting::Rectangular, RectangleType>,
+	Frame<UniformlyBordered>,
+	Frame<Selectable, IControl<typename RectangleType::coordinate_type, TextType>>,
+	Frame<Highlightable>,
+	Frame<Movable::Rectangular>,
+	Frame<Textual, TextType>,
+	Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
+	Frame<BoxedAdaptableSizeText, Margin>,
+	Frame<MultiPartBorderedRectangle, ConcreteReturnTypesBuilder<ControlPart, typename RectangleType::coordinate_type>>
+>;
 
 template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
-using ControlBase =
-	MultiPartBorderedRectangle<FrameStack<
-		IControl<typename RectangleType::coordinate_type, TextType>,
-		Frame<Adapting::Rectangular, RectangleType>,
-		Frame<UniformlyBordered>,
-		Frame<Selectable, IControl<typename RectangleType::coordinate_type, TextType>/*Control<RectangleType,BorderSize,Margin,TextType>*/>,
-		Frame<Highlightable, IControl<typename RectangleType::coordinate_type, TextType>>,
-		Frame<Movable::Rectangular>,
-		Frame<Textual, TextType>,
-		Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
-		Frame<BoxedAdaptableSizeText, Margin>
-	>,ControlPart>;
-
-template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
-using Control =
-	Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-		Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-			Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-			Colorblind::InversedColor<Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>>,
-		Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-			Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-				Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-				Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-			Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-				Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-				Colorblind::BoxedText<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin>>,
-			FunctionObjects::Highlighted>,
-		FunctionObjects::Selected>;
+using Control = FrameStack<
+	ControlBase<RectangleType, Margin, TextType>,
+	Condition<
+		FunctionObjects::Selected,
+		Sequence<
+			Frame<Colorblind::FilledRectangle>,
+			FrameStack<
+				Frame<Colorblind::BoxedText, FunctionObjects::Textual>,
+				Frame<Colorblind::InversedColor>>>,
+		Condition<
+			FunctionObjects::Highlighted,
+			Sequence<
+				Frame<Colorblind::BorderedRectangle, BorderSize>,
+				Frame<Colorblind::BoxedText, FunctionObjects::Textual>>,
+			Sequence<
+				Frame<Colorblind::BorderedRectangle, std::ratio<0>>,
+				Frame<Colorblind::BoxedText, FunctionObjects::Textual>>
+		>
+	>
+>;
 
 template<typename RectangleType, typename BorderSize, typename Margin, typename LineSpacing, typename TextType = std::string>
-using Paragraph =
-	Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-		Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-			Colorblind::FilledRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>>,
-			Colorblind::InversedColor<Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>>,
-		Conditional<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-			Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-				Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,BorderSize>,
-				Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-			Sequential<ControlBase<RectangleType,BorderSize,Margin,TextType>,
-				Colorblind::BorderedRectangle<ControlBase<RectangleType,BorderSize,Margin,TextType>,std::ratio<0>>,
-				Colorblind::BoxedParagraph<ControlBase<RectangleType,BorderSize,Margin,TextType>,FunctionObjects::Textual,Margin,LineSpacing>>,
-			FunctionObjects::Highlighted>,
-		FunctionObjects::Selected>;
+using Paragraph = FrameStack<
+	ControlBase<RectangleType, Margin, TextType>,
+	Condition<
+		FunctionObjects::Selected,
+		Sequence<
+			Frame<Colorblind::FilledRectangle>,
+			FrameStack<
+				Frame<Colorblind::BoxedParagraph, FunctionObjects::Textual, LineSpacing>,
+				Frame<Colorblind::InversedColor>>>,
+		Condition<
+			FunctionObjects::Highlighted,
+			Sequence<
+				Frame<Colorblind::BorderedRectangle, BorderSize>,
+				Frame<Colorblind::BoxedParagraph, FunctionObjects::Textual, LineSpacing>>,
+			Sequence<
+				Frame<Colorblind::BorderedRectangle, std::ratio<0>>,
+				Frame<Colorblind::BoxedParagraph, FunctionObjects::Textual, LineSpacing>>
+		>
+	>
+>;
 
-template<typename RectangleType, typename Margin, typename TextType>
-using LabelBase = FrameStack<
+template<typename RectangleType, typename Margin, typename TextType = std::string>
+using Label = FrameStack<
 	RectangleType,
 	Frame<Movable::Rectangular>,
 	Frame<Textual, TextType>,
 	Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
-	Frame<BoxedAdaptableSizeText, Margin>
+	Frame<BoxedAdaptableSizeText, Margin>,
+	Sequence<
+		Frame<Colorblind::FilledRectangle>,
+		FrameStack<
+			Frame<Colorblind::BoxedText, FunctionObjects::Textual>,
+			Frame<Colorblind::InversedColor>>>
 >;
-
-template<typename RectangleType, typename Margin, typename TextType = std::string>
-using Label =
-	Sequential<
-		LabelBase<RectangleType,Margin,TextType>,
-		Colorblind::FilledRectangle<LabelBase<RectangleType,Margin,TextType>>,
-		Colorblind::InversedColor<Colorblind::BoxedText<LabelBase<RectangleType,Margin,TextType>,FunctionObjects::Textual,Margin>>>;
 
 BOOST_AUTO_TEST_CASE(Test_Button)
 {
@@ -349,13 +348,17 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm7.text(), "ok");
 
 	// Focusable
-	Focusable<CRFrameStack<Bases::Focusable, Rectangle<float>>> f1;
-	Focusable<CRFrameStack<Bases::Focusable, Rectangle<float>>> f2(1.0f,2.0f,3.0f,4.0f);
+	FrameStack<
+		Rectangle<float>,
+		Frame<Bases::Focusable>,
+		Frame<Focusable>
+	> f1;
+	decltype(f1) f2(1.0f,2.0f,3.0f,4.0f);
 	BOOST_CHECK_EQUAL(f2.left(), 1.0f);
 	BOOST_CHECK_EQUAL(f2.bottom(), 2.0f);
 	BOOST_CHECK_EQUAL(f2.right(), 3.0f);
 	BOOST_CHECK_EQUAL(f2.top(), 4.0f);
-	Focusable<CRFrameStack<Bases::Focusable, Rectangle<float>>> f3(true, 1.5f,2.5f,3.5f,4.5f);
+	decltype(f1) f3(true, 1.5f,2.5f,3.5f,4.5f);
 	BOOST_CHECK_EQUAL(f3.left(), 1.5f);
 	BOOST_CHECK_EQUAL(f3.bottom(), 2.5f);
 	BOOST_CHECK_EQUAL(f3.right(), 3.5f);
