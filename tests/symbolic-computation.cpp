@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(Test_Expression_Parser_And_Printers)
 
 	// test DSEL, print methods and parser.
 	const size_t nTests = 390;
-	auto st = std::make_shared<SymbolTable<string,int>>();
+	auto st = std::make_shared<SymbolTable<string, size_t>>();
 	auto Var = ExpressionBuilder<Primitive::Variable>(st);
 	auto Con = ExpressionBuilder<Primitive::Constant>(st);
 	Expression<> x("x",st), y("y",st);

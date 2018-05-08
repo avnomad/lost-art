@@ -184,7 +184,7 @@ namespace Symbolic
 		 *	Signed, rational and fixed point real numbers are represented using negation,
 		 *	division and natural numbers.
 		 */
-		template<typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = int>
+		template<typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = size_t>
 		class Expression
 		{
 			/**********************
@@ -896,7 +896,7 @@ namespace Symbolic
 		template<typename UIntType, typename NameType>
 		struct ArgType<Primitive::Constant,UIntType,NameType>{using type = UIntType;};
 
-		template<Primitive primitive, typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = int>
+		template<Primitive primitive, typename UIntType = unsigned long long int, typename NameType = std::string, typename IDType = size_t>
 		struct ExpressionBuilder
 		{
 			// Member Types

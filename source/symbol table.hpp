@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <type_traits>
 
 namespace Symbolic
 {
@@ -37,9 +38,12 @@ namespace Symbolic
 		 *	it is assumed sizeof(IDType) <= sizeof(IDType *) in
 		 *	efficiency considerations.
 		 */
-		template<typename NameType = std::string, typename IDType = int>
+		template<typename NameType = std::string, typename IDType = size_t>
 		class SymbolTable
 		{
+			// Concept Checks
+			static_assert(std::is_unsigned<IDType>::value, "IDType must be an unsigned integral type!");
+
 			// Fields
 			std::map<NameType,IDType> names;
 			std::vector<typename std::map<NameType,IDType>::iterator> IDs;
@@ -96,7 +100,7 @@ namespace Symbolic
 
 			bool declared(IDType id) const
 			{
-				return 0 <= id && id < IDs.size();
+				return id < IDs.size();
 			} // end method declared
 
 			IDType id(const NameType &name) const

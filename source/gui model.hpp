@@ -1029,7 +1029,7 @@ namespace GUIModel
 				buttons.emplace_back(button_type(buttonTextHeight,"Save",borderSize,0,0,0,0),[this](){save(tbFileName.text());});
 				// TODO: allow customizable header and executable names
 				buttons.emplace_back(button_type(buttonTextHeight,"Compile",borderSize,0,0,0,0),
-					[this](){compile<boost::rational<long long>,float,int,TextType>("application customization.hpp", "build");});
+					[this](){compile<boost::rational<long long>,float,size_t,TextType>("application customization.hpp", "build");});
 				buttons.emplace_back(button_type(buttonTextHeight,"Run",borderSize,0,0,0,0),
 					[this](){run("build");});
 
@@ -1184,7 +1184,7 @@ namespace GUIModel
 			} // end method save
 
 
-			template<typename RationalType, typename IDType /* = int */, typename NameType /* = std::string */> // current compiler version does not support default arguments
+			template<typename RationalType, typename IDType = size_t, typename NameType = std::string>
 			Eigen::Matrix<RationalType,Eigen::Dynamic,Eigen::Dynamic> generateSystemMatrix() const
 			{
 				auto symbols = std::make_shared<Symbolic::Common::SymbolTable<NameType,IDType>>();
@@ -1285,7 +1285,7 @@ namespace GUIModel
 				output << "} // end function updateCoordinates\n";
 			} // end method outputOpenGLCppApp
 
-			template<typename RationalType, typename AppCoordType, typename IDType = int, typename NameType = std::string>
+			template<typename RationalType, typename AppCoordType, typename IDType = size_t, typename NameType = std::string>
 			void compile(const std::string &headerName, const std::string &buildDirectoryName) const
 			{
 				auto systemMatrix = generateSystemMatrix<RationalType,IDType,NameType>();

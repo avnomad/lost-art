@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(Test_Symbol_Table_Operations)
 	using Symbolic::Common::SymbolTable;
 
 	// currently does not check whether exceptions are indeed thrown on errors.
-	SymbolTable<string,long long int> st;
+	SymbolTable<string,unsigned long long int> st;
 
 	BOOST_CHECK(st.empty());
 	BOOST_CHECK_EQUAL(st.size(), 0);
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(Test_Symbol_Table_Operations)
 	BOOST_CHECK_EQUAL(st.id("z"), 2);
 	BOOST_CHECK_EQUAL(st.name(2), "z");
 
-	SymbolTable<string,long long int> cp1 = st;
+	SymbolTable<string,unsigned long long int> cp1 = st;
 	BOOST_CHECK(!cp1.empty());
 	BOOST_CHECK_EQUAL(cp1.declare("z"), 2);	// should have no effect
 	BOOST_CHECK_EQUAL(cp1.size(), 3);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(Test_Symbol_Table_Operations)
 	BOOST_CHECK_EQUAL(cp1.undeclare("z"), 2);
 	BOOST_CHECK_EQUAL(cp1.undeclare("y"), 1);
 
-	SymbolTable<string,long long int> cp2;
+	SymbolTable<string,unsigned long long int> cp2;
 	BOOST_CHECK(cp2.empty());
 	cp2 = st;
 	BOOST_CHECK(!cp2.empty());

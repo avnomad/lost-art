@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(Test_Constraint_Parser)
 	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,1,RectangleSide::BOTTOM,1,RectangleSide::TOP,0,0,"c",10));
 
 	auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
-	vector<Model<int>::constraint_type::template ParseResult<int,Rational>> results;
+	vector<decltype(model.constraints.front().parse<Rational>(symbols))> results;
 	for(auto constraint : model.constraints)
 		results.push_back(constraint.parse<Rational>(symbols));
 
