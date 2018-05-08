@@ -29,6 +29,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "std overloads.hpp"
 #include "opengl overloads.hpp"
 
 #include "geometry.hpp"
@@ -1277,14 +1278,13 @@ namespace graphene
 			std::pair<CoordinateType,CoordinateType> effectiveTextSize() const
 			{
 				font_engine_type fontEngine;
-				using common_type = typename std::common_type<coordinate_type, decltype(margin::num), decltype(fontEngine.fontHeight())>::type;
 
 				// scale text down to fit in rectangle:
-				CoordinateType effectiveTextHeight = std::min<common_type>(this->textHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
-				CoordinateType effectiveTextWidth = std::min<common_type>(effectiveTextHeight * fontEngine.stringWidth(this->text()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
+				auto effectiveTextHeight = utility::min(this->textHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
+				auto effectiveTextWidth = utility::min(effectiveTextHeight * fontEngine.stringWidth(this->text()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
 				if(this->text().empty())
 					return std::make_pair(static_cast<CoordinateType>(0),effectiveTextHeight); // avoid division by zero
-				effectiveTextHeight = std::min<common_type>(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->text()));
+				effectiveTextHeight = utility::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->text()));
 
 				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
 			} // end method effectiveTextSize
@@ -1446,14 +1446,13 @@ namespace graphene
 			std::pair<CoordinateType,CoordinateType> effectiveNameSize() const
 			{
 				font_engine_type fontEngine;
-				using common_type = typename std::common_type<coordinate_type, decltype(margin::num), decltype(fontEngine.fontHeight())>::type;
 
 				// scale name down to fit in rectangle:
-				CoordinateType effectiveNameHeight = std::min<common_type>(this->nameHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
-				CoordinateType effectiveNameWidth = std::min<common_type>(effectiveNameHeight * fontEngine.stringWidth(this->name()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
+				auto effectiveNameHeight = utility::min(this->nameHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
+				auto effectiveNameWidth = utility::min(effectiveNameHeight * fontEngine.stringWidth(this->name()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
 				if(this->name().empty())
 					return std::make_pair(static_cast<CoordinateType>(0),effectiveNameHeight); // avoid division by zero
-				effectiveNameHeight = std::min<common_type>(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->name()));
+				effectiveNameHeight = utility::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->name()));
 
 				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
 			} // end method effectiveNameSize
