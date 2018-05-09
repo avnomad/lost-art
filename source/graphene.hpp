@@ -128,38 +128,6 @@ namespace graphene
 			virtual bool contains(CoordinateType x, CoordinateType y) const = 0;
 		}; // end struct Containing
 
-		template<typename BaseType, typename PointerType = typename BaseType::pointer_type>
-		struct Pointing : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using pointer_type = PointerType;
-
-			// Constructors
-			Pointing() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual PointerType &pointer() = 0;
-			virtual const PointerType &pointer() const = 0;
-		}; // end struct Pointing
-
-		template<typename BaseType, typename IndexType = typename BaseType::index_type>
-		struct Indexing : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using index_type = IndexType;
-
-			// Constructors
-			Indexing() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual IndexType &index() = 0;
-			virtual const IndexType &index() const = 0;
-		}; // end struct Indexing
-
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 		struct Offset : BaseType
 		{
@@ -178,255 +146,122 @@ namespace graphene
 			virtual const CoordinateType &yOffset() const = 0;
 		}; // end struct Offset
 
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		struct Selectable : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
+#define ableMacro(ClassName, setVerb, unsetVerb, testVerb) \
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>\
+		struct ClassName : BaseType\
+		{\
+			/* Member Types */\
+			using base_type = BaseType;\
+			using frame_stack_type = FrameStackType;\
+\
+			/* Constructors */\
+			ClassName() = default;\
+			using BaseType::BaseType;\
+\
+			/* Destructor */\
+			virtual ~ClassName()\
+			{\
+				/* workaround because is_base_of can't work with incomplete types */\
+				static_assert(std::is_base_of<ClassName, FrameStackType>()\
+						   || std::is_base_of<FrameStackType, ClassName>(),\
+							  "This struct and FrameStackType must be connected by inheritance!");\
+			} /* end destructor */\
+\
+			/* Methods */\
+			virtual FrameStackType &setVerb() = 0;\
+			virtual FrameStackType &unsetVerb() = 0;\
+			virtual bool &testVerb() = 0;\
+			virtual const bool &testVerb() const = 0;\
+		}; /* end struct ClassName */
 
-			// Constructors
-			Selectable() = default;
-			using BaseType::BaseType;
+		ableMacro(Selectable, select, deselect, selected)
+		ableMacro(Pressable, press, depress, pressed)
+		ableMacro(Highlightable, highlight, dehighlight, highlighted)
+		ableMacro(Focusable, focus, unfocus, focused)
+#undef ableMacro
 
-			// Destructor
-			virtual ~Selectable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Selectable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Selectable>(),
-							  "This struct and FrameStackType must be connected by inheritance!");
-			} // end destructor
+#define singleFieldByReference(ClassName, methodName, type_alias_prefix, TypeNamePrefix) \
+		template<typename BaseType, typename TypeNamePrefix##Type = typename BaseType::type_alias_prefix##_type>\
+		struct ClassName : BaseType\
+		{\
+			/* Member Types */\
+			using base_type = BaseType;\
+			using type_alias_prefix##_type = TypeNamePrefix##Type;\
+\
+			/* Constructors */\
+			ClassName() = default;\
+			using BaseType::BaseType;\
+\
+			/* Methods */\
+			virtual TypeNamePrefix##Type &methodName() = 0;\
+			virtual const TypeNamePrefix##Type &methodName() const = 0;\
+		}; /* end struct ClassName */
 
-			// Methods
-			virtual FrameStackType &select() = 0;
-			virtual FrameStackType &deselect() = 0;
-			virtual bool &selected() = 0;
-			virtual const bool &selected() const = 0;
-		}; // end struct Selectable
+		singleFieldByReference(Textual, text, text, Text)
+		singleFieldByReference(Named, name, name, Name)
+		singleFieldByReference(Pointing, pointer, pointer, Pointer)
+		singleFieldByReference(Indexing, index, index, Index)
+		singleFieldByReference(UniformlyBordered, borderSize, border_size, BorderSize)
+#undef singleFieldByReference
 
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		struct Pressable : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
+#define sizedMacro(ClassSuffix, methodPrefix) \
+		/** SizedText instances have a fixed 'natural' aspect ratio, so changing the height,\
+		 *	actually changes the width as well. Some frame stacks, may interpret  text sizes, as\
+		 *	preferred instead of mandatory.\
+		 */\
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>\
+		struct Sized##ClassSuffix : BaseType\
+		{\
+			/* Member Types */\
+			using base_type = BaseType;\
+			using coordinate_type = CoordinateType;\
+\
+			/* Constructors */\
+			Sized##ClassSuffix() = default;\
+			using BaseType::BaseType;\
+\
+			/* Methods */\
+			virtual CoordinateType &methodPrefix##Height() = 0;\
+			virtual const CoordinateType &methodPrefix##Height() const = 0;\
+			/* TODO: add support for setting the methodPrefix width using properties, and perhaps the ability\
+			 * to set/get the aspect ratio.\
+			 */\
+			virtual CoordinateType methodPrefix##Width() const = 0;\
+			virtual CoordinateType methodPrefix##CharWidth(size_t index) const = 0;\
+			virtual void set##ClassSuffix##Width(const CoordinateType &value) = 0; /* deprecated */\
+			/* TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio\
+			 * and add preferred width, height read-only properties.\
+			 */\
+		}; /* end struct Sized##ClassSuffix */
 
-			// Constructors
-			Pressable() = default;
-			using BaseType::BaseType;
+		sizedMacro(Text, text)
+		sizedMacro(Name, name)
+#undef sizedMacro
 
-			// Destructor
-			virtual ~Pressable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Pressable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Pressable>(),
-							  "This struct and FrameStackType must be connected by inheritance!");
-			} // end destructor
+#define adaptableSizeMacro(ClassAffix) \
+		/** This frame is intended for use in frame stacks that use textHeight/textWidth as a\
+		 *	"preferred" size and need another method to return the actual text height/width.\
+		 *	The first pair member is the width and the second the height.\
+		 */\
+		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>\
+		struct AdaptableSize##ClassAffix : BaseType\
+		{\
+			/* Member Types */\
+			using base_type = BaseType;\
+			using coordinate_type = CoordinateType;\
+\
+			/* Constructors */\
+			AdaptableSize##ClassAffix() = default;\
+			using BaseType::BaseType;\
+\
+			/* Methods */\
+			virtual std::pair<CoordinateType,CoordinateType> effective##ClassAffix##Size() const = 0;\
+			virtual std::pair<CoordinateType,CoordinateType> effective##ClassAffix##CharSize(size_t index) const = 0;\
+		}; /* end struct AdaptableSize##ClassAffix */
 
-			// Methods
-			virtual FrameStackType &press() = 0;
-			virtual FrameStackType &depress() = 0;
-			virtual bool &pressed() = 0;
-			virtual const bool &pressed() const = 0;
-		}; // end struct Pressable
-
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		struct Highlightable : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
-
-			// Constructors
-			Highlightable() = default;
-			using BaseType::BaseType;
-
-			// Destructor
-			virtual ~Highlightable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Highlightable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Highlightable>(),
-							  "This struct and FrameStackType must be connected by inheritance!");
-			} // end destructor
-
-			// Methods
-			virtual FrameStackType &highlight() = 0;
-			virtual FrameStackType &dehighlight() = 0;
-			virtual bool &highlighted() = 0;
-			virtual const bool &highlighted() const = 0;
-		}; // end struct Highlightable
-
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		struct Focusable : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
-
-			// Constructors
-			Focusable() = default;
-			using BaseType::BaseType;
-
-			// Destructor
-			virtual ~Focusable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Focusable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Focusable>(),
-							  "This struct and FrameStackType must be connected by inheritance!");
-			} // end destructor
-
-			// Methods
-			virtual FrameStackType &focus() = 0;
-			virtual FrameStackType &unfocus() = 0;
-			virtual bool &focused() = 0;
-			virtual const bool &focused() const = 0;
-		}; // end struct Focusable
-
-		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
-		struct UniformlyBordered : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using border_size_type = BorderSizeType;
-
-			// Constructors
-			UniformlyBordered() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual BorderSizeType &borderSize() = 0;
-			virtual const BorderSizeType &borderSize() const = 0;
-		}; // end struct UniformlyBordered
-
-		template<typename BaseType, typename TextType = typename BaseType::text_type>
-		struct Textual : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using text_type = TextType;
-
-			// Constructors
-			Textual() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual TextType &text() = 0;
-			virtual const TextType &text() const = 0;
-		}; // end struct Textual
-
-		/** SizedText instances have a fixed 'natural' aspect ratio, so changing the height,
-		 *	actually changes the width as well. Some frame stacks, may interpret  text sizes, as
-		 *	preferred instead of mandatory.
-		 */
-		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		struct SizedText : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-
-			// Constructors
-			SizedText() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual CoordinateType &textHeight() = 0;
-			virtual const CoordinateType &textHeight() const = 0;
-			// TODO: add support for setting the text width using properties, and perhaps the ability
-			// to set/get the aspect ratio.
-			virtual CoordinateType textWidth() const = 0;
-			virtual CoordinateType textCharWidth(size_t index) const = 0;
-			virtual void setTextWidth(const CoordinateType &value) = 0; // deprecated
-			// TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio
-			// and add preferred width, height read-only properties.
-		}; // end struct SizedText
-
-		/** This frame is intended for use in frame stacks that use textHeight/textWidth as a
-		 *	"preferred" size and need another method to return the actual text height/width.
-		 *	The first pair member is the width and the second the height.
-		 */
-		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		struct AdaptableSizeText : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-
-			// Constructors
-			AdaptableSizeText() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual std::pair<CoordinateType,CoordinateType> effectiveTextSize() const = 0;
-			virtual std::pair<CoordinateType,CoordinateType> effectiveTextCharSize(size_t index) const = 0;
-		}; // end struct AdaptableSizeText
-
-		template<typename BaseType, typename NameType = typename BaseType::name_type>
-		struct Named : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using name_type = NameType;
-
-			// Constructors
-			Named() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual NameType &name() = 0;
-			virtual const NameType &name() const = 0;
-		}; // end struct Named
-
-		/** SizedName instances have a fixed 'natural' aspect ratio, so changing the height,
-		 *	actually changes the width as well. Some frame stacks, may interpret  name sizes, as
-		 *	preferred instead of mandatory.
-		 */
-		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		struct SizedName : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-
-			// Constructors
-			SizedName() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual CoordinateType &nameHeight() = 0;
-			virtual const CoordinateType &nameHeight() const = 0;
-			// TODO: add support for setting the name width using properties, and perhaps the ability
-			// to set/get the aspect ratio.
-			virtual CoordinateType nameWidth() const = 0;
-			virtual CoordinateType nameCharWidth(size_t index) const = 0;
-			virtual void setNameWidth(const CoordinateType &value) = 0; // deprecated
-			// TODO: allow arbitrary writable height & width combinations, add a preferred aspect ratio
-			// and add preferred width, height read-only properties.
-		}; // end struct SizedName
-
-		/** This frame is intended for use in frame stacks that use nameHeight/nameWidth as a
-		 *	"preferred" size and need another method to return the actual name height/width.
-		 *	The first pair member is the width and the second the height.
-		 */
-		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
-		struct AdaptableSizeName : BaseType
-		{
-			// Member Types
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-
-			// Constructors
-			AdaptableSizeName() = default;
-			using BaseType::BaseType;
-
-			// Methods
-			virtual std::pair<CoordinateType,CoordinateType> effectiveNameSize() const = 0;
-			virtual std::pair<CoordinateType,CoordinateType> effectiveNameCharSize(size_t index) const = 0;
-		}; // end struct AdaptableSizeName
+		adaptableSizeMacro(Text)
+		adaptableSizeMacro(Name)
+#undef adaptableSizeMacro
 
 		/** If a MultiPart is also Containing then partUnderPoint(x,y) should return a value designating "no part"
 		 *	if and only if contains(x,y) returns false.
@@ -626,100 +461,6 @@ namespace graphene
 
 		} // end namespace Movable
 
-		template<typename BaseType, typename PointerType = typename BaseType::pointer_type>
-		class Pointing : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using pointer_type = PointerType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			PointerType iPointer = nullptr;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Pointing() = default;
-
-			template<typename PointerArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<PointerType, PointerArgType &&>::value, void>::type>
-			Pointing(PointerArgType &&pointer, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iPointer(std::forward<PointerArgType>(pointer))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			PointerType &pointer()
-			{
-				return iPointer;
-			} // end method pointer
-
-			const PointerType &pointer() const
-			{
-				return iPointer;
-			} // end method pointer
-		}; // end class Pointing
-
-		template<typename BaseType, typename IndexType = typename BaseType::index_type>
-		class Indexing : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using index_type = IndexType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			IndexType iIndex;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Indexing() = default;
-
-			template<typename IndexArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<IndexType, IndexArgType &&>::value, void>::type>
-			Indexing(IndexArgType &&index, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iIndex(std::forward<IndexArgType>(index))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			IndexType &index()
-			{
-				return iIndex;
-			} // end method index
-
-			const IndexType &index() const
-			{
-				return iIndex;
-			} // end method index
-		}; // end class Indexing
-
 		template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 		class Offset : public BaseType
 		{
@@ -781,692 +522,284 @@ namespace graphene
 			} // end method yOffset
 		}; // end class Offset
 
-		/**
-		 * Adds state and methods to make a stack frame 'selectable'.
-		 *
-		 * It is an error to instantiate a stack frame that contains Frame<Selectable, FrameStackType>,
-		 * but doesn't include a complete FrameStackType sub-stack at the top.
-		 */
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Selectable : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iSelected = false;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Selectable() = default;
-
-			template<typename... ArgTypes>
-			Selectable(bool selected, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iSelected(selected)
-			{
-				// empty body
-			} // end constructor
-
-			using BaseType::BaseType;
-
-			/*******************
-			*    Destructor    *
-			*******************/
-		public:
-			~Selectable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Selectable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Selectable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
-			} // end destructor
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			FrameStackType &select()
-			{
-				iSelected = true;
-				return *static_cast<FrameStackType *>(this);
-			} // end method select
-
-			FrameStackType &deselect()
-			{
-				iSelected = false;
-				return *static_cast<FrameStackType *>(this);
-			} // end method deselect
-
-			bool &selected()
-			{
-				return iSelected;
-			} // end method selected
-
-			const bool &selected() const
-			{
-				return iSelected;
-			} // end method selected
-		}; // end class Selectable
-
-		/**
-		 * Adds state and methods to make a stack frame 'pressable'.
-		 *
-		 * It is an error to instantiate a stack frame that contains Frame<Pressable, FrameStackType>,
-		 * but doesn't include a complete FrameStackType sub-stack at the top.
-		 */
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Pressable : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iPressed = false;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Pressable() = default;
-
-			template<typename... ArgTypes>
-			Pressable(bool pressed, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iPressed(pressed)
-			{
-				// empty body
-			} // end constructor
-
-			using BaseType::BaseType;
-
-			/*******************
-			*    Destructor    *
-			*******************/
-		public:
-			~Pressable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Pressable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Pressable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
-			} // end destructor
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			FrameStackType &press()
-			{
-				iPressed = true;
-				return *static_cast<FrameStackType *>(this);
-			} // end method press
-
-			FrameStackType &depress()
-			{
-				iPressed = false;
-				return *static_cast<FrameStackType *>(this);
-			} // end method depress
-
-			bool &pressed()
-			{
-				return iPressed;
-			} // end method pressed
-
-			const bool &pressed() const
-			{
-				return iPressed;
-			} // end method pressed
-		}; // end class Pressable
-
-		/**
-		 * Adds state and methods to make a stack frame 'highlightable'.
-		 *
-		 * It is an error to instantiate a stack frame that contains Frame<Highlightable, FrameStackType>,
-		 * but doesn't include a complete FrameStackType sub-stack at the top.
-		 */
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Highlightable : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iHighlighted = false;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Highlightable() = default;
-
-			template<typename... ArgTypes>
-			Highlightable(bool highlighted, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iHighlighted(highlighted)
-			{
-				// empty body
-			} // end constructor
-
-			using BaseType::BaseType;
-
-			/*******************
-			*    Destructor    *
-			*******************/
-		public:
-			~Highlightable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Highlightable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Highlightable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
-			} // end destructor
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			FrameStackType &highlight()
-			{
-				iHighlighted = true;
-				return *static_cast<FrameStackType *>(this);
-			} // end method highlight
-
-			FrameStackType &dehighlight()
-			{
-				iHighlighted = false;
-				return *static_cast<FrameStackType *>(this);
-			} // end method dehighlight
-
-			bool &highlighted()
-			{
-				return iHighlighted;
-			} // end method highlighted
-
-			const bool &highlighted() const
-			{
-				return iHighlighted;
-			} // end method highlighted
-		}; // end class Highlightable
-
-		/**
-		 * Adds state and methods to make a stack frame 'focusable'.
-		 *
-		 * It is an error to instantiate a stack frame that contains Frame<Focusable, FrameStackType>,
-		 * but doesn't include a complete FrameStackType sub-stack at the top.
-		 */
-		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>
-		class Focusable : public BaseType
-		{
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			bool iFocused = false;
-
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using frame_stack_type = FrameStackType;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Focusable() = default;
-
-			template<typename... ArgTypes>
-			Focusable(bool focused, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iFocused(focused)
-			{
-				// empty body
-			} // end constructor
-
-			using BaseType::BaseType;
-
-			/*******************
-			*    Destructor    *
-			*******************/
-		public:
-			~Focusable()
-			{
-				// workaround because is_base_of can't work with incomplete types
-				static_assert(std::is_base_of<Focusable, FrameStackType>()
-						   || std::is_base_of<FrameStackType, Focusable>(),
-							  "This class and FrameStackType must be connected by inheritance!");
-			} // end destructor
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			FrameStackType &focus()
-			{
-				iFocused = true;
-				return *static_cast<FrameStackType *>(this);
-			} // end method focus
-
-			FrameStackType &unfocus()
-			{
-				iFocused = false;
-				return *static_cast<FrameStackType *>(this);
-			} // end method unfocus
-
-			bool &focused()
-			{
-				return iFocused;
-			} // end method focused
-
-			const bool &focused() const
-			{
-				return iFocused;
-			} // end method focused
-		}; // end class Focusable
-
-		template<typename BaseType, typename BorderSizeType = typename BaseType::border_size_type>
-		class UniformlyBordered : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using border_size_type = BorderSizeType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			BorderSizeType iBorderSize = 0;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			UniformlyBordered() = default;
-
-			template<typename BorderSizeArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<BorderSizeType, BorderSizeArgType &&>::value, void>::type>
-			UniformlyBordered(BorderSizeArgType &&borderSize, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iBorderSize(std::forward<BorderSizeArgType>(borderSize))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			BorderSizeType &borderSize()
-			{
-				return iBorderSize;
-			} // end method borderSize
-
-			const BorderSizeType &borderSize() const
-			{
-				return iBorderSize;
-			} // end method borderSize
-		}; // end class UniformlyBordered
-
-		template<typename BaseType, typename TextType = typename BaseType::text_type>
-		class Textual : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using text_type = TextType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			TextType iText;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Textual() = default;
-
-			template<typename TextArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<TextType, TextArgType &&>::value, void>::type>
-			Textual(TextArgType &&text, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iText(std::forward<TextArgType>(text))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			TextType &text()
-			{
-				return iText;
-			} // end method text
-
-			const TextType &text() const
-			{
-				return iText;
-			} // end method text
-		}; // end class Textual
-
-		/** BaseType should be Textual, TextEngineType should be default constructible
-		 */
-		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
-		class SizedText : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-			using font_engine_type = FontEngineType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			CoordinateType iTextHeight;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			SizedText() = default;
-
-			template<typename TextHeightArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<CoordinateType, TextHeightArgType &&>::value,void>::type>
-			SizedText(TextHeightArgType &&textHeight, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iTextHeight(std::forward<TextHeightArgType>(textHeight))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			CoordinateType &textHeight()
-			{
-				return iTextHeight;
-			} // end method textHeight
-
-			const CoordinateType &textHeight() const
-			{
-				return iTextHeight;
-			} // end method textHeight
-
-			// TODO: add support for setting the text width using properties, and perhaps the ability
-			// to set/get the aspect ratio.
-			CoordinateType textWidth() const
-			{
-				FontEngineType fontEngine;
-				return fontEngine.stringWidth(this->text()) * textHeight() / fontEngine.fontHeight();
-			} // end method textWidth
-
-			CoordinateType textCharWidth(size_t index) const
-			{
-				FontEngineType fontEngine;
-				return fontEngine.charWidth(this->text().at(index)) * textHeight() / fontEngine.fontHeight();
-			} // end method textCharWidth
-
-			void setTextWidth(const CoordinateType &value) // deprecated
-			{
-				FontEngineType fontEngine;
-				textHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(this->text());
-			} // end method setTextWidth
-		}; // end class SizedText
-
-		/** BaseType should be Rectangular and SizedText, TextEngineType should be default constructible
-		 */
-		template<typename BaseType, typename Margin = typename BaseType::margin, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
-		class BoxedAdaptableSizeText : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-			using font_engine_type = FontEngineType;
-			using margin = Margin;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			BoxedAdaptableSizeText() = default;
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			std::pair<CoordinateType,CoordinateType> effectiveTextSize() const
-			{
-				font_engine_type fontEngine;
-
-				// scale text down to fit in rectangle:
-				auto effectiveTextHeight = utility::min(this->textHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
-				auto effectiveTextWidth = utility::min(effectiveTextHeight * fontEngine.stringWidth(this->text()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
-				if(this->text().empty())
-					return std::make_pair(static_cast<CoordinateType>(0),effectiveTextHeight); // avoid division by zero
-				effectiveTextHeight = utility::min(effectiveTextHeight, effectiveTextWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->text()));
-
-				return std::make_pair(effectiveTextWidth,effectiveTextHeight);
-			} // end method effectiveTextSize
-
-			// TODO: This is too inefficient. Consider caching.
-			std::pair<CoordinateType,CoordinateType> effectiveTextCharSize(size_t index) const
-			{
-				font_engine_type fontEngine;
-				auto result = effectiveTextSize();
-				result.first = fontEngine.charWidth(this->text().at(index)) * result.second / fontEngine.fontHeight();
-
-				return result;
-			} // end method effectiveTextCharSize
-		}; // end class BoxedAdaptableSizeText
-
-		template<typename BaseType, typename NameType = typename BaseType::name_type>
-		class Named : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using name_type = NameType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			NameType iName;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			Named() = default;
-
-			template<typename NameArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<NameType, NameArgType &&>::value, void>::type>
-			Named(NameArgType &&name, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iName(std::forward<NameArgType>(name))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			NameType &name()
-			{
-				return iName;
-			} // end method name
-
-			const NameType &name() const
-			{
-				return iName;
-			} // end method name
-		}; // end class Named
-
-		/** BaseType should be Named, TextEngineType should be default constructible
-		 */
-		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
-		class SizedName : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-			using font_engine_type = FontEngineType;
-
-			/***************
-			*    Fields    *
-			***************/
-		private:
-			CoordinateType iNameHeight = 0;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			SizedName() = default;
-
-			template<typename NameHeightArgType, typename... ArgTypes,
-				typename = typename std::enable_if<std::is_constructible<CoordinateType, NameHeightArgType &&>::value, void>::type>
-			SizedName(NameHeightArgType &&nameHeight, ArgTypes &&...args)
-				:base_type(std::forward<ArgTypes>(args)...), iNameHeight(std::forward<NameHeightArgType>(nameHeight))
-			{
-				// empty body
-			}
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			CoordinateType &nameHeight()
-			{
-				return iNameHeight;
-			} // end method nameHeight
-
-			const CoordinateType &nameHeight() const
-			{
-				return iNameHeight;
-			} // end method nameHeight
-
-			// TODO: add support for setting the name width using properties, and perhaps the ability
-			// to set/get the aspect ratio.
-			CoordinateType nameWidth() const
-			{
-				FontEngineType fontEngine;
-				return fontEngine.stringWidth(this->name()) * nameHeight() / fontEngine.fontHeight();
-			} // end method nameWidth
-
-			CoordinateType nameCharWidth(size_t index) const
-			{
-				FontEngineType fontEngine;
-				return fontEngine.charWidth(this->name().at(index)) * nameHeight() / fontEngine.fontHeight();
-			} // end method nameCharWidth
-
-			void setNameWidth(const CoordinateType &value) // deprecated
-			{
-				FontEngineType fontEngine;
-				nameHeight() = fontEngine.fontHeight() * value / fontEngine.stringWidth(this->name());
-			} // end method setNameWidth
-		}; // end class SizedName
-
-		/** BaseType should be Rectangular and SizedName, TextEngineType should be default constructible
-		 */
-		template<typename BaseType, typename Margin = typename BaseType::margin, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>
-		class BoxedAdaptableSizeName : public BaseType
-		{
-			/*********************
-			*    Member Types    *
-			*********************/
-		public:
-			using base_type = BaseType;
-			using coordinate_type = CoordinateType;
-			using font_engine_type = FontEngineType;
-			using margin = Margin;
-
-			/*********************
-			*    Constructors    *
-			*********************/
-		public:
-			BoxedAdaptableSizeName() = default;
-
-			using BaseType::BaseType;
-
-			/****************
-			*    Methods    *
-			****************/
-		public:
-			std::pair<CoordinateType,CoordinateType> effectiveNameSize() const
-			{
-				font_engine_type fontEngine;
-
-				// scale name down to fit in rectangle:
-				auto effectiveNameHeight = utility::min(this->nameHeight(),(this->height()*margin::den - 2*margin::num) / margin::den);
-				auto effectiveNameWidth = utility::min(effectiveNameHeight * fontEngine.stringWidth(this->name()) / fontEngine.fontHeight(),(this->width()*margin::den - 2*margin::num) / margin::den);
-				if(this->name().empty())
-					return std::make_pair(static_cast<CoordinateType>(0),effectiveNameHeight); // avoid division by zero
-				effectiveNameHeight = utility::min(effectiveNameHeight, effectiveNameWidth * fontEngine.fontHeight() / fontEngine.stringWidth(this->name()));
-
-				return std::make_pair(effectiveNameWidth,effectiveNameHeight);
-			} // end method effectiveNameSize
-
-			// TODO: This is too inefficient. Consider caching.
-			std::pair<CoordinateType,CoordinateType> effectiveNameCharSize(size_t index) const
-			{
-				font_engine_type fontEngine;
-				auto result = effectiveNameSize();
-				result.first = fontEngine.charWidth(this->name().at(index)) * result.second / fontEngine.fontHeight();
-
-				return  result;
-			} // end method nameCharWidth
-		}; // end class BoxedAdaptableSizeName
+#define ableMacro(ClassName, fieldName, setVerb, unsetVerb, testVerb) \
+		/**\
+		 * Adds state and methods to make a stack frame '*able'.\
+		 *\
+		 * It is an error to instantiate a stack frame that contains Frame<ClassName, FrameStackType>,\
+		 * but doesn't include a complete FrameStackType sub-stack at the top.\
+		 */\
+		template<typename BaseType, typename FrameStackType = typename BaseType::frame_stack_type>\
+		class ClassName : public BaseType\
+		{\
+			/*********************\
+			*    Member Types    *\
+			*********************/\
+		public:\
+			using base_type = BaseType;\
+			using frame_stack_type = FrameStackType;\
+\
+			/***************\
+			*    Fields    *\
+			***************/\
+		private:\
+			bool fieldName = false;\
+\
+			/*********************\
+			*    Constructors    *\
+			*********************/\
+		public:\
+			ClassName() = default;\
+\
+			template<typename... ArgTypes>\
+			ClassName(bool testVerb, ArgTypes &&...args)\
+				:base_type(std::forward<ArgTypes>(args)...), fieldName(testVerb)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
+\
+			using BaseType::BaseType;\
+\
+			/*******************\
+			*    Destructor    *\
+			*******************/\
+		public:\
+			~ClassName()\
+			{\
+				/* workaround because is_base_of can't work with incomplete types */\
+				static_assert(std::is_base_of<ClassName, FrameStackType>()\
+						   || std::is_base_of<FrameStackType, ClassName>(),\
+							  "This class and FrameStackType must be connected by inheritance!");\
+			} /* end destructor */\
+\
+			/****************\
+			*    Methods    *\
+			****************/\
+		public:\
+			FrameStackType &setVerb()\
+			{\
+				fieldName = true;\
+				return *static_cast<FrameStackType *>(this);\
+			} /* end method setVerb */\
+\
+			FrameStackType &unsetVerb()\
+			{\
+				fieldName = false;\
+				return *static_cast<FrameStackType *>(this);\
+			} /* end method unsetVerb */\
+\
+			bool &testVerb()\
+			{\
+				return fieldName;\
+			} /* end method testVerb */\
+\
+			const bool &testVerb() const\
+			{\
+				return fieldName;\
+			} /* end method testVerb */\
+		}; /* end class ClassName */
+		ableMacro(Selectable, iSelected, select, deselect, selected)
+		ableMacro(Pressable, iPressed, press, depress, pressed)
+		ableMacro(Highlightable, iHighlighted, highlight, dehighlight, highlighted)
+		ableMacro(Focusable, iFocused, focus, unfocus, focused)
+#undef ableMacro
+
+#define singleFieldByReference(ClassName, lowercaseAffix, underscore_affix, CapitalizedAffix) \
+		template<typename BaseType, typename CapitalizedAffix##Type = typename BaseType::underscore_affix##_type>\
+		class ClassName : public BaseType\
+		{\
+			/*********************\
+			*    Member Types    *\
+			*********************/\
+		public:\
+			using base_type = BaseType;\
+			using underscore_affix##_type = CapitalizedAffix##Type;\
+\
+			/***************\
+			*    Fields    *\
+			***************/\
+		private:\
+			CapitalizedAffix##Type i##CapitalizedAffix;\
+\
+			/*********************\
+			*    Constructors    *\
+			*********************/\
+		public:\
+			ClassName() = default;\
+\
+			template<typename CapitalizedAffix##ArgType, typename... ArgTypes,\
+				typename = typename std::enable_if<std::is_constructible<CapitalizedAffix##Type, CapitalizedAffix##ArgType &&>::value, void>::type>\
+			ClassName(CapitalizedAffix##ArgType &&lowercaseAffix, ArgTypes &&...args)\
+				:base_type(std::forward<ArgTypes>(args)...), i##CapitalizedAffix(std::forward<CapitalizedAffix##ArgType>(lowercaseAffix))\
+			{\
+				/* empty body */\
+			}\
+\
+			using BaseType::BaseType;\
+\
+			/****************\
+			*    Methods    *\
+			****************/\
+		public:\
+			CapitalizedAffix##Type &lowercaseAffix()\
+			{\
+				return i##CapitalizedAffix;\
+			} /* end method lowercaseAffix */\
+\
+			const CapitalizedAffix##Type &lowercaseAffix() const\
+			{\
+				return i##CapitalizedAffix;\
+			} /* end method lowercaseAffix */\
+		}; /* end class ClassName */
+
+		singleFieldByReference(Textual, text, text, Text)
+		singleFieldByReference(Named, name, name, Name)
+		singleFieldByReference(Pointing, pointer, pointer, Pointer)
+		singleFieldByReference(Indexing, index, index, Index)
+		singleFieldByReference(UniformlyBordered, borderSize, border_size, BorderSize)
+#undef singleFieldByReference
+
+#define sizedMacro(ClassName, lowercaseAffix, CapitalizedAffix) \
+		/**\
+		 * BaseType should be ClassName, TextEngineType should be default constructible\
+		 */\
+		template<typename BaseType, typename FontEngineType = typename BaseType::font_engine_type, typename CoordinateType = typename BaseType::coordinate_type>\
+		class Sized##CapitalizedAffix : public BaseType\
+		{\
+			/*********************\
+			*    Member Types    *\
+			*********************/\
+		public:\
+			using base_type = BaseType;\
+			using coordinate_type = CoordinateType;\
+			using font_engine_type = FontEngineType;\
+\
+			/***************\
+			*    Fields    *\
+			***************/\
+		private:\
+			CoordinateType i##CapitalizedAffix##Height;\
+\
+			/*********************\
+			*    Constructors    *\
+			*********************/\
+		public:\
+			Sized##CapitalizedAffix() = default;\
+\
+			template<typename CapitalizedAffix##HeightArgType, typename... ArgTypes,\
+				typename = typename std::enable_if<std::is_constructible<CoordinateType, CapitalizedAffix##HeightArgType &&>::value,void>::type>\
+			Sized##CapitalizedAffix(CapitalizedAffix##HeightArgType &&lowercaseAffix##Height, ArgTypes &&...args)\
+				:base_type(std::forward<ArgTypes>(args)...), i##CapitalizedAffix##Height(std::forward<CapitalizedAffix##HeightArgType>(lowercaseAffix##Height))\
+			{\
+				/* empty body */\
+			}\
+\
+			using BaseType::BaseType;\
+\
+			/****************\
+			*    Methods    *\
+			****************/\
+		public:\
+			CoordinateType &lowercaseAffix##Height()\
+			{\
+				return i##CapitalizedAffix##Height;\
+			} /* end method lowercaseAffix##Height */\
+\
+			const CoordinateType &lowercaseAffix##Height() const\
+			{\
+				return i##CapitalizedAffix##Height;\
+			} /* end method lowercaseAffix##Height */\
+\
+			/* TODO: add support for setting the lowercaseAffix width using properties, and perhaps the ability\
+			 * to set/get the aspect ratio.\
+			 */\
+			CoordinateType lowercaseAffix##Width() const\
+			{\
+				FontEngineType fontEngine;\
+				return fontEngine.stringWidth(this->lowercaseAffix()) * lowercaseAffix##Height() / fontEngine.fontHeight();\
+			} /* end method lowercaseAffix##Width */\
+\
+			CoordinateType lowercaseAffix##CharWidth(size_t index) const\
+			{\
+				FontEngineType fontEngine;\
+				return fontEngine.charWidth(this->lowercaseAffix().at(index)) * lowercaseAffix##Height() / fontEngine.fontHeight();\
+			} /* end method lowercaseAffix##CharWidth */\
+\
+			void set##CapitalizedAffix##Width(const CoordinateType &value) /* deprecated */\
+			{\
+				FontEngineType fontEngine;\
+				lowercaseAffix##Height() = fontEngine.fontHeight() * value / fontEngine.stringWidth(this->lowercaseAffix());\
+			} /* end method set##CapitalizedAffix##Width */\
+		}; /* end class Sized##CapitalizedAffix */
+
+		sizedMacro(Textual, text, Text)
+		sizedMacro(Named, name, Name)
+#undef sizedMacro
+
+#define boxedAdaptableSizeMacro(ClassAffix, methodAffix) \
+		/**\
+		 * BaseType should be Rectangular and Sized##ClassAffix, TextEngineType should be default constructible\
+		 */\
+		template<typename BaseType,\
+				typename Margin = typename BaseType::margin,\
+				typename FontEngineType = typename BaseType::font_engine_type,\
+				typename CoordinateType = typename BaseType::coordinate_type>\
+		class BoxedAdaptableSize##ClassAffix : public BaseType\
+		{\
+			/*********************\
+			*    Member Types    *\
+			*********************/\
+		public:\
+			using base_type = BaseType;\
+			using coordinate_type = CoordinateType;\
+			using font_engine_type = FontEngineType;\
+			using margin = Margin;\
+\
+			/*********************\
+			*    Constructors    *\
+			*********************/\
+		public:\
+			BoxedAdaptableSize##ClassAffix() = default;\
+\
+			using BaseType::BaseType;\
+\
+			/****************\
+			*    Methods    *\
+			****************/\
+		public:\
+			std::pair<CoordinateType,CoordinateType> effective##ClassAffix##Size() const\
+			{\
+				font_engine_type fontEngine;\
+\
+				/* scale methodAffix down to fit in rectangle: */\
+				auto effective##ClassAffix##Height = utility::min(this->methodAffix##Height(),\
+																  (this->height()*margin::den - 2*margin::num) / margin::den);\
+				auto effective##ClassAffix##Width = utility::min(effective##ClassAffix##Height * fontEngine.stringWidth(this->methodAffix())\
+																							   / fontEngine.fontHeight(),\
+																 (this->width()*margin::den - 2*margin::num) / margin::den);\
+				if(this->methodAffix().empty())\
+					return std::make_pair(static_cast<CoordinateType>(0),effective##ClassAffix##Height); /* avoid division by zero */\
+				effective##ClassAffix##Height = utility::min(effective##ClassAffix##Height,\
+															 effective##ClassAffix##Width * fontEngine.fontHeight()\
+																						  / fontEngine.stringWidth(this->methodAffix()));\
+\
+				return std::make_pair(effective##ClassAffix##Width, effective##ClassAffix##Height);\
+			} /* end method effective##ClassAffix##Size */\
+\
+			/* TODO: This is too inefficient. Consider caching. */\
+			std::pair<CoordinateType,CoordinateType> effective##ClassAffix##CharSize(size_t index) const\
+			{\
+				font_engine_type fontEngine;\
+				auto result = effective##ClassAffix##Size();\
+				result.first = fontEngine.charWidth(this->methodAffix().at(index)) * result.second / fontEngine.fontHeight();\
+\
+				return result;\
+			} /* end method effective##ClassAffix##CharSize */\
+		}; /* end class BoxedAdaptableSize##ClassAffix */
+
+		boxedAdaptableSizeMacro(Text, text)
+		boxedAdaptableSizeMacro(Name, name)
+#undef boxedAdaptableSizeMacro
 
 		template<template<typename ConcretePartCoordinateType, typename horizontal, typename vertical, bool constant,
 							bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
@@ -2837,137 +2170,74 @@ namespace graphene
 
 	namespace FunctionObjects
 	{
-		struct Pressed
-		{
-			template<typename PressableType>
-			bool operator()(const PressableType &pressable) const
-			{
-				return pressable.pressed();
-			} // end method operator()
-		}; // end struct Pressed
+#define ableMacro(ClassName, variableName, testVerb) \
+		struct ClassName\
+		{\
+			template<typename ClassName##Type>\
+			bool operator()(const ClassName##Type &variableName) const\
+			{\
+				return variableName.testVerb();\
+			} /* end method operator() */\
+		}; /* end struct ClassName */
 
-		struct Selected
-		{
-			template<typename SelectableType>
-			bool operator()(const SelectableType &selectable) const
-			{
-				return selectable.selected();
-			} // end method operator()
-		}; // end struct Selected
+		ableMacro(Selected, selectable, selected)
+		ableMacro(Pressed, pressable, pressed)
+		ableMacro(Highlighted, highlightable, highlighted)
+		ableMacro(Focused, focusable, focused)
+#undef ableMacro
 
-		struct Highlighted
-		{
-			template<typename HighlightableType>
-			bool operator()(const HighlightableType &highlightable) const
-			{
-				return highlightable.highlighted();
-			} // end method operator()
-		}; // end struct Highlighted
+#define textualMacro(ClassName, prefixName, infixName) \
+		/* TODO: use concept maps instead when available */\
+		struct ClassName\
+		{\
+			template<typename ClassName##Type>\
+			decltype(auto) text(ClassName##Type &&textual) const\
+			{\
+				return textual.prefixName();\
+			} /* end method text */\
+\
+			template<typename ClassName##Type>\
+			decltype(auto) textHeight(ClassName##Type &&textual) const\
+			{\
+				return textual.prefixName##Height();\
+			} /* end method textHeight */\
+\
+			template<typename ClassName##Type>\
+			decltype(auto) textWidth(ClassName##Type &&textual) const\
+			{\
+				return textual.prefixName##Width();\
+			} /* end method textWidth */\
+\
+			template<typename ClassName##Type>\
+			decltype(auto) textCharWidth(ClassName##Type &&textual, size_t index) const\
+			{\
+				return textual.prefixName##CharWidth(index);\
+			} /* end method textCharWidth */\
+\
+			template<typename ClassName##Type>\
+			void setTextWidth(ClassName##Type &&textual, const typename ClassName##Type::coordinate_type &value) const\
+			{\
+				textual.set##infixName##Width(value);\
+			} /* end method setTextWidth */\
+\
+			/* TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveTextSize is not available. */\
+			template<typename ClassName##Type>\
+			decltype(auto) effectiveTextSize(ClassName##Type &&textual) const\
+			{\
+				return textual.effective##infixName##Size();\
+			} /* end method effectiveTextSize */\
+\
+			/* TODO: use SFINAE to fallback to (textCharWidth,textHeight) if effectiveTextCharSize is not available. */\
+			template<typename ClassName##Type>\
+			decltype(auto) effectiveTextCharSize(ClassName##Type &&textual, size_t index) const\
+			{\
+				return textual.effective##infixName##CharSize(index);\
+			} /* end method effectiveTextCharSize */\
+		}; /* end struct ClassName */
 
-		struct Focused
-		{
-			template<typename FocusableType>
-			bool operator()(const FocusableType &focusable) const
-			{
-				return focusable.focused();
-			} // end method operator()
-		}; // end struct Focused
-
-		// TODO: use concept maps instead when available
-		struct Textual
-		{
-			template<typename TextualType>
-			decltype(auto) text(TextualType &&textual) const
-			{
-				return textual.text();
-			} // end method text
-
-			template<typename TextualType>
-			decltype(auto) textHeight(TextualType &&textual) const
-			{
-				return textual.textHeight();
-			} // end method textHeight
-
-			template<typename TextualType>
-			decltype(auto) textWidth(TextualType &&textual) const
-			{
-				return textual.textWidth();
-			} // end method textWidth
-
-			template<typename TextualType>
-			decltype(auto) textCharWidth(TextualType &&textual, size_t index) const
-			{
-				return textual.textCharWidth(index);
-			} // end method textCharWidth
-
-			template<typename TextualType>
-			void setTextWidth(TextualType &&textual, const typename TextualType::coordinate_type &value) const
-			{
-				textual.setTextWidth(value);
-			} // end method setTextWidth
-
-			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveTextSize is not available.
-			template<typename TextualType>
-			decltype(auto) effectiveTextSize(TextualType &&textual) const
-			{
-				return textual.effectiveTextSize();
-			} // end method effectiveTextSize
-
-			// TODO: use SFINAE to fallback to (textCharWidth,textHeight) if effectiveTextCharSize is not available.
-			template<typename TextualType>
-			decltype(auto) effectiveTextCharSize(TextualType &&textual, size_t index) const
-			{
-				return textual.effectiveTextCharSize(index);
-			} // end method effectiveTextCharSize
-		}; // end struct Textual
-
-		// TODO: use concept maps instead when available
-		struct Named
-		{
-			template<typename NamedType>
-			decltype(auto) text(NamedType &&named) const
-			{
-				return named.name();
-			} // end method text
-
-			template<typename NamedType>
-			decltype(auto) textHeight(NamedType &&named) const
-			{
-				return named.nameHeight();
-			} // end method textHeight
-
-			template<typename NamedType>
-			decltype(auto) textWidth(NamedType &&named) const
-			{
-				return named.nameWidth();
-			} // end method textWidth
-
-			template<typename NamedType>
-			decltype(auto) textCharWidth(NamedType &&named, size_t index) const
-			{
-				return named.nameCharWidth(index);
-			} // end method textCharWidth
-
-			template<typename NamedType>
-			void setTextWidth(NamedType &&named, const typename NamedType::coordinate_type &value) const
-			{
-				named.setNameWidth(value);
-			} // end method setTextWidth
-
-			// TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveNameSize is not available.
-			template<typename NamedType>
-			decltype(auto) effectiveTextSize(NamedType &&named) const
-			{
-				return named.effectiveNameSize();
-			} // end method effectiveTextSize
-
-			// TODO: use SFINAE to fallback to (nameWidth,nameHeight) if effectiveNameCharSize is not available.
-			template<typename NamedType>
-			decltype(auto) effectiveTextCharSize(NamedType &&named, size_t index) const
-			{
-				return named.effectiveNameCharSize(index);
-			} // end method effectiveTextSize
-		}; // end struct Named
+		textualMacro(Textual, text, Text)
+		textualMacro(Named, name, Name)
+#undef textualMacro
 
 		/** Font engines encapsulate low level font metric and rendering functions, to present
 		 *	them in a uniform manner. They should be constructible from a font and default
