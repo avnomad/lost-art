@@ -190,6 +190,28 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	BOOST_CHECK_EQUAL(button.textHeight(), 12);
 	// TODO: check textWidth. What is the correct result?
 
+	decltype(button) buttonCopy = button;
+	BOOST_CHECK_EQUAL(buttonCopy.left(), 1);
+	BOOST_CHECK_EQUAL(buttonCopy.bottom(), 2);
+	BOOST_CHECK_EQUAL(buttonCopy.right(), 5);
+	BOOST_CHECK_EQUAL(buttonCopy.top(), 7);
+	BOOST_CHECK_EQUAL(buttonCopy.borderSize(), 3);
+	BOOST_CHECK_EQUAL(buttonCopy.text(), "a");
+	BOOST_CHECK_EQUAL(buttonCopy.textHeight(), 12);
+	BOOST_CHECK_EQUAL(buttonCopy.pressed(), true);
+	BOOST_CHECK_EQUAL(buttonCopy.highlighted(), true);
+
+	decltype(button) buttonMove = std::move(button);
+	BOOST_CHECK_EQUAL(buttonMove.left(), 1);
+	BOOST_CHECK_EQUAL(buttonMove.bottom(), 2);
+	BOOST_CHECK_EQUAL(buttonMove.right(), 5);
+	BOOST_CHECK_EQUAL(buttonMove.top(), 7);
+	BOOST_CHECK_EQUAL(buttonMove.borderSize(), 3);
+	BOOST_CHECK_EQUAL(buttonMove.text(), "a");
+	BOOST_CHECK_EQUAL(buttonMove.textHeight(), 12);
+	BOOST_CHECK_EQUAL(buttonMove.pressed(), true);
+	BOOST_CHECK_EQUAL(buttonMove.highlighted(), true);
+
 	// Construct with some arguments missing
 	decltype(button) b1;
 	BOOST_CHECK_EQUAL(b1.text(), "");
@@ -265,6 +287,22 @@ BOOST_AUTO_TEST_CASE(Test_Label)
 	BOOST_CHECK_EQUAL(label.top(), 5);
 	BOOST_CHECK_EQUAL(label.text(), "label");
 	BOOST_CHECK_EQUAL(label.textHeight(), 10);
+
+	decltype(label) labelCopy = label;
+	BOOST_CHECK_EQUAL(labelCopy.left(), 2);
+	BOOST_CHECK_EQUAL(labelCopy.bottom(), 3);
+	BOOST_CHECK_EQUAL(labelCopy.right(), 4);
+	BOOST_CHECK_EQUAL(labelCopy.top(), 5);
+	BOOST_CHECK_EQUAL(labelCopy.text(), "label");
+	BOOST_CHECK_EQUAL(labelCopy.textHeight(), 10);
+
+	decltype(label) labelMove = std::move(label);
+	BOOST_CHECK_EQUAL(labelMove.left(), 2);
+	BOOST_CHECK_EQUAL(labelMove.bottom(), 3);
+	BOOST_CHECK_EQUAL(labelMove.right(), 4);
+	BOOST_CHECK_EQUAL(labelMove.top(), 5);
+	BOOST_CHECK_EQUAL(labelMove.text(), "label");
+	BOOST_CHECK_EQUAL(labelMove.textHeight(), 10);
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_Paragraph)
@@ -279,6 +317,29 @@ BOOST_AUTO_TEST_CASE(Test_Paragraph)
 	BOOST_CHECK_EQUAL(paragraph.textHeight(), 11);
 	BOOST_CHECK_EQUAL(paragraph.selected(), false);
 	BOOST_CHECK_EQUAL(paragraph.highlighted(), false);
+	paragraph.highlight().select();
+
+	decltype(paragraph) paragraphCopy = paragraph;
+	BOOST_CHECK_EQUAL(paragraphCopy.left(), 3);
+	BOOST_CHECK_EQUAL(paragraphCopy.bottom(), 4);
+	BOOST_CHECK_EQUAL(paragraphCopy.right(), 5);
+	BOOST_CHECK_EQUAL(paragraphCopy.top(), 6);
+	BOOST_CHECK_EQUAL(paragraphCopy.borderSize(), 1);
+	BOOST_CHECK_EQUAL(paragraphCopy.text(), "paragraph");
+	BOOST_CHECK_EQUAL(paragraphCopy.textHeight(), 11);
+	BOOST_CHECK_EQUAL(paragraphCopy.selected(), true);
+	BOOST_CHECK_EQUAL(paragraphCopy.highlighted(), true);
+
+	decltype(paragraph) paragraphMove = std::move(paragraph);
+	BOOST_CHECK_EQUAL(paragraphMove.left(), 3);
+	BOOST_CHECK_EQUAL(paragraphMove.bottom(), 4);
+	BOOST_CHECK_EQUAL(paragraphMove.right(), 5);
+	BOOST_CHECK_EQUAL(paragraphMove.top(), 6);
+	BOOST_CHECK_EQUAL(paragraphMove.borderSize(), 1);
+	BOOST_CHECK_EQUAL(paragraphMove.text(), "paragraph");
+	BOOST_CHECK_EQUAL(paragraphMove.textHeight(), 11);
+	BOOST_CHECK_EQUAL(paragraphMove.selected(), true);
+	BOOST_CHECK_EQUAL(paragraphMove.highlighted(), true);
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_Control)
@@ -293,6 +354,29 @@ BOOST_AUTO_TEST_CASE(Test_Control)
 	BOOST_CHECK_EQUAL(control.textHeight(), 15);
 	BOOST_CHECK_EQUAL(control.selected(), false);
 	BOOST_CHECK_EQUAL(control.highlighted(), false);
+	control.highlight().select();
+
+	decltype(control) controlCopy = control;
+	BOOST_CHECK_EQUAL(controlCopy.left(), 4);
+	BOOST_CHECK_EQUAL(controlCopy.bottom(), 3);
+	BOOST_CHECK_EQUAL(controlCopy.right(), 2);
+	BOOST_CHECK_EQUAL(controlCopy.top(), 1);
+	BOOST_CHECK_EQUAL(controlCopy.borderSize(), 2);
+	BOOST_CHECK_EQUAL(controlCopy.text(), "control");
+	BOOST_CHECK_EQUAL(controlCopy.textHeight(), 15);
+	BOOST_CHECK_EQUAL(controlCopy.selected(), true);
+	BOOST_CHECK_EQUAL(controlCopy.highlighted(), true);
+
+	decltype(control) controlMove = std::move(control);
+	BOOST_CHECK_EQUAL(controlMove.left(), 4);
+	BOOST_CHECK_EQUAL(controlMove.bottom(), 3);
+	BOOST_CHECK_EQUAL(controlMove.right(), 2);
+	BOOST_CHECK_EQUAL(controlMove.top(), 1);
+	BOOST_CHECK_EQUAL(controlMove.borderSize(), 2);
+	BOOST_CHECK_EQUAL(controlMove.text(), "control");
+	BOOST_CHECK_EQUAL(controlMove.textHeight(), 15);
+	BOOST_CHECK_EQUAL(controlMove.selected(), true);
+	BOOST_CHECK_EQUAL(controlMove.highlighted(), true);
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_Constructors)
@@ -305,11 +389,23 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	Adapting::Rectangular<Bases::Empty, Rectangle<int>> r1;
 	r1.top() = 2;
 	BOOST_CHECK_EQUAL(r1.top(), 2);
-	Adapting::Rectangular<Bases::Empty, Rectangle<int>> r2(1,2,3,4);
+	decltype(r1) r2(1,2,3,4);
 	BOOST_CHECK_EQUAL(r2.left(), 1);
 	BOOST_CHECK_EQUAL(r2.bottom(), 2);
 	BOOST_CHECK_EQUAL(r2.right(), 3);
 	BOOST_CHECK_EQUAL(r2.top(), 4);
+
+	decltype(r2) r2Copy = r2;
+	BOOST_CHECK_EQUAL(r2Copy.left(), 1);
+	BOOST_CHECK_EQUAL(r2Copy.bottom(), 2);
+	BOOST_CHECK_EQUAL(r2Copy.right(), 3);
+	BOOST_CHECK_EQUAL(r2Copy.top(), 4);
+
+	decltype(r2) r2Move = std::move(r2);
+	BOOST_CHECK_EQUAL(r2Move.left(), 1);
+	BOOST_CHECK_EQUAL(r2Move.bottom(), 2);
+	BOOST_CHECK_EQUAL(r2Move.right(), 3);
+	BOOST_CHECK_EQUAL(r2Move.top(), 4);
 
 	// KeyboardAndMouseStub
 	FrameStack<
@@ -546,12 +642,30 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 		Frame<Pointing, decltype(t1)*>,
 		Frame<Offset, int>,
 		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
-	> icl1(-2,2,&t1,1); // TODO: IndirectCaretLike constructor shouldn't allow arbitrary offsets, but instead set them based on index.
+	> icl1(FunctionObjects::GlutStrokeFontEngine(GLUT_STROKE_MONO_ROMAN),-2,2,&t1,1);
+	// TODO: IndirectCaretLike constructor shouldn't allow arbitrary offsets, but instead set them based on index.
+	BOOST_CHECK_EQUAL(icl1.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
 	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
 	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
 	BOOST_CHECK_EQUAL(icl1.pointer(), &t1);
 	BOOST_CHECK_EQUAL(icl1.index(), 1);
 	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "some string");
+
+	decltype(icl1) icl1Copy = icl1;
+	BOOST_CHECK_EQUAL(icl1Copy.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
+	BOOST_CHECK_EQUAL(icl1Copy.xOffset(), -2);
+	BOOST_CHECK_EQUAL(icl1Copy.yOffset(), 2);
+	BOOST_CHECK_EQUAL(icl1Copy.pointer(), &t1);
+	BOOST_CHECK_EQUAL(icl1Copy.index(), 1);
+	BOOST_CHECK_EQUAL(icl1Copy.pointer()->text(), "some string");
+
+	decltype(icl1) icl1Move = std::move(icl1);
+	BOOST_CHECK_EQUAL(icl1Move.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
+	BOOST_CHECK_EQUAL(icl1Move.xOffset(), -2);
+	BOOST_CHECK_EQUAL(icl1Move.yOffset(), 2);
+	BOOST_CHECK_EQUAL(icl1Move.pointer(), &t1);
+	BOOST_CHECK_EQUAL(icl1Move.index(), 1);
+	BOOST_CHECK_EQUAL(icl1Move.pointer()->text(), "some string");
 
 	icl1.nextPosition();
 	icl1.prevPosition();
@@ -579,6 +693,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 		Frame<Offset, float>,
 		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
 	> icl2(1.0f,0.0f,&t2,1);
+	BOOST_CHECK_EQUAL(icl2.fontEngine().font(), GLUT_STROKE_ROMAN);
 	BOOST_CHECK_EQUAL(icl2.xOffset(), 1.0f);
 	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
 	BOOST_CHECK_EQUAL(icl2.pointer(), &t2);
@@ -594,6 +709,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 
 	// EventHandling::CaretLike
 	EventHandling::CaretLike<decltype(icl1)> ehcl1(-2,2,&t1,1);
+	BOOST_CHECK_EQUAL(ehcl1.fontEngine().font(), GLUT_STROKE_ROMAN);
 	BOOST_CHECK_EQUAL(ehcl1.xOffset(), -2);
 	BOOST_CHECK_EQUAL(ehcl1.yOffset(), 2);
 	BOOST_CHECK_EQUAL(ehcl1.pointer(), &t1);
@@ -609,6 +725,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(ehcl1.pointer()->text(), "me strin-");
 
 	EventHandling::CaretLike<decltype(icl2)> ehcl2(1.0f,0.0f,&t2,1);
+	BOOST_CHECK_EQUAL(ehcl2.fontEngine().font(), GLUT_STROKE_ROMAN);
 	BOOST_CHECK_EQUAL(ehcl2.xOffset(), 1.0f);
 	BOOST_CHECK_EQUAL(ehcl2.yOffset(), 0.0f);
 	BOOST_CHECK_EQUAL(ehcl2.pointer(), &t2);

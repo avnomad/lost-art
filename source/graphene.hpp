@@ -1068,6 +1068,16 @@ namespace graphene
 			*    Methods    *
 			****************/
 		public:
+			FontEngineType &fontEngine()
+			{
+				return iFontEngine;
+			} // end method fontEngine
+
+			const FontEngineType &fontEngine() const
+			{
+				return iFontEngine;
+			} // end method fontEngine
+
 			// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
 			// TODO: consider arguments like wraparound:bool
 			void nextPosition()
