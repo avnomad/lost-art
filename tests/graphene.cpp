@@ -189,6 +189,71 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	button.textHeight() = 12;
 	BOOST_CHECK_EQUAL(button.textHeight(), 12);
 	// TODO: check textWidth. What is the correct result?
+
+	// Construct with some arguments missing
+	decltype(button) b1;
+	BOOST_CHECK_EQUAL(b1.text(), "");
+	BOOST_CHECK_EQUAL(b1.pressed(), false);
+	BOOST_CHECK_EQUAL(b1.highlighted(), false);
+
+//	decltype(button) b2("OK"); // currently uses arguments to initialize the wrong fields(!)
+//	BOOST_CHECK_EQUAL(b2.text(), "OK");
+//	BOOST_CHECK_EQUAL(b2.pressed(), false);
+//	BOOST_CHECK_EQUAL(b2.highlighted(), false);
+
+//	decltype(button) b3("OK",true); // currently uses arguments to initialize the wrong fields(!)
+//	BOOST_CHECK_EQUAL(b3.text(), "OK");
+//	BOOST_CHECK_EQUAL(b3.highlighted(), true);
+//	BOOST_CHECK_EQUAL(b3.pressed(), false);
+
+//	decltype(button) b4("OK",true,true); // currently uses arguments to initialize the wrong fields(!)
+//	BOOST_CHECK_EQUAL(b4.text(), "OK");
+//	BOOST_CHECK_EQUAL(b4.pressed(), true);
+//	BOOST_CHECK_EQUAL(b4.highlighted(), true);
+
+//	decltype(button) b5(10,"OK",true,true); // this only fails to compile with GCC
+//	BOOST_CHECK_EQUAL(b5.textHeight(), 10);
+//	BOOST_CHECK_EQUAL(b5.text(), "OK");
+//	BOOST_CHECK_EQUAL(b5.pressed(), true);
+//	BOOST_CHECK_EQUAL(b5.highlighted(), true);
+
+//	decltype(button) b6(10,"OK",true,true,2); // this only fails to compile with GCC
+//	BOOST_CHECK_EQUAL(b6.textHeight(), 10);
+//	BOOST_CHECK_EQUAL(b6.text(), "OK");
+//	BOOST_CHECK_EQUAL(b6.pressed(), true);
+//	BOOST_CHECK_EQUAL(b6.highlighted(), true);
+//	BOOST_CHECK_EQUAL(b6.borderSize(), 2);
+
+//	decltype(button) b7("OK",true,true,2); // currently compile-time error
+
+	decltype(button) b8(10,"OK",2);
+	BOOST_CHECK_EQUAL(b8.textHeight(), 10);
+	BOOST_CHECK_EQUAL(b8.text(), "OK");
+	BOOST_CHECK_EQUAL(b8.pressed(), false);
+	BOOST_CHECK_EQUAL(b8.highlighted(), false);
+	BOOST_CHECK_EQUAL(b8.borderSize(), 2);
+
+	decltype(button) b9(10,"OK");
+	BOOST_CHECK_EQUAL(b9.textHeight(), 10);
+	BOOST_CHECK_EQUAL(b9.text(), "OK");
+	BOOST_CHECK_EQUAL(b9.pressed(), false);
+	BOOST_CHECK_EQUAL(b9.highlighted(), false);
+
+//	decltype(button) b10("OK",2); // currently uses arguments to initialize the wrong fields(!)
+//	BOOST_CHECK_EQUAL(b10.text(), "OK");
+//	BOOST_CHECK_EQUAL(b10.pressed(), false);
+//	BOOST_CHECK_EQUAL(b10.highlighted(), false);
+//	BOOST_CHECK_EQUAL(b10.borderSize(), 2);
+
+	// Instantiate with other coordinate types
+	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b02(10.0f,"button",1.0f,1.0f,2.0f,5.0f,7.0f);
+	Button<geometry::Rectangle<double>,std::ratio<10>,std::ratio<11>> b03(10.0,"button",1.0,1.0,2.0,5.0,7.0);
+//	Button<geometry::Rectangle<double>,std::ratio<10>,std::ratio<11>> b04(10.0,"button",false,false,1.0,1.0,2.0,5.0,7.0); // this only fails to compile with GCC
+
+	// Construct with l-values
+	float c1=0, c2=0, c3=0, c4=0, b=1, h=10;
+	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b05(h,"button",b,c1,c2,c3,c4);
+	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b06(h,"button",c1,c2,c3,c4);
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_Label)
@@ -252,6 +317,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 		Frame<Bases::EventHandling::KeyboardAndMouse, float>,
 		Frame<EventHandling::KeyboardAndMouseStub>
 	> knm1;
+
 	FrameStack<
 		Bases::Empty,
 		Frame<Bases::EventHandling::KeyboardAndMouse, int>,
@@ -262,20 +328,18 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(knm2.bottom(), -2);
 	BOOST_CHECK_EQUAL(knm2.right(), -3);
 	BOOST_CHECK_EQUAL(knm2.top(), -4);
+
 	FrameStack<
 		Rectangle<int>,
 		Frame<Bases::EventHandling::KeyboardAndMouse>,
 		Frame<EventHandling::KeyboardAndMouseStub>
-	> knm3(-1, -2, -3, -4);
-	BOOST_CHECK_EQUAL(knm3.left(), -1);
-	BOOST_CHECK_EQUAL(knm3.bottom(), -2);
-	BOOST_CHECK_EQUAL(knm3.right(), -3);
-	BOOST_CHECK_EQUAL(knm3.top(), -4);
-	FrameStack<
-		Rectangle<int>,
-		Frame<Bases::EventHandling::KeyboardAndMouse>,
-		Frame<EventHandling::KeyboardAndMouseStub>
-	> knm4(4,3,2,1);
+	> knm3;
+
+	decltype(knm3) knm4(-1, -2, -3, -4);
+	BOOST_CHECK_EQUAL(knm4.left(), -1);
+	BOOST_CHECK_EQUAL(knm4.bottom(), -2);
+	BOOST_CHECK_EQUAL(knm4.right(), -3);
+	BOOST_CHECK_EQUAL(knm4.top(), -4);
 
 	// Movable::Rectangular
 	FrameStack<
@@ -285,11 +349,8 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	> mr1;
 	mr1.top() = 2;
 	BOOST_CHECK_EQUAL(mr1.top(), 2);
-	FrameStack<
-		Bases::Empty,
-		Frame<Adapting::Rectangular, Rectangle<float>>,
-		Frame<Movable::Rectangular>
-	> mr2(1,2,3,4);
+
+	decltype(mr1) mr2(1,2,3,4);
 	BOOST_CHECK_EQUAL(mr2.left(), 1);
 	BOOST_CHECK_EQUAL(mr2.bottom(), 2);
 	BOOST_CHECK_EQUAL(mr2.right(), 3);
@@ -304,16 +365,13 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	> hvm1;
 	hvm1.top() = 2;
 	BOOST_CHECK_EQUAL(hvm1.top(), 2);
-	FrameStack<
-		Bases::Empty,
-		Frame<Adapting::Rectangular, Rectangle<float>>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>
-	> hvm2(1,2,3,4);
+
+	decltype(hvm1) hvm2(1,2,3,4);
 	BOOST_CHECK_EQUAL(hvm2.left(), 1);
 	BOOST_CHECK_EQUAL(hvm2.bottom(), 2);
 	BOOST_CHECK_EQUAL(hvm2.right(), 3);
 	BOOST_CHECK_EQUAL(hvm2.top(), 4);
+
 	FrameStack<
 		Rectangle<float>,
 		Frame<Movable::Rectangular>,
@@ -323,29 +381,130 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm3.bottom(), 2);
 	BOOST_CHECK_EQUAL(hvm3.right(), 3);
 	BOOST_CHECK_EQUAL(hvm3.top(), 4);
+
+	// HVMovable + Textual
 	FrameStack<
 		Bases::Empty,
 		Frame<Adapting::Rectangular, Rectangle<float>>,
 		Frame<Movable::Rectangular>,
 		Frame<Movable::HVMovable>,
 		Frame<Textual, std::string>
-	> hvm4("ok",1,2,3,4), hvm5(1,2,3,4), hvm6("ok");
+	> hvm4("ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm4.text(), "ok");
 	BOOST_CHECK_EQUAL(hvm4.left(), 1);
 	BOOST_CHECK_EQUAL(hvm4.bottom(), 2);
 	BOOST_CHECK_EQUAL(hvm4.right(), 3);
 	BOOST_CHECK_EQUAL(hvm4.top(), 4);
-	BOOST_CHECK_EQUAL(hvm4.text(), "ok");
+
+	decltype(hvm4) hvm5(1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm5.left(), 1);
+	BOOST_CHECK_EQUAL(hvm5.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm5.right(), 3);
+	BOOST_CHECK_EQUAL(hvm5.top(), 4);
+	BOOST_CHECK_EQUAL(hvm5.text(), "");
+
+	decltype(hvm4) hvm6("ok");
+	BOOST_CHECK_EQUAL(hvm6.text(), "ok");
+
 	FrameStack<
 		Rectangle<float>,
 		Frame<Movable::Rectangular>,
 		Frame<Movable::HVMovable>,
 		Frame<Textual, std::string>
-	> hvm7("ok",1,2,3,4), hvm8(1,2,3,4), hvm9("ok");
+	> hvm7("ok",1,2,3,4);
 	BOOST_CHECK_EQUAL(hvm7.left(), 1);
 	BOOST_CHECK_EQUAL(hvm7.bottom(), 2);
 	BOOST_CHECK_EQUAL(hvm7.right(), 3);
 	BOOST_CHECK_EQUAL(hvm7.top(), 4);
 	BOOST_CHECK_EQUAL(hvm7.text(), "ok");
+
+	decltype(hvm7) hvm8(1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm8.left(), 1);
+	BOOST_CHECK_EQUAL(hvm8.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm8.right(), 3);
+	BOOST_CHECK_EQUAL(hvm8.top(), 4);
+	BOOST_CHECK_EQUAL(hvm8.text(), "");
+
+	decltype(hvm7) hvm9("ok");
+	BOOST_CHECK_EQUAL(hvm9.text(), "ok");
+
+	// HVMovable + Textual + SizedText
+	FrameStack<
+		Bases::Empty,
+		Frame<Adapting::Rectangular, Rectangle<float>>,
+		Frame<Movable::Rectangular>,
+		Frame<Movable::HVMovable>,
+		Frame<Textual, std::string>,
+		Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>
+	> hvm10(12,"ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm10.textHeight(), 12);
+	BOOST_CHECK_EQUAL(hvm10.text(), "ok");
+	BOOST_CHECK_EQUAL(hvm10.left(), 1);
+	BOOST_CHECK_EQUAL(hvm10.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm10.right(), 3);
+	BOOST_CHECK_EQUAL(hvm10.top(), 4);
+
+//	decltype(hvm10) hvm11(1,2,3,4); // currently compile-time error
+//	decltype(hvm10) hvm12("ok"); // currently compile-time error
+
+	decltype(hvm10) hvm13(12);
+	BOOST_CHECK_EQUAL(hvm13.textHeight(), 12);
+	BOOST_CHECK_EQUAL(hvm13.text(), "");
+
+	decltype(hvm10) hvm14(12,"ok");
+	BOOST_CHECK_EQUAL(hvm14.textHeight(), 12);
+	BOOST_CHECK_EQUAL(hvm14.text(), "ok");
+
+	decltype(hvm10) hvm15(12,1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm15.textHeight(), 12);
+	BOOST_CHECK_EQUAL(hvm15.text(), "");
+	BOOST_CHECK_EQUAL(hvm15.left(), 1);
+	BOOST_CHECK_EQUAL(hvm15.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm15.right(), 3);
+	BOOST_CHECK_EQUAL(hvm15.top(), 4);
+
+//	decltype(hvm10) hvm16("ok",1,2,3,4); // currently compile-time error
+
+	decltype(hvm10) hvm17;
+	BOOST_CHECK_EQUAL(hvm17.text(), "");
+
+	FrameStack<
+		Rectangle<float>,
+		Frame<Movable::Rectangular>,
+		Frame<Movable::HVMovable>,
+		Frame<Textual, std::string>,
+		Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>
+	> hvm18(12,"ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm18.left(), 1);
+	BOOST_CHECK_EQUAL(hvm18.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm18.right(), 3);
+	BOOST_CHECK_EQUAL(hvm18.top(), 4);
+	BOOST_CHECK_EQUAL(hvm18.text(), "ok");
+	BOOST_CHECK_EQUAL(hvm18.textHeight(), 12);
+
+//	decltype(hvm18) hvm19(1,2,3,4); // currently compile-time error
+//	decltype(hvm18) hvm20("ok"); // currently compile-time error
+
+	decltype(hvm18) hvm21(12);
+	BOOST_CHECK_EQUAL(hvm21.text(), "");
+	BOOST_CHECK_EQUAL(hvm21.textHeight(), 12);
+
+	decltype(hvm18) hvm22(12,"ok");
+	BOOST_CHECK_EQUAL(hvm22.text(), "ok");
+	BOOST_CHECK_EQUAL(hvm22.textHeight(), 12);
+
+	decltype(hvm18) hvm23(12,1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm23.left(), 1);
+	BOOST_CHECK_EQUAL(hvm23.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm23.right(), 3);
+	BOOST_CHECK_EQUAL(hvm23.top(), 4);
+	BOOST_CHECK_EQUAL(hvm23.text(), "");
+	BOOST_CHECK_EQUAL(hvm23.textHeight(), 12);
+
+//	decltype(hvm18) hvm24("ok",1,2,3,4); // currently compile-time error
+
+	decltype(hvm18) hvm25;
+	BOOST_CHECK_EQUAL(hvm25.text(), "");
 
 	// Focusable
 	FrameStack<
@@ -353,11 +512,13 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 		Frame<Bases::Focusable>,
 		Frame<Focusable>
 	> f1;
+
 	decltype(f1) f2(1.0f,2.0f,3.0f,4.0f);
 	BOOST_CHECK_EQUAL(f2.left(), 1.0f);
 	BOOST_CHECK_EQUAL(f2.bottom(), 2.0f);
 	BOOST_CHECK_EQUAL(f2.right(), 3.0f);
 	BOOST_CHECK_EQUAL(f2.top(), 4.0f);
+
 	decltype(f1) f3(true, 1.5f,2.5f,3.5f,4.5f);
 	BOOST_CHECK_EQUAL(f3.left(), 1.5f);
 	BOOST_CHECK_EQUAL(f3.bottom(), 2.5f);
