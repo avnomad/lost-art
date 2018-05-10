@@ -218,35 +218,39 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	BOOST_CHECK_EQUAL(b1.pressed(), false);
 	BOOST_CHECK_EQUAL(b1.highlighted(), false);
 
-//	decltype(button) b2("OK"); // currently uses arguments to initialize the wrong fields(!)
-//	BOOST_CHECK_EQUAL(b2.text(), "OK");
-//	BOOST_CHECK_EQUAL(b2.pressed(), false);
-//	BOOST_CHECK_EQUAL(b2.highlighted(), false);
+	decltype(button) b2("OK");
+	BOOST_CHECK_EQUAL(b2.text(), "OK");
+	BOOST_CHECK_EQUAL(b2.pressed(), false);
+	BOOST_CHECK_EQUAL(b2.highlighted(), false);
 
-//	decltype(button) b3("OK",true); // currently uses arguments to initialize the wrong fields(!)
-//	BOOST_CHECK_EQUAL(b3.text(), "OK");
-//	BOOST_CHECK_EQUAL(b3.highlighted(), true);
-//	BOOST_CHECK_EQUAL(b3.pressed(), false);
+	decltype(button) b3("OK",true);
+	BOOST_CHECK_EQUAL(b3.text(), "OK");
+	BOOST_CHECK_EQUAL(b3.highlighted(), true);
+	BOOST_CHECK_EQUAL(b3.pressed(), false);
 
-//	decltype(button) b4("OK",true,true); // currently uses arguments to initialize the wrong fields(!)
-//	BOOST_CHECK_EQUAL(b4.text(), "OK");
-//	BOOST_CHECK_EQUAL(b4.pressed(), true);
-//	BOOST_CHECK_EQUAL(b4.highlighted(), true);
+	decltype(button) b4("OK",true,true);
+	BOOST_CHECK_EQUAL(b4.text(), "OK");
+	BOOST_CHECK_EQUAL(b4.pressed(), true);
+	BOOST_CHECK_EQUAL(b4.highlighted(), true);
 
-//	decltype(button) b5(10,"OK",true,true); // this only fails to compile with GCC
-//	BOOST_CHECK_EQUAL(b5.textHeight(), 10);
-//	BOOST_CHECK_EQUAL(b5.text(), "OK");
-//	BOOST_CHECK_EQUAL(b5.pressed(), true);
-//	BOOST_CHECK_EQUAL(b5.highlighted(), true);
+	decltype(button) b5(10,"OK",true,true);
+	BOOST_CHECK_EQUAL(b5.textHeight(), 10);
+	BOOST_CHECK_EQUAL(b5.text(), "OK");
+	BOOST_CHECK_EQUAL(b5.pressed(), true);
+	BOOST_CHECK_EQUAL(b5.highlighted(), true);
 
-//	decltype(button) b6(10,"OK",true,true,2); // this only fails to compile with GCC
-//	BOOST_CHECK_EQUAL(b6.textHeight(), 10);
-//	BOOST_CHECK_EQUAL(b6.text(), "OK");
-//	BOOST_CHECK_EQUAL(b6.pressed(), true);
-//	BOOST_CHECK_EQUAL(b6.highlighted(), true);
-//	BOOST_CHECK_EQUAL(b6.borderSize(), 2);
+	decltype(button) b6(10,"OK",true,true,2);
+	BOOST_CHECK_EQUAL(b6.textHeight(), 10);
+	BOOST_CHECK_EQUAL(b6.text(), "OK");
+	BOOST_CHECK_EQUAL(b6.pressed(), true);
+	BOOST_CHECK_EQUAL(b6.highlighted(), true);
+	BOOST_CHECK_EQUAL(b6.borderSize(), 2);
 
-//	decltype(button) b7("OK",true,true,2); // currently compile-time error
+	decltype(button) b7("OK",true,true,2);
+	BOOST_CHECK_EQUAL(b7.text(), "OK");
+	BOOST_CHECK_EQUAL(b7.pressed(), true);
+	BOOST_CHECK_EQUAL(b7.highlighted(), true);
+	BOOST_CHECK_EQUAL(b7.borderSize(), 2);
 
 	decltype(button) b8(10,"OK",2);
 	BOOST_CHECK_EQUAL(b8.textHeight(), 10);
@@ -261,21 +265,59 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	BOOST_CHECK_EQUAL(b9.pressed(), false);
 	BOOST_CHECK_EQUAL(b9.highlighted(), false);
 
-//	decltype(button) b10("OK",2); // currently uses arguments to initialize the wrong fields(!)
-//	BOOST_CHECK_EQUAL(b10.text(), "OK");
-//	BOOST_CHECK_EQUAL(b10.pressed(), false);
-//	BOOST_CHECK_EQUAL(b10.highlighted(), false);
-//	BOOST_CHECK_EQUAL(b10.borderSize(), 2);
+	decltype(button) b10("OK",2);
+	BOOST_CHECK_EQUAL(b10.text(), "OK");
+	BOOST_CHECK_EQUAL(b10.pressed(), false);
+	BOOST_CHECK_EQUAL(b10.highlighted(), false);
+	BOOST_CHECK_EQUAL(b10.borderSize(), 2);
 
 	// Instantiate with other coordinate types
 	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b02(10.0f,"button",1.0f,1.0f,2.0f,5.0f,7.0f);
+	BOOST_CHECK_EQUAL(b02.textHeight(), 10.0f);
+	BOOST_CHECK_EQUAL(b02.text(), "button");
+	BOOST_CHECK_EQUAL(b02.pressed(), false);
+	BOOST_CHECK_EQUAL(b02.highlighted(), false);
+	BOOST_CHECK_EQUAL(b02.borderSize(), 1.0f);
+	BOOST_CHECK_EQUAL(b02.left(), 1.0f);
+	BOOST_CHECK_EQUAL(b02.bottom(), 2.0f);
+	BOOST_CHECK_EQUAL(b02.right(), 5.0f);
+	BOOST_CHECK_EQUAL(b02.top(), 7.0f);
 	Button<geometry::Rectangle<double>,std::ratio<10>,std::ratio<11>> b03(10.0,"button",1.0,1.0,2.0,5.0,7.0);
-//	Button<geometry::Rectangle<double>,std::ratio<10>,std::ratio<11>> b04(10.0,"button",false,false,1.0,1.0,2.0,5.0,7.0); // this only fails to compile with GCC
+	BOOST_CHECK_EQUAL(b03.textHeight(), 10.0);
+	BOOST_CHECK_EQUAL(b03.text(), "button");
+	BOOST_CHECK_EQUAL(b03.pressed(), false);
+	BOOST_CHECK_EQUAL(b03.highlighted(), false);
+	BOOST_CHECK_EQUAL(b03.borderSize(), 1.0);
+	BOOST_CHECK_EQUAL(b03.left(), 1.0);
+	BOOST_CHECK_EQUAL(b03.bottom(), 2.0);
+	BOOST_CHECK_EQUAL(b03.right(), 5.0);
+	BOOST_CHECK_EQUAL(b03.top(), 7.0);
+	Button<geometry::Rectangle<double>,std::ratio<10>,std::ratio<11>> b04(10.0,"button",true,true,1.0,1.0,2.0,5.0,7.0);
+	BOOST_CHECK_EQUAL(b04.textHeight(), 10.0);
+	BOOST_CHECK_EQUAL(b04.text(), "button");
+	BOOST_CHECK_EQUAL(b04.pressed(), true);
+	BOOST_CHECK_EQUAL(b04.highlighted(), true);
+	BOOST_CHECK_EQUAL(b04.borderSize(), 1.0);
+	BOOST_CHECK_EQUAL(b04.left(), 1.0);
+	BOOST_CHECK_EQUAL(b04.bottom(), 2.0);
+	BOOST_CHECK_EQUAL(b04.right(), 5.0);
+	BOOST_CHECK_EQUAL(b04.top(), 7.0);
 
 	// Construct with l-values
-	float c1=0, c2=0, c3=0, c4=0, b=1, h=10;
-	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b05(h,"button",b,c1,c2,c3,c4);
-	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b06(h,"button",c1,c2,c3,c4);
+	float c1=5, c2=6, c3=7, c4=8, b=1, h=10;
+	std::string name("cancel");
+	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b05(h,name,b,c1,c2,c3,c4);
+	BOOST_CHECK_EQUAL(b05.left(), c1);
+	BOOST_CHECK_EQUAL(b05.bottom(), c2);
+	BOOST_CHECK_EQUAL(b05.right(), c3);
+	BOOST_CHECK_EQUAL(b05.top(), c4);
+	BOOST_CHECK_EQUAL(b05.borderSize(), b);
+	BOOST_CHECK_EQUAL(b05.text(), name);
+	BOOST_CHECK_EQUAL(b05.textHeight(), h);
+	BOOST_CHECK_EQUAL(b05.pressed(), false);
+	BOOST_CHECK_EQUAL(b05.highlighted(), false);
+
+//	Button<geometry::Rectangle<float>,std::ratio<10>,std::ratio<11>> b06(h,"button",c1,c2,c3,c4); // currently compile-time error
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_Label)
@@ -541,7 +583,8 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm10.top(), 4);
 
 //	decltype(hvm10) hvm11(1,2,3,4); // currently compile-time error
-//	decltype(hvm10) hvm12("ok"); // currently compile-time error
+	decltype(hvm10) hvm12("ok");
+	BOOST_CHECK_EQUAL(hvm12.text(), "ok");
 
 	decltype(hvm10) hvm13(12);
 	BOOST_CHECK_EQUAL(hvm13.textHeight(), 12);
@@ -559,7 +602,12 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm15.right(), 3);
 	BOOST_CHECK_EQUAL(hvm15.top(), 4);
 
-//	decltype(hvm10) hvm16("ok",1,2,3,4); // currently compile-time error
+	decltype(hvm10) hvm16("ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm16.text(), "ok");
+	BOOST_CHECK_EQUAL(hvm16.left(), 1);
+	BOOST_CHECK_EQUAL(hvm16.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm16.right(), 3);
+	BOOST_CHECK_EQUAL(hvm16.top(), 4);
 
 	decltype(hvm10) hvm17;
 	BOOST_CHECK_EQUAL(hvm17.text(), "");
@@ -579,7 +627,8 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm18.textHeight(), 12);
 
 //	decltype(hvm18) hvm19(1,2,3,4); // currently compile-time error
-//	decltype(hvm18) hvm20("ok"); // currently compile-time error
+	decltype(hvm18) hvm20("ok");
+	BOOST_CHECK_EQUAL(hvm20.text(), "ok");
 
 	decltype(hvm18) hvm21(12);
 	BOOST_CHECK_EQUAL(hvm21.text(), "");
@@ -597,7 +646,12 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm23.text(), "");
 	BOOST_CHECK_EQUAL(hvm23.textHeight(), 12);
 
-//	decltype(hvm18) hvm24("ok",1,2,3,4); // currently compile-time error
+	decltype(hvm18) hvm24("ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm24.text(), "ok");
+	BOOST_CHECK_EQUAL(hvm24.left(), 1);
+	BOOST_CHECK_EQUAL(hvm24.bottom(), 2);
+	BOOST_CHECK_EQUAL(hvm24.right(), 3);
+	BOOST_CHECK_EQUAL(hvm24.top(), 4);
 
 	decltype(hvm18) hvm25;
 	BOOST_CHECK_EQUAL(hvm25.text(), "");

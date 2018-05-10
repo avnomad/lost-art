@@ -495,7 +495,13 @@ namespace graphene
 				// empty body
 			} // end constructor
 
-			using BaseType::BaseType;
+			template<typename ArgType, typename... ArgTypes,
+				typename = typename std::enable_if<!std::is_base_of<Offset, typename std::decay<ArgType>::type>::value, void>::type>
+			Offset(ArgType &&arg, ArgTypes &&...args)
+				:base_type(std::forward<ArgType>(arg), std::forward<ArgTypes>(args)...)
+			{
+				// empty body
+			} // end constructor
 
 			/****************
 			*    Methods    *
@@ -558,7 +564,20 @@ namespace graphene
 				/* empty body */\
 			} /* end constructor */\
 \
-			using BaseType::BaseType;\
+			template<typename ArgType,\
+				typename = typename std::enable_if<std::is_base_of<ClassName, typename std::decay<ArgType>::type>::value, void>::type>\
+			ClassName(ArgType &&other)\
+				:base_type(std::forward<ArgType>(other)), fieldName(std::forward<ArgType>(other).fieldName)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
+\
+			template<typename... ArgTypes>\
+			ClassName(ArgTypes &&...args)\
+				:base_type(std::forward<ArgTypes>(args)...)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
 \
 			/*******************\
 			*    Destructor    *\
@@ -635,7 +654,20 @@ namespace graphene
 				/* empty body */\
 			} /* end constructor */\
 \
-			using BaseType::BaseType;\
+			template<typename ArgType,\
+				typename = typename std::enable_if<std::is_base_of<ClassName, typename std::decay<ArgType>::type>::value, void>::type>\
+			ClassName(ArgType &&other)\
+				:base_type(std::forward<ArgType>(other)), i##CapitalizedAffix(std::forward<ArgType>(other).i##CapitalizedAffix)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
+\
+			template<typename... ArgTypes>\
+			ClassName(ArgTypes &&...args)\
+				:base_type(std::forward<ArgTypes>(args)...)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
 \
 			/****************\
 			*    Methods    *\
@@ -694,7 +726,20 @@ namespace graphene
 				/* empty body */\
 			} /* end constructor */\
 \
-			using BaseType::BaseType;\
+			template<typename ArgType,\
+				typename = typename std::enable_if<std::is_base_of<Sized##CapitalizedAffix, typename std::decay<ArgType>::type>::value, void>::type>\
+			Sized##CapitalizedAffix(ArgType &&other)\
+				:base_type(std::forward<ArgType>(other)), i##CapitalizedAffix##Height(std::forward<ArgType>(other).i##CapitalizedAffix##Height)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
+\
+			template<typename... ArgTypes>\
+			Sized##CapitalizedAffix(ArgTypes &&...args)\
+				:base_type(std::forward<ArgTypes>(args)...)\
+			{\
+				/* empty body */\
+			} /* end constructor */\
 \
 			/****************\
 			*    Methods    *\
@@ -1072,7 +1117,20 @@ namespace graphene
 				// empty body
 			} // end constructor
 
-			using BaseType::BaseType;
+			template<typename ArgType,
+				typename = typename std::enable_if<std::is_base_of<ConstIndirectCaretLike, typename std::decay<ArgType>::type>::value, void>::type>
+			ConstIndirectCaretLike(ArgType &&other)
+				:base_type(std::forward<ArgType>(other)), iFontEngine(std::forward<ArgType>(other).iFontEngine)
+			{
+				// empty body
+			} // end constructor
+
+			template<typename... ArgTypes>
+			ConstIndirectCaretLike(ArgTypes &&...args)
+				:base_type(std::forward<ArgTypes>(args)...)
+			{
+				// empty body
+			} // end constructor
 
 			/****************
 			*    Methods    *
@@ -1302,13 +1360,6 @@ namespace graphene
 				public:
 					FilledRectangle() = default;
 
-					template<typename OtherType>
-					explicit FilledRectangle(OtherType &&other)
-						:BaseType(std::forward<OtherType>(other))
-					{
-						// empty body
-					} // end FilledRectangle forwarding constructor (may move/copy/convert)
-
 					using BaseType::BaseType;
 
 					/****************
@@ -1339,13 +1390,6 @@ namespace graphene
 					*********************/
 				public:
 					BorderedRectangle() = default;
-
-					template<typename OtherType>
-					explicit BorderedRectangle(OtherType &&other)
-						:BaseType(std::forward<OtherType>(other))
-					{
-						// empty body
-					} // end BorderedRectangle forwarding constructor (may move/copy/convert)
 
 					using BaseType::BaseType;
 
@@ -1392,13 +1436,6 @@ namespace graphene
 					*********************/
 				public:
 					BoxedText() = default;
-
-					template<typename OtherType>
-					explicit BoxedText(OtherType &&other)
-						:BaseType(std::forward<OtherType>(other))
-					{
-						// empty body
-					} // end BoxedText forwarding constructor (may move/copy/convert)
 
 					using BaseType::BaseType;
 
@@ -1453,13 +1490,6 @@ namespace graphene
 					*********************/
 				public:
 					BoxedParagraph() = default;
-
-					template<typename OtherType>
-					explicit BoxedParagraph(OtherType &&other)
-						:BaseType(std::forward<OtherType>(other))
-					{
-						// empty body
-					} // end BoxedParagraph forwarding constructor (may move/copy/convert)
 
 					using BaseType::BaseType;
 
@@ -1524,13 +1554,6 @@ namespace graphene
 				public:
 					InversedColor() = default;
 
-					template<typename OtherType>
-					explicit InversedColor(OtherType &&other)
-						:BaseType(std::forward<OtherType>(other))
-					{
-						// empty body
-					} // end InversedColor forwarding constructor (may move/copy/convert)
-
 					using BaseType::BaseType;
 
 					/****************
@@ -1569,13 +1592,6 @@ namespace graphene
 					*********************/
 				public:
 					IndirectCaret() = default;
-
-					template<typename OtherType>
-					explicit IndirectCaret(OtherType &&other)
-						:BaseType(std::forward<OtherType>(other))
-					{
-						// empty body
-					} // end IndirectCaret forwarding constructor (may move/copy/convert)
 
 					using BaseType::BaseType;
 
@@ -1630,13 +1646,6 @@ namespace graphene
 				*********************/
 			public:
 				Stippled() = default;
-
-				template<typename OtherType>
-				explicit Stippled(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Stippled forwarding constructor (may move/copy/convert)
 
 				using BaseType::BaseType;
 
@@ -1715,13 +1724,6 @@ namespace graphene
 			public:
 				Conditional() = default;
 
-				template<typename OtherType>
-				explicit Conditional(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Conditional forwarding constructor (may move/copy/convert)
-
 				using BaseType::BaseType;
 
 				/****************
@@ -1763,13 +1765,6 @@ namespace graphene
 			public:
 				Sequential() = default;
 
-				template<typename OtherType>
-				explicit Sequential(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Sequential forwarding constructor (may move/copy/convert)
-
 				using BaseType::BaseType;
 
 				/****************
@@ -1798,13 +1793,6 @@ namespace graphene
 				*********************/
 			public:
 				Rotated() = default;
-
-				template<typename OtherType>
-				explicit Rotated(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Rotated forwarding constructor (may move/copy/convert)
 
 				using BaseType::BaseType;
 
@@ -1841,13 +1829,6 @@ namespace graphene
 			public:
 				Scaled() = default;
 
-				template<typename OtherType>
-				explicit Scaled(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Scaled forwarding constructor (may move/copy/convert)
-
 				using BaseType::BaseType;
 
 				/****************
@@ -1882,13 +1863,6 @@ namespace graphene
 				*********************/
 			public:
 				Translated() = default;
-
-				template<typename OtherType>
-				explicit Translated(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Translated forwarding constructor (may move/copy/convert)
 
 				using BaseType::BaseType;
 
@@ -1926,13 +1900,6 @@ namespace graphene
 				*********************/
 			public:
 				Null() = default;
-
-				template<typename OtherType>
-				explicit Null(OtherType &&other)
-					:BaseType(std::forward<OtherType>(other))
-				{
-					// empty body
-				} // end Null forwarding constructor (may move/copy/convert)
 
 				using BaseType::BaseType;
 
