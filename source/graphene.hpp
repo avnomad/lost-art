@@ -493,7 +493,7 @@ namespace graphene
 				 iYoffset(std::forward<YCoordinateArgType>(yOffset))
 			{
 				// empty body
-			}
+			} // end constructor
 
 			using BaseType::BaseType;
 
@@ -633,7 +633,7 @@ namespace graphene
 				:base_type(std::forward<ArgTypes>(args)...), i##CapitalizedAffix(std::forward<CapitalizedAffix##ArgType>(lowercaseAffix))\
 			{\
 				/* empty body */\
-			}\
+			} /* end constructor */\
 \
 			using BaseType::BaseType;\
 \
@@ -692,7 +692,7 @@ namespace graphene
 				:base_type(std::forward<ArgTypes>(args)...), i##CapitalizedAffix##Height(std::forward<CapitalizedAffix##HeightArgType>(lowercaseAffix##Height))\
 			{\
 				/* empty body */\
-			}\
+			} /* end constructor */\
 \
 			using BaseType::BaseType;\
 \
@@ -926,7 +926,11 @@ namespace graphene
 #undef partUnderPointMacro
 		}; // end class MultiPartBorderedRectangle
 
-		/**	BaseType should be Rectangular, UniformlyBordered, Containing, have a font_engine_type member type and
+		/**
+		 * Represents a 2D rectangular area containing a line of text and allows retrieving individual characters from
+		 * it using points and/or indices.
+		 *
+		 * BaseType should be Rectangular, UniformlyBordered, Containing, have a font_engine_type member type and
 		 *  expose text traits via the supplied TextConceptMap. CharType should be a (preferably smart) pointer type.
 		 *	ConcreteCharTemplate instantiations should be constructible from a reference to *this, an index and an instance of CoordinateType.
 		 */
@@ -940,6 +944,12 @@ namespace graphene
 			typename CoordinateType = typename BaseType::coordinate_type>
 		class MultiCharBorderedRectangle : public BaseType
 		{
+			/***********************
+			*    Concept Checks    *
+			***********************/
+
+			static_assert(std::is_unsigned<IndexType>(), "IndexType must be an unsigned integral type!");
+
 			/*********************
 			*    Member Types    *
 			*********************/
@@ -978,7 +988,7 @@ namespace graphene
 				\
 				if(this->contains(x,y))\
 				{\
-					size_t i = 0;\
+					index_type i = 0;\
 					coordinate_type sceneTextLeft = left + (this->width() - TextConceptMap::effectiveTextSize(*this).first)/2;\
 					coordinate_type fontX = (x-sceneTextLeft)*fontEngine.stringWidth(TextConceptMap::text(*this)) / TextConceptMap::effectiveTextSize(*this).first;\
 					coordinate_type fontCharLeft = 0; /* fontX calculation can cause a division by zero, but then the loop won't run and return value will be correct. */\
@@ -1060,7 +1070,7 @@ namespace graphene
 				 iFontEngine(std::forward<FontEngineType>(fontEngine))
 			{
 				// empty body
-			}
+			} // end constructor
 
 			using BaseType::BaseType;
 
@@ -1205,7 +1215,7 @@ namespace graphene
 					:base_type(std::forward<ArgTypes>(args)...), iRectangle(std::forward<RectangleArgType>(rectangle))
 				{
 					// empty body
-				}
+				} // end constructor
 
 				/**
 				 * Default construct the underlying RectangularType forwarding arguments to base class constructors.

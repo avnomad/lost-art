@@ -35,17 +35,17 @@ BOOST_AUTO_TEST_CASE(Test_Constraint_Parser)
 	Model<int> model;
 
 	// TODO: revert to test only relative frame.
-	model.controls.emplace_back(Model<int>::control_type(10,"screen",1,0,0,100,100));
-	model.controls.emplace_back(Model<int>::control_type(10,"control1",1,20,20,80,80));
-	model.controls.emplace_back(Model<int>::control_type(10,"control2",1,0,0,50,50));
+	model.controls.emplace_back(10,"screen",1,0,0,100,100);
+	model.controls.emplace_back(10,"control1",1,20,20,80,80);
+	model.controls.emplace_back(10,"control2",1,0,0,50,50);
 
-	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,0,RectangleSide::LEFT,1,RectangleSide::LEFT,0,0,"2.3a + 2mm",10));
-	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,0,RectangleSide::RIGHT,1,RectangleSide::RIGHT,0,0,"2/3a + 3.55b + 2px + mm",10));
-	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,1,RectangleSide::LEFT,1,RectangleSide::RIGHT,0,0,"20.1px",10));
+	model.constraints.emplace_back(&model.controls,0,RectangleSide::LEFT,1,RectangleSide::LEFT,0,0,"2.3a + 2mm",10);
+	model.constraints.emplace_back(&model.controls,0,RectangleSide::RIGHT,1,RectangleSide::RIGHT,0,0,"2/3a + 3.55b + 2px + mm",10);
+	model.constraints.emplace_back(&model.controls,1,RectangleSide::LEFT,1,RectangleSide::RIGHT,0,0,"20.1px",10);
 
-	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM,0,0,"0.03mm",10));
-	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,0,RectangleSide::TOP,1,RectangleSide::TOP,0,0,"1/2b",10));
-	model.constraints.emplace_back(Model<int>::constraint_type(&model.controls,1,RectangleSide::BOTTOM,1,RectangleSide::TOP,0,0,"c",10));
+	model.constraints.emplace_back(&model.controls,0,RectangleSide::BOTTOM,1,RectangleSide::BOTTOM,0,0,"0.03mm",10);
+	model.constraints.emplace_back(&model.controls,0,RectangleSide::TOP,1,RectangleSide::TOP,0,0,"1/2b",10);
+	model.constraints.emplace_back(&model.controls,1,RectangleSide::BOTTOM,1,RectangleSide::TOP,0,0,"c",10);
 
 	auto symbols = std::make_shared<Symbolic::Common::SymbolTable<>>();
 	vector<decltype(model.constraints.front().parse<Rational>(symbols))> results;
