@@ -475,8 +475,8 @@ namespace graphene
 			*    Fields    *
 			***************/
 		private:
-			CoordinateType iXoffset = 0;
-			CoordinateType iYoffset = 0;
+			CoordinateType iXoffset = CoordinateType();
+			CoordinateType iYoffset = CoordinateType();
 
 			/*********************
 			*    Constructors    *
@@ -638,7 +638,7 @@ namespace graphene
 			*    Fields    *\
 			***************/\
 		private:\
-			CapitalizedAffix##Type i##CapitalizedAffix;\
+			CapitalizedAffix##Type i##CapitalizedAffix = CapitalizedAffix##Type();\
 \
 			/*********************\
 			*    Constructors    *\
@@ -710,7 +710,7 @@ namespace graphene
 			*    Fields    *\
 			***************/\
 		private:\
-			CoordinateType i##CapitalizedAffix##Height;\
+			CoordinateType i##CapitalizedAffix##Height = CoordinateType();\
 \
 			/*********************\
 			*    Constructors    *\
@@ -1112,7 +1112,7 @@ namespace graphene
 			template<typename... ArgTypes>
 			ConstIndirectCaretLike(FontEngineType fontEngine, ArgTypes&&... args)
 				:base_type(std::forward<ArgTypes>(args)...),
-				 iFontEngine(std::forward<FontEngineType>(fontEngine))
+				 iFontEngine(fontEngine)
 			{
 				// empty body
 			} // end constructor

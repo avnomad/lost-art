@@ -214,30 +214,39 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 
 	// Construct with some arguments missing
 	decltype(button) b1;
+	BOOST_CHECK_EQUAL(b1.textHeight(), 0);
 	BOOST_CHECK_EQUAL(b1.text(), "");
 	BOOST_CHECK_EQUAL(b1.pressed(), false);
 	BOOST_CHECK_EQUAL(b1.highlighted(), false);
+	BOOST_CHECK_EQUAL(b1.borderSize(), 0);
 
 	decltype(button) b2("OK");
+	BOOST_CHECK_EQUAL(b2.textHeight(), 0);
 	BOOST_CHECK_EQUAL(b2.text(), "OK");
 	BOOST_CHECK_EQUAL(b2.pressed(), false);
 	BOOST_CHECK_EQUAL(b2.highlighted(), false);
+	BOOST_CHECK_EQUAL(b2.borderSize(), 0);
 
 	decltype(button) b3("OK",true);
+	BOOST_CHECK_EQUAL(b3.textHeight(), 0);
 	BOOST_CHECK_EQUAL(b3.text(), "OK");
 	BOOST_CHECK_EQUAL(b3.highlighted(), true);
 	BOOST_CHECK_EQUAL(b3.pressed(), false);
+	BOOST_CHECK_EQUAL(b3.borderSize(), 0);
 
 	decltype(button) b4("OK",true,true);
+	BOOST_CHECK_EQUAL(b4.textHeight(), 0);
 	BOOST_CHECK_EQUAL(b4.text(), "OK");
 	BOOST_CHECK_EQUAL(b4.pressed(), true);
 	BOOST_CHECK_EQUAL(b4.highlighted(), true);
+	BOOST_CHECK_EQUAL(b4.borderSize(), 0);
 
 	decltype(button) b5(10,"OK",true,true);
 	BOOST_CHECK_EQUAL(b5.textHeight(), 10);
 	BOOST_CHECK_EQUAL(b5.text(), "OK");
 	BOOST_CHECK_EQUAL(b5.pressed(), true);
 	BOOST_CHECK_EQUAL(b5.highlighted(), true);
+	BOOST_CHECK_EQUAL(b5.borderSize(), 0);
 
 	decltype(button) b6(10,"OK",true,true,2);
 	BOOST_CHECK_EQUAL(b6.textHeight(), 10);
@@ -247,6 +256,7 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	BOOST_CHECK_EQUAL(b6.borderSize(), 2);
 
 	decltype(button) b7("OK",true,true,2);
+	BOOST_CHECK_EQUAL(b7.textHeight(), 0);
 	BOOST_CHECK_EQUAL(b7.text(), "OK");
 	BOOST_CHECK_EQUAL(b7.pressed(), true);
 	BOOST_CHECK_EQUAL(b7.highlighted(), true);
@@ -264,8 +274,10 @@ BOOST_AUTO_TEST_CASE(Test_Button)
 	BOOST_CHECK_EQUAL(b9.text(), "OK");
 	BOOST_CHECK_EQUAL(b9.pressed(), false);
 	BOOST_CHECK_EQUAL(b9.highlighted(), false);
+	BOOST_CHECK_EQUAL(b9.borderSize(), 0);
 
 	decltype(button) b10("OK",2);
+	BOOST_CHECK_EQUAL(b10.textHeight(), 0);
 	BOOST_CHECK_EQUAL(b10.text(), "OK");
 	BOOST_CHECK_EQUAL(b10.pressed(), false);
 	BOOST_CHECK_EQUAL(b10.highlighted(), false);
@@ -584,6 +596,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 
 //	decltype(hvm10) hvm11(1,2,3,4); // currently compile-time error
 	decltype(hvm10) hvm12("ok");
+	BOOST_CHECK_EQUAL(hvm12.textHeight(), 0);
 	BOOST_CHECK_EQUAL(hvm12.text(), "ok");
 
 	decltype(hvm10) hvm13(12);
@@ -603,6 +616,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm15.top(), 4);
 
 	decltype(hvm10) hvm16("ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm16.textHeight(), 0);
 	BOOST_CHECK_EQUAL(hvm16.text(), "ok");
 	BOOST_CHECK_EQUAL(hvm16.left(), 1);
 	BOOST_CHECK_EQUAL(hvm16.bottom(), 2);
@@ -610,6 +624,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm16.top(), 4);
 
 	decltype(hvm10) hvm17;
+	BOOST_CHECK_EQUAL(hvm17.textHeight(), 0);
 	BOOST_CHECK_EQUAL(hvm17.text(), "");
 
 	FrameStack<
@@ -628,6 +643,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 
 //	decltype(hvm18) hvm19(1,2,3,4); // currently compile-time error
 	decltype(hvm18) hvm20("ok");
+	BOOST_CHECK_EQUAL(hvm20.textHeight(), 0);
 	BOOST_CHECK_EQUAL(hvm20.text(), "ok");
 
 	decltype(hvm18) hvm21(12);
@@ -647,6 +663,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm23.textHeight(), 12);
 
 	decltype(hvm18) hvm24("ok",1,2,3,4);
+	BOOST_CHECK_EQUAL(hvm24.textHeight(), 0);
 	BOOST_CHECK_EQUAL(hvm24.text(), "ok");
 	BOOST_CHECK_EQUAL(hvm24.left(), 1);
 	BOOST_CHECK_EQUAL(hvm24.bottom(), 2);
@@ -654,6 +671,7 @@ BOOST_AUTO_TEST_CASE(Test_Constructors)
 	BOOST_CHECK_EQUAL(hvm24.top(), 4);
 
 	decltype(hvm18) hvm25;
+	BOOST_CHECK_EQUAL(hvm25.textHeight(), 0);
 	BOOST_CHECK_EQUAL(hvm25.text(), "");
 
 	// Focusable
