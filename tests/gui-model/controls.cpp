@@ -16,11 +16,24 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUI_MODEL_H
-#define GUI_MODEL_H
-
 #include "gui model/controls.hpp"
-#include "gui model/constraint.hpp"
-#include "gui model/model.hpp"
+#include "geometry.hpp"
 
-#endif // GUI_MODEL_H
+#include <ratio>
+
+#define BOOST_TEST_MODULE Controls
+#include <boost/test/included/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE(Test_Instantiations)
+{
+	using namespace GUIModel::Controls;
+
+	Button<geometry::Rectangle<int>, std::ratio<10>, std::ratio<11>, std::string> button(10,"button",1,1,2,5,7);
+	Control<geometry::Rectangle<int>, std::ratio<10>, std::ratio<11>, std::ratio<5>> control(15,"control",2,4,3,2,1);
+	TextBox<geometry::Rectangle<int>, std::ratio<10>, std::ratio<11>, std::ratio<5>> textbox(15,"textbox",2,4,3,2,1);
+} // end test case
+
+BOOST_AUTO_TEST_CASE(Test_Controls)
+{
+	// TODO: test functionality appended to frame stacks, if any.
+} // end test case

@@ -16,11 +16,12 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUI_MODEL_H
-#define GUI_MODEL_H
-
-#include "gui model/controls.hpp"
 #include "gui model/constraint.hpp"
-#include "gui model/model.hpp"
 
-#endif // GUI_MODEL_H
+#define BOOST_TEST_MODULE Constraint
+#include <boost/test/included/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE(Test_Constraint)
+{
+	// TODO: add tests
+} // end test case

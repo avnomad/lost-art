@@ -52,7 +52,7 @@ link_libraries(${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
 include_directories("source")
 
 # Tests
-aux_source_directory("tests" TESTS) # CMake won't automatically detect new files!
+file(GLOB_RECURSE TESTS tests/*.cpp) # CMake won't automatically detect new files!
 add_custom_target(unit-tests COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --build-config $<CONFIG> COMMENT "Running Unit Tests...")
 
 foreach(test_file ${TESTS})
