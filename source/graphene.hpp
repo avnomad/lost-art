@@ -970,7 +970,6 @@ namespace graphene
 #define charUnderPointMacro(CharType,ConcreteCharType,Const) \
 			CharType charUnderPoint(CoordinateType x, CoordinateType y) Const\
 			{\
-				TextConceptMap textConceptMap;\
 				FontEngineType fontEngine;\
 				auto left   = std::min(this->left(),this->right());\
 				auto bottom = std::min(this->bottom(),this->top());\
@@ -980,11 +979,11 @@ namespace graphene
 				if(this->contains(x,y))\
 				{\
 					size_t i = 0;\
-					coordinate_type sceneTextLeft = left + (this->width() - textConceptMap.effectiveTextSize(*this).first)/2;\
-					coordinate_type fontX = (x-sceneTextLeft)*fontEngine.stringWidth(textConceptMap.text(*this)) / textConceptMap.effectiveTextSize(*this).first;\
+					coordinate_type sceneTextLeft = left + (this->width() - TextConceptMap::effectiveTextSize(*this).first)/2;\
+					coordinate_type fontX = (x-sceneTextLeft)*fontEngine.stringWidth(TextConceptMap::text(*this)) / TextConceptMap::effectiveTextSize(*this).first;\
 					coordinate_type fontCharLeft = 0; /* fontX calculation can cause a division by zero, but then the loop won't run and return value will be correct. */\
-					for( ; i < textConceptMap.text(*this).size() ; fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[i]), ++i)\
-						if(fontX <= fontCharLeft + fontEngine.charWidth(textConceptMap.text(*this)[i])/2)\
+					for( ; i < TextConceptMap::text(*this).size() ; fontCharLeft += fontEngine.charWidth(TextConceptMap::text(*this)[i]), ++i)\
+						if(fontX <= fontCharLeft + fontEngine.charWidth(TextConceptMap::text(*this)[i])/2)\
 							break;\
 					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
 															/* TODO: check that this indeed points to that type */\
@@ -1002,15 +1001,14 @@ namespace graphene
 #define charAtIndexMacro(CharType,ConcreteCharType,Const) \
 			CharType charAtIndex(IndexType i) Const\
 			{\
-				TextConceptMap textConceptMap;\
 				FontEngineType fontEngine;\
 				\
-				if(i > textConceptMap.text(*this).size())\
+				if(i > TextConceptMap::text(*this).size())\
 					throw std::out_of_range("charAtIndex called with i outside the valid range of [0,text().size()].");\
 				\
 				coordinate_type fontCharLeft = 0;\
 				for(IndexType c = 0 ; c < i ; ++c)\
-					fontCharLeft += fontEngine.charWidth(textConceptMap.text(*this)[c]);\
+					fontCharLeft += fontEngine.charWidth(TextConceptMap::text(*this)[c]);\
 				return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
 			} // end method charAtIndex
 
@@ -1041,13 +1039,13 @@ namespace graphene
 		public:
 			using base_type = BaseType;
 			using char_type = CharType;
+			using text_concept_map = TextConceptMap;
 			using font_engine_type = FontEngineType;
 
 			/***************
 			*    Fields    *
 			***************/
 		private:
-			TextConceptMap iTextConceptMap;
 			FontEngineType iFontEngine;
 
 			/*********************
@@ -1057,9 +1055,8 @@ namespace graphene
 			ConstIndirectCaretLike() = default;
 
 			template<typename... ArgTypes>
-			ConstIndirectCaretLike(TextConceptMap textConceptMap, FontEngineType fontEngine, ArgTypes&&... args)
+			ConstIndirectCaretLike(FontEngineType fontEngine, ArgTypes&&... args)
 				:base_type(std::forward<ArgTypes>(args)...),
-				 iTextConceptMap(std::forward<TextConceptMap>(textConceptMap)),
 				 iFontEngine(std::forward<FontEngineType>(fontEngine))
 			{
 				// empty body
@@ -1075,9 +1072,9 @@ namespace graphene
 			// TODO: consider arguments like wraparound:bool
 			void nextPosition()
 			{
-				if(this->index() < iTextConceptMap.text(*this->pointer()).size())
+				if(this->index() < TextConceptMap::text(*this->pointer()).size())
 				{
-					this->xOffset() += iFontEngine.charWidth(iTextConceptMap.text(*this->pointer())[this->index()]);
+					this->xOffset() += iFontEngine.charWidth(TextConceptMap::text(*this->pointer())[this->index()]);
 					++this->index();
 				} // end if
 			} // end method nextPosition
@@ -1087,7 +1084,7 @@ namespace graphene
 				if(this->index() > 0)
 				{
 					--this->index();
-					this->xOffset() -= iFontEngine.charWidth(iTextConceptMap.text(*this->pointer())[this->index()]);
+					this->xOffset() -= iFontEngine.charWidth(TextConceptMap::text(*this->pointer())[this->index()]);
 				} // end if
 			} // end method prevPosition
 
@@ -1099,8 +1096,8 @@ namespace graphene
 
 			void lastPosition()
 			{
-				this->index() = iTextConceptMap.text(*this->pointer()).size();
-				this->xOffset() = iFontEngine.stringWidth(iTextConceptMap.text(*this->pointer()));
+				this->index() = TextConceptMap::text(*this->pointer()).size();
+				this->xOffset() = iFontEngine.stringWidth(TextConceptMap::text(*this->pointer()));
 			} // end method lastPosition
 
 		}; // end class ConstIndirectCaretLike
@@ -1127,7 +1124,7 @@ namespace graphene
 		public:
 			void eraseNext()
 			{
-				this->iTextConceptMap.text(*this->pointer()).erase(this->index(),1);
+				TextConceptMap::text(*this->pointer()).erase(this->index(),1);
 			} // end method eraseNext
 
 			void erasePrev()
@@ -1141,7 +1138,7 @@ namespace graphene
 
 			void insert(CharType character)
 			{
-				this->iTextConceptMap.text(*this->pointer()).insert(this->index(),1,character);
+				TextConceptMap::text(*this->pointer()).insert(this->index(),1,character);
 				this->nextPosition();
 			} // end method insert
 
@@ -1368,6 +1365,7 @@ namespace graphene
 				public:
 					using base_type = BaseType;
 					using margin = Margin;
+					using text_concept_map = TextConceptMap;
 
 					/*********************
 					*    Constructors    *
@@ -1391,7 +1389,7 @@ namespace graphene
 					void render() const
 					{
 						typename BaseType::font_engine_type fontEngine;
-						auto effectiveTextSize = TextConceptMap().effectiveTextSize(*this);
+						auto effectiveTextSize = TextConceptMap::effectiveTextSize(*this);
 						auto effectiveTextWidth = effectiveTextSize.first;
 						auto effectiveTextHeight = effectiveTextSize.second;
 
@@ -1401,9 +1399,9 @@ namespace graphene
 								glTranslated((((this->width() - effectiveTextWidth)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(this->left(),this->right())*Margin::den + Margin::num) / Margin::den,
 											 (((this->height() - effectiveTextHeight)*Margin::den - 2*Margin::num) / Margin::den) / 2 + (std::min(this->bottom(),this->top())*Margin::den + Margin::num) / Margin::den,
 											 0); // center text in inner rectangle
-								glScaled(effectiveTextWidth / fontEngine.stringWidth(TextConceptMap().text(*this)) , effectiveTextHeight / fontEngine.fontHeight() , 1);
+								glScaled(effectiveTextWidth / fontEngine.stringWidth(TextConceptMap::text(*this)) , effectiveTextHeight / fontEngine.fontHeight() , 1);
 								glTranslated(0,fontEngine.fontBelowBaseLine(),0);
-								fontEngine.render(TextConceptMap().text(*this));
+								fontEngine.render(TextConceptMap::text(*this));
 							glPopMatrix();
 						glPopAttrib();
 					} // end method render
@@ -1458,14 +1456,14 @@ namespace graphene
 						auto innerRight  = (std::max(this->left(),this->right())*Margin::den - Margin::num)/Margin::den;
 						auto innerTop    = (std::max(this->bottom(),this->top())*Margin::den - Margin::num)/Margin::den;
 						typename BaseType::text_type currentLine;
-						auto lineHeight = TextConceptMap().textHeight(*this); // change later...
+						auto lineHeight = TextConceptMap::textHeight(*this); // change later...
 
 						// TODO: add line wrapping.
 						glPushAttrib(GL_TRANSFORM_BIT);
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
 								glTranslated(innerLeft,innerTop - fontEngine.fontAboveBaseLine()*lineHeight/fontEngine.fontHeight(),0); // set caret to initial position
-								for(auto character : TextConceptMap().text(*this))
+								for(auto character : TextConceptMap::text(*this))
 								{
 									if(character == '\n') // TODO: use character traits for comparison
 									{
@@ -1572,9 +1570,9 @@ namespace graphene
 						auto right  = std::max(this->pointer()->left(),this->pointer()->right());
 						auto top    = std::max(this->pointer()->bottom(),this->pointer()->top());
 
-						auto textLeft = left + (this->pointer()->width() - TextConceptMap().effectiveTextSize(*this->pointer()).first)/2;
-						auto caretMiddle = textLeft + (TextConceptMap().text(*this->pointer()).empty() ? 0 :
-							this->xOffset()*TextConceptMap().effectiveTextSize(*this->pointer()).first / FontEngineType().stringWidth(TextConceptMap().text(*this->pointer())));
+						auto textLeft = left + (this->pointer()->width() - TextConceptMap::effectiveTextSize(*this->pointer()).first)/2;
+						auto caretMiddle = textLeft + (TextConceptMap::text(*this->pointer()).empty() ? 0 :
+							this->xOffset()*TextConceptMap::effectiveTextSize(*this->pointer()).first / FontEngineType().stringWidth(TextConceptMap::text(*this->pointer())));
 
 						float fgColor[4], bgColor[4];
 						glPushAttrib(GL_CURRENT_BIT);
@@ -2191,45 +2189,45 @@ namespace graphene
 		struct ClassName\
 		{\
 			template<typename ClassName##Type>\
-			decltype(auto) text(ClassName##Type &&textual) const\
+			static inline decltype(auto) text(ClassName##Type &&textual)\
 			{\
 				return textual.prefixName();\
 			} /* end method text */\
 \
 			template<typename ClassName##Type>\
-			decltype(auto) textHeight(ClassName##Type &&textual) const\
+			static inline decltype(auto) textHeight(ClassName##Type &&textual)\
 			{\
 				return textual.prefixName##Height();\
 			} /* end method textHeight */\
 \
 			template<typename ClassName##Type>\
-			decltype(auto) textWidth(ClassName##Type &&textual) const\
+			static inline decltype(auto) textWidth(ClassName##Type &&textual)\
 			{\
 				return textual.prefixName##Width();\
 			} /* end method textWidth */\
 \
 			template<typename ClassName##Type>\
-			decltype(auto) textCharWidth(ClassName##Type &&textual, size_t index) const\
+			static inline decltype(auto) textCharWidth(ClassName##Type &&textual, size_t index)\
 			{\
 				return textual.prefixName##CharWidth(index);\
 			} /* end method textCharWidth */\
 \
 			template<typename ClassName##Type>\
-			void setTextWidth(ClassName##Type &&textual, const typename ClassName##Type::coordinate_type &value) const\
+			static inline void setTextWidth(ClassName##Type &&textual, const typename ClassName##Type::coordinate_type &value)\
 			{\
 				textual.set##infixName##Width(value);\
 			} /* end method setTextWidth */\
 \
 			/* TODO: use SFINAE to fallback to (textWidth,textHeight) if effectiveTextSize is not available. */\
 			template<typename ClassName##Type>\
-			decltype(auto) effectiveTextSize(ClassName##Type &&textual) const\
+			static inline decltype(auto) effectiveTextSize(ClassName##Type &&textual)\
 			{\
 				return textual.effective##infixName##Size();\
 			} /* end method effectiveTextSize */\
 \
 			/* TODO: use SFINAE to fallback to (textCharWidth,textHeight) if effectiveTextCharSize is not available. */\
 			template<typename ClassName##Type>\
-			decltype(auto) effectiveTextCharSize(ClassName##Type &&textual, size_t index) const\
+			static inline decltype(auto) effectiveTextCharSize(ClassName##Type &&textual, size_t index)\
 			{\
 				return textual.effective##infixName##CharSize(index);\
 			} /* end method effectiveTextCharSize */\
