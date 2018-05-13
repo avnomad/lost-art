@@ -19,13 +19,19 @@
 #include "graphene.hpp"
 using namespace graphene;
 using namespace Frames;
+using namespace Frames::Stateful;
+using namespace Frames::Behavioural;
+using namespace Frames::EventHandling;
+using namespace Frames::Renderable;
 using namespace DSEL;
-using namespace Renderable;
+
+#include <ratio>
 
 #define BOOST_TEST_MODULE Graphene
 #include <boost/test/included/unit_test.hpp>
 
-// Declare frame stacks to verify they compile
+// This test suite is intended to test properties related to how graphene classes interact with each other.
+// Declare realistic frame stacks to verify they compile and behave as expected.
 
 template<typename RectangleType, typename BorderSize, typename Margin, typename TextType = std::string>
 using Button = FrameStack<
@@ -36,7 +42,7 @@ using Button = FrameStack<
 	Frame<Textual, TextType>,
 	Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
 	Frame<BoxedAdaptableSizeText, Margin>,
-	Frame<EventHandling::TwoStagePressable>,
+	Frame<TwoStagePressable>,
 	Condition<FunctionObjects::Pressed,
 		Sequence<
 			Frame<Colorblind::FilledRectangle>,
@@ -56,11 +62,11 @@ using Button = FrameStack<
 
 template<typename CoordinateType>
 using IShapePart = FrameStack<
-	Bases::Empty,
-	Frame<Bases::Destructible>,
-	Frame<Bases::Movable, CoordinateType>,
-	Frame<Bases::Containing>,
-	Frame<Bases::Renderable>
+	Interface::Empty,
+	Frame<Interface::Destructible>,
+	Frame<Interface::Movable, CoordinateType>,
+	Frame<Interface::Containing>,
+	Frame<Interface::Renderable>
 >;
 
 /** Const instances should be constant and non-const instances should be non constant
@@ -68,40 +74,40 @@ using IShapePart = FrameStack<
 template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 using ControlPart = FrameStack<
 	IShapePart<CoordinateType>,
-	Frame<Bases::Rectangular>,
-	Frame<Movable::Rectangular>,
-	Frame<Movable::HVMovable, horizontallyMovable, verticallyMovable>,
+	Frame<Interface::Rectangular>,
+	Frame<Movable>,
+	Frame<HVMovable, horizontallyMovable, verticallyMovable>,
 	Frame<Colorblind::FilledRectangle>,
 	Frame<Stippled>,
 	Frame<Colorblind::InversedColor>,
-	Frame<Adapting::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
+	Frame<Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
 >;
 
 template<typename CoordinateType, typename TextType = std::string>
 using IControl = FrameStack<
-	Bases::Empty,
-	Frame<Bases::Destructible>,
-	Frame<Bases::Rectangular, CoordinateType>,
-	Frame<Bases::Containing>,
-	Frame<Bases::Movable>,
-	Frame<Bases::UniformlyBordered, CoordinateType>,
-	Frame<Bases::Textual, TextType>,
-	Frame<Bases::SizedText>,
-	Frame<Bases::Selectable>,
-	Frame<Bases::Highlightable>,
-	Frame<Bases::MultiPart, std::unique_ptr<      IShapePart<CoordinateType>>,
+	Interface::Empty,
+	Frame<Interface::Destructible>,
+	Frame<Interface::Rectangular, CoordinateType>,
+	Frame<Interface::Containing>,
+	Frame<Interface::Movable>,
+	Frame<Interface::UniformlyBordered, CoordinateType>,
+	Frame<Interface::Textual, TextType>,
+	Frame<Interface::SizedText>,
+	Frame<Interface::Selectable>,
+	Frame<Interface::Highlightable>,
+	Frame<Interface::MultiPart, std::unique_ptr<      IShapePart<CoordinateType>>,
 							std::unique_ptr<const IShapePart<CoordinateType>>>,
-	Frame<Bases::Renderable>
+	Frame<Interface::Renderable>
 >;
 
 template<typename RectangleType, typename Margin, typename TextType = std::string>
 using ControlBase =	FrameStack<
 	IControl<typename RectangleType::coordinate_type, TextType>,
-	Frame<Adapting::Rectangular, RectangleType>,
+	Frame<Rectangular, RectangleType>,
 	Frame<UniformlyBordered>,
 	Frame<Selectable, IControl<typename RectangleType::coordinate_type, TextType>>,
 	Frame<Highlightable>,
-	Frame<Movable::Rectangular>,
+	Frame<Movable>,
 	Frame<Textual, TextType>,
 	Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
 	Frame<BoxedAdaptableSizeText, Margin>,
@@ -155,7 +161,7 @@ using Paragraph = FrameStack<
 template<typename RectangleType, typename Margin, typename TextType = std::string>
 using Label = FrameStack<
 	RectangleType,
-	Frame<Movable::Rectangular>,
+	Frame<Movable>,
 	Frame<Textual, TextType>,
 	Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>,
 	Frame<BoxedAdaptableSizeText, Margin>,
@@ -431,384 +437,4 @@ BOOST_AUTO_TEST_CASE(Test_Control)
 	BOOST_CHECK_EQUAL(controlMove.textHeight(), 15);
 	BOOST_CHECK_EQUAL(controlMove.selected(), true);
 	BOOST_CHECK_EQUAL(controlMove.highlighted(), true);
-} // end test case
-
-BOOST_AUTO_TEST_CASE(Test_Constructors)
-{
-	using geometry::Rectangle;
-
-	// Mostly force classes and constructors to be instantiated to catch compile-time errors.
-
-	// Adapting::Rectangular
-	Adapting::Rectangular<Bases::Empty, Rectangle<int>> r1;
-	r1.top() = 2;
-	BOOST_CHECK_EQUAL(r1.top(), 2);
-	decltype(r1) r2(1,2,3,4);
-	BOOST_CHECK_EQUAL(r2.left(), 1);
-	BOOST_CHECK_EQUAL(r2.bottom(), 2);
-	BOOST_CHECK_EQUAL(r2.right(), 3);
-	BOOST_CHECK_EQUAL(r2.top(), 4);
-
-	decltype(r2) r2Copy = r2;
-	BOOST_CHECK_EQUAL(r2Copy.left(), 1);
-	BOOST_CHECK_EQUAL(r2Copy.bottom(), 2);
-	BOOST_CHECK_EQUAL(r2Copy.right(), 3);
-	BOOST_CHECK_EQUAL(r2Copy.top(), 4);
-
-	decltype(r2) r2Move = std::move(r2);
-	BOOST_CHECK_EQUAL(r2Move.left(), 1);
-	BOOST_CHECK_EQUAL(r2Move.bottom(), 2);
-	BOOST_CHECK_EQUAL(r2Move.right(), 3);
-	BOOST_CHECK_EQUAL(r2Move.top(), 4);
-
-	// KeyboardAndMouseStub
-	FrameStack<
-		Bases::Empty,
-		Frame<Bases::EventHandling::KeyboardAndMouse, float>,
-		Frame<EventHandling::KeyboardAndMouseStub>
-	> knm1;
-
-	FrameStack<
-		Bases::Empty,
-		Frame<Bases::EventHandling::KeyboardAndMouse, int>,
-		Frame<Adapting::Rectangular, Rectangle<int>>,
-		Frame<EventHandling::KeyboardAndMouseStub>
-	> knm2(-1, -2, -3, -4);
-	BOOST_CHECK_EQUAL(knm2.left(), -1);
-	BOOST_CHECK_EQUAL(knm2.bottom(), -2);
-	BOOST_CHECK_EQUAL(knm2.right(), -3);
-	BOOST_CHECK_EQUAL(knm2.top(), -4);
-
-	FrameStack<
-		Rectangle<int>,
-		Frame<Bases::EventHandling::KeyboardAndMouse>,
-		Frame<EventHandling::KeyboardAndMouseStub>
-	> knm3;
-
-	decltype(knm3) knm4(-1, -2, -3, -4);
-	BOOST_CHECK_EQUAL(knm4.left(), -1);
-	BOOST_CHECK_EQUAL(knm4.bottom(), -2);
-	BOOST_CHECK_EQUAL(knm4.right(), -3);
-	BOOST_CHECK_EQUAL(knm4.top(), -4);
-
-	// Movable::Rectangular
-	FrameStack<
-		Bases::Empty,
-		Frame<Adapting::Rectangular, Rectangle<float>>,
-		Frame<Movable::Rectangular>
-	> mr1;
-	mr1.top() = 2;
-	BOOST_CHECK_EQUAL(mr1.top(), 2);
-
-	decltype(mr1) mr2(1,2,3,4);
-	BOOST_CHECK_EQUAL(mr2.left(), 1);
-	BOOST_CHECK_EQUAL(mr2.bottom(), 2);
-	BOOST_CHECK_EQUAL(mr2.right(), 3);
-	BOOST_CHECK_EQUAL(mr2.top(), 4);
-
-	// HVMovable
-	FrameStack<
-		Bases::Empty,
-		Frame<Adapting::Rectangular, Rectangle<float>>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>
-	> hvm1;
-	hvm1.top() = 2;
-	BOOST_CHECK_EQUAL(hvm1.top(), 2);
-
-	decltype(hvm1) hvm2(1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm2.left(), 1);
-	BOOST_CHECK_EQUAL(hvm2.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm2.right(), 3);
-	BOOST_CHECK_EQUAL(hvm2.top(), 4);
-
-	FrameStack<
-		Rectangle<float>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>
-	> hvm3(1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm3.left(), 1);
-	BOOST_CHECK_EQUAL(hvm3.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm3.right(), 3);
-	BOOST_CHECK_EQUAL(hvm3.top(), 4);
-
-	// HVMovable + Textual
-	FrameStack<
-		Bases::Empty,
-		Frame<Adapting::Rectangular, Rectangle<float>>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>,
-		Frame<Textual, std::string>
-	> hvm4("ok",1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm4.text(), "ok");
-	BOOST_CHECK_EQUAL(hvm4.left(), 1);
-	BOOST_CHECK_EQUAL(hvm4.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm4.right(), 3);
-	BOOST_CHECK_EQUAL(hvm4.top(), 4);
-
-	decltype(hvm4) hvm5(1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm5.left(), 1);
-	BOOST_CHECK_EQUAL(hvm5.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm5.right(), 3);
-	BOOST_CHECK_EQUAL(hvm5.top(), 4);
-	BOOST_CHECK_EQUAL(hvm5.text(), "");
-
-	decltype(hvm4) hvm6("ok");
-	BOOST_CHECK_EQUAL(hvm6.text(), "ok");
-
-	FrameStack<
-		Rectangle<float>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>,
-		Frame<Textual, std::string>
-	> hvm7("ok",1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm7.left(), 1);
-	BOOST_CHECK_EQUAL(hvm7.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm7.right(), 3);
-	BOOST_CHECK_EQUAL(hvm7.top(), 4);
-	BOOST_CHECK_EQUAL(hvm7.text(), "ok");
-
-	decltype(hvm7) hvm8(1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm8.left(), 1);
-	BOOST_CHECK_EQUAL(hvm8.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm8.right(), 3);
-	BOOST_CHECK_EQUAL(hvm8.top(), 4);
-	BOOST_CHECK_EQUAL(hvm8.text(), "");
-
-	decltype(hvm7) hvm9("ok");
-	BOOST_CHECK_EQUAL(hvm9.text(), "ok");
-
-	// HVMovable + Textual + SizedText
-	FrameStack<
-		Bases::Empty,
-		Frame<Adapting::Rectangular, Rectangle<float>>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>,
-		Frame<Textual, std::string>,
-		Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>
-	> hvm10(12,"ok",1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm10.textHeight(), 12);
-	BOOST_CHECK_EQUAL(hvm10.text(), "ok");
-	BOOST_CHECK_EQUAL(hvm10.left(), 1);
-	BOOST_CHECK_EQUAL(hvm10.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm10.right(), 3);
-	BOOST_CHECK_EQUAL(hvm10.top(), 4);
-
-//	decltype(hvm10) hvm11(1,2,3,4); // currently compile-time error
-	decltype(hvm10) hvm12("ok");
-	BOOST_CHECK_EQUAL(hvm12.textHeight(), 0);
-	BOOST_CHECK_EQUAL(hvm12.text(), "ok");
-
-	decltype(hvm10) hvm13(12);
-	BOOST_CHECK_EQUAL(hvm13.textHeight(), 12);
-	BOOST_CHECK_EQUAL(hvm13.text(), "");
-
-	decltype(hvm10) hvm14(12,"ok");
-	BOOST_CHECK_EQUAL(hvm14.textHeight(), 12);
-	BOOST_CHECK_EQUAL(hvm14.text(), "ok");
-
-	decltype(hvm10) hvm15(12,1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm15.textHeight(), 12);
-	BOOST_CHECK_EQUAL(hvm15.text(), "");
-	BOOST_CHECK_EQUAL(hvm15.left(), 1);
-	BOOST_CHECK_EQUAL(hvm15.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm15.right(), 3);
-	BOOST_CHECK_EQUAL(hvm15.top(), 4);
-
-	decltype(hvm10) hvm16("ok",1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm16.textHeight(), 0);
-	BOOST_CHECK_EQUAL(hvm16.text(), "ok");
-	BOOST_CHECK_EQUAL(hvm16.left(), 1);
-	BOOST_CHECK_EQUAL(hvm16.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm16.right(), 3);
-	BOOST_CHECK_EQUAL(hvm16.top(), 4);
-
-	decltype(hvm10) hvm17;
-	BOOST_CHECK_EQUAL(hvm17.textHeight(), 0);
-	BOOST_CHECK_EQUAL(hvm17.text(), "");
-
-	FrameStack<
-		Rectangle<float>,
-		Frame<Movable::Rectangular>,
-		Frame<Movable::HVMovable>,
-		Frame<Textual, std::string>,
-		Frame<SizedText, FunctionObjects::GlutStrokeFontEngine>
-	> hvm18(12,"ok",1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm18.left(), 1);
-	BOOST_CHECK_EQUAL(hvm18.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm18.right(), 3);
-	BOOST_CHECK_EQUAL(hvm18.top(), 4);
-	BOOST_CHECK_EQUAL(hvm18.text(), "ok");
-	BOOST_CHECK_EQUAL(hvm18.textHeight(), 12);
-
-//	decltype(hvm18) hvm19(1,2,3,4); // currently compile-time error
-	decltype(hvm18) hvm20("ok");
-	BOOST_CHECK_EQUAL(hvm20.textHeight(), 0);
-	BOOST_CHECK_EQUAL(hvm20.text(), "ok");
-
-	decltype(hvm18) hvm21(12);
-	BOOST_CHECK_EQUAL(hvm21.text(), "");
-	BOOST_CHECK_EQUAL(hvm21.textHeight(), 12);
-
-	decltype(hvm18) hvm22(12,"ok");
-	BOOST_CHECK_EQUAL(hvm22.text(), "ok");
-	BOOST_CHECK_EQUAL(hvm22.textHeight(), 12);
-
-	decltype(hvm18) hvm23(12,1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm23.left(), 1);
-	BOOST_CHECK_EQUAL(hvm23.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm23.right(), 3);
-	BOOST_CHECK_EQUAL(hvm23.top(), 4);
-	BOOST_CHECK_EQUAL(hvm23.text(), "");
-	BOOST_CHECK_EQUAL(hvm23.textHeight(), 12);
-
-	decltype(hvm18) hvm24("ok",1,2,3,4);
-	BOOST_CHECK_EQUAL(hvm24.textHeight(), 0);
-	BOOST_CHECK_EQUAL(hvm24.text(), "ok");
-	BOOST_CHECK_EQUAL(hvm24.left(), 1);
-	BOOST_CHECK_EQUAL(hvm24.bottom(), 2);
-	BOOST_CHECK_EQUAL(hvm24.right(), 3);
-	BOOST_CHECK_EQUAL(hvm24.top(), 4);
-
-	decltype(hvm18) hvm25;
-	BOOST_CHECK_EQUAL(hvm25.textHeight(), 0);
-	BOOST_CHECK_EQUAL(hvm25.text(), "");
-
-	// Focusable
-	FrameStack<
-		Rectangle<float>,
-		Frame<Bases::Focusable>,
-		Frame<Focusable>
-	> f1;
-
-	decltype(f1) f2(1.0f,2.0f,3.0f,4.0f);
-	BOOST_CHECK_EQUAL(f2.left(), 1.0f);
-	BOOST_CHECK_EQUAL(f2.bottom(), 2.0f);
-	BOOST_CHECK_EQUAL(f2.right(), 3.0f);
-	BOOST_CHECK_EQUAL(f2.top(), 4.0f);
-
-	decltype(f1) f3(true, 1.5f,2.5f,3.5f,4.5f);
-	BOOST_CHECK_EQUAL(f3.left(), 1.5f);
-	BOOST_CHECK_EQUAL(f3.bottom(), 2.5f);
-	BOOST_CHECK_EQUAL(f3.right(), 3.5f);
-	BOOST_CHECK_EQUAL(f3.top(), 4.5f);
-
-	// Textual
-	FrameStack<
-		Bases::Empty,
-		Frame<Textual, std::string>
-	> t1("some string");
-	BOOST_CHECK_EQUAL(t1.text(), "some string");
-
-	const decltype(t1) t2("42");
-	BOOST_CHECK_EQUAL(t2.text(), "42");
-
-	// IndirectCaretLike
-	int argc = 0;
-	char *argv[] = {nullptr};
-	glutInit(&argc, argv); // GlutStrokeFontEngine requires GLUT to be initialized first:
-
-	FrameStack<
-		Bases::Empty,
-		Frame<Indexing, size_t>,
-		Frame<Pointing, decltype(t1)*>,
-		Frame<Offset, int>,
-		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
-	> icl1(FunctionObjects::GlutStrokeFontEngine(GLUT_STROKE_MONO_ROMAN),-2,2,&t1,1);
-	// TODO: IndirectCaretLike constructor shouldn't allow arbitrary offsets, but instead set them based on index.
-	BOOST_CHECK_EQUAL(icl1.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
-	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1.pointer(), &t1);
-	BOOST_CHECK_EQUAL(icl1.index(), 1);
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "some string");
-
-	decltype(icl1) icl1Copy = icl1;
-	BOOST_CHECK_EQUAL(icl1Copy.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
-	BOOST_CHECK_EQUAL(icl1Copy.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1Copy.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1Copy.pointer(), &t1);
-	BOOST_CHECK_EQUAL(icl1Copy.index(), 1);
-	BOOST_CHECK_EQUAL(icl1Copy.pointer()->text(), "some string");
-
-	decltype(icl1) icl1Move = std::move(icl1);
-	BOOST_CHECK_EQUAL(icl1Move.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
-	BOOST_CHECK_EQUAL(icl1Move.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1Move.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1Move.pointer(), &t1);
-	BOOST_CHECK_EQUAL(icl1Move.index(), 1);
-	BOOST_CHECK_EQUAL(icl1Move.pointer()->text(), "some string");
-
-	icl1.nextPosition();
-	icl1.prevPosition();
-	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1.index(), 1);
-
-	icl1.firstPosition();
-	BOOST_CHECK_EQUAL(icl1.xOffset(), 0);
-	BOOST_CHECK_EQUAL(icl1.yOffset(), 2); // unchanged
-	BOOST_CHECK_EQUAL(icl1.index(), 0);
-	icl1.eraseNext();
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome string");
-	icl1.lastPosition();
-	icl1.erasePrev();
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome strin");
-
-	icl1.insert('-');
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome strin-");
-
-	FrameStack<
-		Bases::Empty,
-		Frame<Indexing, size_t>,
-		Frame<Pointing, decltype(t2)*>,
-		Frame<Offset, float>,
-		Frame<IndirectCaretLike, FunctionObjects::Textual, FunctionObjects::GlutStrokeFontEngine, char>
-	> icl2(1.0f,0.0f,&t2,1);
-	BOOST_CHECK_EQUAL(icl2.fontEngine().font(), GLUT_STROKE_ROMAN);
-	BOOST_CHECK_EQUAL(icl2.xOffset(), 1.0f);
-	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(icl2.pointer(), &t2);
-	BOOST_CHECK_EQUAL(icl2.index(), 1);
-	BOOST_CHECK_EQUAL(icl2.pointer()->text(), "42");
-
-	icl2.firstPosition();
-	icl2.nextPosition();
-	icl2.prevPosition();
-	BOOST_CHECK_EQUAL(icl2.xOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(icl2.index(), 0);
-
-	// EventHandling::CaretLike
-	EventHandling::CaretLike<decltype(icl1)> ehcl1(-2,2,&t1,1);
-	BOOST_CHECK_EQUAL(ehcl1.fontEngine().font(), GLUT_STROKE_ROMAN);
-	BOOST_CHECK_EQUAL(ehcl1.xOffset(), -2);
-	BOOST_CHECK_EQUAL(ehcl1.yOffset(), 2);
-	BOOST_CHECK_EQUAL(ehcl1.pointer(), &t1);
-	BOOST_CHECK_EQUAL(ehcl1.index(), 1);
-	BOOST_CHECK_EQUAL(ehcl1.pointer()->text(), "ome strin-");
-
-	ehcl1.keyboardNonAscii(Bases::EventHandling::NonAsciiKey::HOME, true, 0, 0);
-	BOOST_CHECK_EQUAL(ehcl1.xOffset(), 0);
-	BOOST_CHECK_EQUAL(ehcl1.yOffset(), 2); // unchanged
-	BOOST_CHECK_EQUAL(ehcl1.index(), 0);
-
-	ehcl1.keyboardAscii(0x7f, true, 0, 0);
-	BOOST_CHECK_EQUAL(ehcl1.pointer()->text(), "me strin-");
-
-	EventHandling::CaretLike<decltype(icl2)> ehcl2(1.0f,0.0f,&t2,1);
-	BOOST_CHECK_EQUAL(ehcl2.fontEngine().font(), GLUT_STROKE_ROMAN);
-	BOOST_CHECK_EQUAL(ehcl2.xOffset(), 1.0f);
-	BOOST_CHECK_EQUAL(ehcl2.yOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(ehcl2.pointer(), &t2);
-	BOOST_CHECK_EQUAL(ehcl2.index(), 1);
-	BOOST_CHECK_EQUAL(ehcl2.pointer()->text(), "42");
-
-	ehcl2.keyboardNonAscii(Bases::EventHandling::NonAsciiKey::HOME, true, 0, 0);
-	BOOST_CHECK_EQUAL(ehcl2.xOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(ehcl2.yOffset(), 0.0f); // unchanged
-	BOOST_CHECK_EQUAL(ehcl2.index(), 0);
-
-	ehcl2.keyboardAscii(0x7f, true, 0, 0);
-	BOOST_CHECK_EQUAL(ehcl2.pointer()->text(), "42"); // unchanged
 } // end test case

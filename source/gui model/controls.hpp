@@ -19,6 +19,8 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
+#include <ratio>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -31,12 +33,12 @@ namespace GUIModel
 		template<typename RectangleType, typename BorderSize, typename Margin, typename TextType>
 		using Button = graphene::DSEL::FrameStack<
 			RectangleType,
-			graphene::DSEL::Frame<graphene::Frames::UniformlyBordered, typename RectangleType::coordinate_type>,
-			graphene::DSEL::Frame<graphene::Frames::Pressable>,
-			graphene::DSEL::Frame<graphene::Frames::Highlightable>,
-			graphene::DSEL::Frame<graphene::Frames::Textual, TextType>,
-			graphene::DSEL::Frame<graphene::Frames::SizedText, graphene::FunctionObjects::GlutStrokeFontEngine>,
-			graphene::DSEL::Frame<graphene::Frames::BoxedAdaptableSizeText, Margin>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::UniformlyBordered, typename RectangleType::coordinate_type>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Pressable>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Highlightable>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Textual, TextType>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::SizedText, graphene::FunctionObjects::GlutStrokeFontEngine>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::BoxedAdaptableSizeText, Margin>,
 			graphene::DSEL::Condition<graphene::FunctionObjects::Pressed,
 				graphene::DSEL::Sequence<
 					graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::FilledRectangle>,
@@ -56,12 +58,12 @@ namespace GUIModel
 
 		template<typename CoordinateType>
 		using IShapePart = graphene::DSEL::FrameStack<
-			graphene::Bases::Empty,
-			graphene::DSEL::Frame<graphene::Bases::Destructible>,
-			graphene::DSEL::Frame<graphene::Bases::Movable, CoordinateType>,
-			graphene::DSEL::Frame<graphene::Bases::Rectangular>, // TODO: move rectangular back to concrete control when the screen special case is handled
-			graphene::DSEL::Frame<graphene::Bases::Containing>,
-			graphene::DSEL::Frame<graphene::Bases::Renderable>
+			graphene::Frames::Interface::Empty,
+			graphene::DSEL::Frame<graphene::Frames::Interface::Destructible>,
+			graphene::DSEL::Frame<graphene::Frames::Interface::Movable, CoordinateType>,
+			graphene::DSEL::Frame<graphene::Frames::Interface::Rectangular>, // TODO: move rectangular back to concrete control when the screen special case is handled
+			graphene::DSEL::Frame<graphene::Frames::Interface::Containing>,
+			graphene::DSEL::Frame<graphene::Frames::Interface::Renderable>
 		>;
 
 		/** Const instances should be constant and non-const instances should be non-constant
@@ -69,30 +71,30 @@ namespace GUIModel
 		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 		using ControlPart = graphene::DSEL::FrameStack<
 			IShapePart<CoordinateType>,
-			graphene::DSEL::Frame<graphene::Frames::Movable::Rectangular>,
-			graphene::DSEL::Frame<graphene::Frames::Movable::HVMovable, horizontallyMovable, verticallyMovable>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::Movable>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::HVMovable, horizontallyMovable, verticallyMovable>,
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::FilledRectangle>,
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Stippled>,
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>,
-			graphene::DSEL::Frame<graphene::Frames::Adapting::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
 		>;
 
 		template<typename CoordinateType, typename Const, typename CharType>
 		using ICaret = graphene::DSEL::FrameStack<
-			graphene::Bases::Empty,
-			graphene::DSEL::Frame<graphene::Bases::Destructible>,
-			graphene::DSEL::Frame<graphene::Bases::CaretLike, Const, CharType>,
-			graphene::DSEL::Frame<graphene::Bases::EventHandling::KeyboardAndMouse, CoordinateType>, // TODO: handle in parent
-			graphene::DSEL::Frame<graphene::Bases::Renderable>
+			graphene::Frames::Interface::Empty,
+			graphene::DSEL::Frame<graphene::Frames::Interface::Destructible>,
+			graphene::DSEL::Frame<graphene::Frames::Interface::CaretLike, Const, CharType>,
+			graphene::DSEL::Frame<graphene::Frames::Interface::KeyboardAndMouse, CoordinateType>, // TODO: handle in parent
+			graphene::DSEL::Frame<graphene::Frames::Interface::Renderable>
 		>;
 
 		template<typename CoordinateType, typename Const, typename TextConceptMap, typename CharType, typename PointerType, typename Width>
 		using Caret = graphene::DSEL::FrameStack<
 			ICaret<CoordinateType,Const,CharType>,
-			graphene::DSEL::Frame<graphene::Frames::Indexing, size_t>,
-			graphene::DSEL::Frame<graphene::Frames::Offset>,
-			graphene::DSEL::Frame<graphene::Frames::Pointing, PointerType>,
-			graphene::DSEL::Frame<graphene::Frames::IndirectCaretLike, TextConceptMap, graphene::FunctionObjects::GlutStrokeFontEngine>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Indexing, size_t>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Offset>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Pointing, PointerType>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::IndirectCaretLike, TextConceptMap, graphene::FunctionObjects::GlutStrokeFontEngine>,
 			graphene::DSEL::Frame<graphene::Frames::EventHandling::KeyboardAndMouseStub>, // TODO: remove...
 			graphene::DSEL::Frame<graphene::Frames::EventHandling::CaretLike>, // ...and handle in parent
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::IndirectCaret, TextConceptMap, Width>
@@ -104,15 +106,15 @@ namespace GUIModel
 		using ControlBase =
 			graphene::DSEL::FrameStack<
 				RectangleType,
-				graphene::DSEL::Frame<graphene::Frames::UniformlyBordered, typename RectangleType::coordinate_type>,
-				graphene::DSEL::Frame<graphene::Frames::Selectable, Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>>,
-				graphene::DSEL::Frame<graphene::Frames::Highlightable>,
-				graphene::DSEL::Frame<graphene::Frames::Focusable>,
-				graphene::DSEL::Frame<graphene::Frames::Movable::Rectangular>,
-				graphene::DSEL::Frame<graphene::Frames::Named, TextType>,
-				graphene::DSEL::Frame<graphene::Frames::SizedName, graphene::FunctionObjects::GlutStrokeFontEngine>,
-				graphene::DSEL::Frame<graphene::Frames::BoxedAdaptableSizeName, Margin>,
-				graphene::DSEL::Frame<graphene::Frames::MultiCharBorderedRectangle, graphene::FunctionObjects::Named,
+				graphene::DSEL::Frame<graphene::Frames::Stateful::UniformlyBordered, typename RectangleType::coordinate_type>,
+				graphene::DSEL::Frame<graphene::Frames::Stateful::Selectable, Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>>,
+				graphene::DSEL::Frame<graphene::Frames::Stateful::Highlightable>,
+				graphene::DSEL::Frame<graphene::Frames::Stateful::Focusable>,
+				graphene::DSEL::Frame<graphene::Frames::Behavioural::Movable>,
+				graphene::DSEL::Frame<graphene::Frames::Stateful::Named, TextType>,
+				graphene::DSEL::Frame<graphene::Frames::Stateful::SizedName, graphene::FunctionObjects::GlutStrokeFontEngine>,
+				graphene::DSEL::Frame<graphene::Frames::Behavioural::BoxedAdaptableSizeName, Margin>,
+				graphene::DSEL::Frame<graphene::Frames::Behavioural::MultiCharBorderedRectangle, graphene::FunctionObjects::Named,
 					std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
 					std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
 						  Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Named, typename TextType::value_type,
@@ -121,8 +123,8 @@ namespace GUIModel
 								const Control<RectangleType, BorderSize, Margin, CaretWidth, TextType>*, CaretWidth>,
 					size_t>,
 				graphene::DSEL::Frame<
-					graphene::Frames::MultiPartBorderedRectangle,
-					graphene::Frames::ConcreteReturnTypesBuilder<ControlPart, typename RectangleType::coordinate_type>,
+					graphene::Frames::Behavioural::MultiPartBorderedRectangle,
+					graphene::Frames::Behavioural::ConcreteReturnTypesBuilder<ControlPart, typename RectangleType::coordinate_type>,
 					std::unique_ptr<      IShapePart<typename RectangleType::coordinate_type>>,
 					std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>
 				>,
@@ -218,14 +220,14 @@ namespace GUIModel
 		template<typename RectangleType, typename BorderSize, typename Margin, typename CaretWidth, typename TextType>
 		using TextBoxBase = graphene::DSEL::FrameStack<
 			RectangleType,
-			graphene::DSEL::Frame<graphene::Frames::UniformlyBordered, typename RectangleType::coordinate_type>,
-			graphene::DSEL::Frame<graphene::Frames::Focusable, TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>>,
-			graphene::DSEL::Frame<graphene::Frames::Highlightable>,
-			graphene::DSEL::Frame<graphene::Frames::Movable::Rectangular>,
-			graphene::DSEL::Frame<graphene::Frames::Textual, TextType>,
-			graphene::DSEL::Frame<graphene::Frames::SizedText, graphene::FunctionObjects::GlutStrokeFontEngine>,
-			graphene::DSEL::Frame<graphene::Frames::BoxedAdaptableSizeText, Margin>,
-			graphene::DSEL::Frame<graphene::Frames::MultiCharBorderedRectangle, graphene::FunctionObjects::Textual,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::UniformlyBordered, typename RectangleType::coordinate_type>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Focusable, TextBox<RectangleType, BorderSize, Margin, CaretWidth, TextType>>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Highlightable>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::Movable>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Textual, TextType>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::SizedText, graphene::FunctionObjects::GlutStrokeFontEngine>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::BoxedAdaptableSizeText, Margin>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::MultiCharBorderedRectangle, graphene::FunctionObjects::Textual,
 				std::unique_ptr<      ICaret<typename RectangleType::coordinate_type, std::false_type, typename TextType::value_type>>,
 				std::unique_ptr<const ICaret<typename RectangleType::coordinate_type, std::true_type,  typename TextType::value_type>>,
 				      Caret<typename RectangleType::coordinate_type, std::false_type, graphene::FunctionObjects::Textual, typename TextType::value_type,

@@ -16,16 +16,15 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPHENE_H
-#define GRAPHENE_H
-
-#include "graphene/dsel.hpp"
-#include "graphene/function objects.hpp"
-#include "graphene/event adaptors.hpp"
-#include "graphene/frames/interface.hpp"
-#include "graphene/frames/stateful.hpp"
-#include "graphene/frames/behavioural.hpp"
 #include "graphene/frames/renderable.hpp"
-#include "graphene/frames/event-handling.hpp"
+using namespace graphene;
+using namespace Frames;
+using namespace Frames::Renderable;
 
-#endif // GRAPHENE_H
+#define BOOST_TEST_MODULE Renderable Frames
+#include <boost/test/included/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE(Test_Renderable_Frames)
+{
+	// TODO: find ways to test renderable frames in isolation.
+} // end test case

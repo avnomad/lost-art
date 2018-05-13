@@ -16,16 +16,14 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPHENE_H
-#define GRAPHENE_H
-
 #include "graphene/dsel.hpp"
-#include "graphene/function objects.hpp"
-#include "graphene/event adaptors.hpp"
-#include "graphene/frames/interface.hpp"
-#include "graphene/frames/stateful.hpp"
-#include "graphene/frames/behavioural.hpp"
-#include "graphene/frames/renderable.hpp"
-#include "graphene/frames/event-handling.hpp"
+using namespace graphene;
+using namespace DSEL;
 
-#endif // GRAPHENE_H
+#define BOOST_TEST_MODULE DSEL
+#include <boost/test/included/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE(Test_DSEL)
+{
+	// TODO: test DSEL meta-functions in isolation.
+} // end test case

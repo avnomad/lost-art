@@ -16,16 +16,16 @@
  *	along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPHENE_H
-#define GRAPHENE_H
-
-#include "graphene/dsel.hpp"
-#include "graphene/function objects.hpp"
-#include "graphene/event adaptors.hpp"
 #include "graphene/frames/interface.hpp"
-#include "graphene/frames/stateful.hpp"
-#include "graphene/frames/behavioural.hpp"
-#include "graphene/frames/renderable.hpp"
-#include "graphene/frames/event-handling.hpp"
+using namespace graphene;
+using namespace Frames;
+using namespace Frames::Interface;
 
-#endif // GRAPHENE_H
+#define BOOST_TEST_MODULE Interface Frames
+#include <boost/test/included/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE(Test_Interface_Frames)
+{
+	// TODO: find ways to test interface frames in isolation.
+	// e.g. could use type traits to test that certain optional members exist only on mutable interfaces.
+} // end test case

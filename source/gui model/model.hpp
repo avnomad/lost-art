@@ -549,9 +549,9 @@ namespace GUIModel
 				} // end else
 			} // end method keyboardAscii
 
-			void keyboardNonAscii(graphene::Bases::EventHandling::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
+			void keyboardNonAscii(graphene::Frames::Interface::NonAsciiKey key, bool down, CoordinateType x, CoordinateType y)
 			{
-				if(key == graphene::Bases::EventHandling::NonAsciiKey::L_CTRL)
+				if(key == graphene::Frames::Interface::NonAsciiKey::L_CTRL)
 				{
 					if(!(inConstraintAddMode = down))
 					{
