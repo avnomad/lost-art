@@ -347,6 +347,8 @@ namespace graphene
 				****************/
 			public:
 				// TODO: does it work in every case where left() > right() || bottom() > top()?
+				// TODO: Abstract the way ConcreteCharType is created. Should be able to use types that expect
+				// arguments in a different order.
 #define charUnderPointMacro(CharType,ConcreteCharType,Const) \
 				CharType charUnderPoint(CoordinateType x, CoordinateType y) Const\
 				{\
@@ -365,7 +367,7 @@ namespace graphene
 						for( ; i < TextConceptMap::text(*this).size() ; fontCharLeft += fontEngine.charWidth(TextConceptMap::text(*this)[i]), ++i)\
 							if(fontX <= fontCharLeft + fontEngine.charWidth(TextConceptMap::text(*this)[i])/2)\
 								break;\
-						return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
+						return CharType(new ConcreteCharType(fontCharLeft,0,static_cast<typename ConcreteCharType::pointer_type>(this),i));\
 																/* TODO: check that this indeed points to that type */\
 					}\
 					else\
@@ -390,13 +392,132 @@ namespace graphene
 					coordinate_type fontCharLeft = 0;\
 					for(IndexType c = 0 ; c < i ; ++c)\
 						fontCharLeft += fontEngine.charWidth(TextConceptMap::text(*this)[c]);\
-					return CharType(new ConcreteCharType(static_cast<typename ConcreteCharType::pointer_type>(this),fontCharLeft,0,i));\
+					return CharType(new ConcreteCharType(fontCharLeft,0,static_cast<typename ConcreteCharType::pointer_type>(this),i));\
 				} // end method charAtIndex
 
 				charAtIndexMacro(     CharType,     ConcreteCharType,/* omit */)
 				charAtIndexMacro(ConstCharType,ConstConcreteCharType,const     )
 #undef charAtIndexMacro
 			}; // end class MultiCharBorderedRectangle
+
+			template<typename BaseType, typename TextConceptMap,
+				typename CharType = typename BaseType::char_type>
+			class MutIndirectCaretLike;
+
+			template<typename BaseType, typename TextConceptMap,
+				typename CharType = typename BaseType::char_type>
+			class ConstIndirectCaretLike : public BaseType
+			{
+				/****************
+				*    Friends    *
+				****************/
+
+				friend class MutIndirectCaretLike<BaseType, TextConceptMap, CharType>;
+
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				using base_type = BaseType;
+				using char_type = CharType;
+				using text_concept_map = TextConceptMap;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				ConstIndirectCaretLike() = default;
+
+				using base_type::base_type;
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				// TODO: consider more methods like moveToLeft/Right/Up/Down (will differ in e.g. right-to-left scripts)
+				// TODO: consider arguments like wraparound:bool
+				void nextPosition()
+				{
+					if(this->index() < TextConceptMap::text(*this->pointer()).size())
+					{
+						this->xOffset() += this->fontEngine().charWidth(TextConceptMap::text(*this->pointer())[this->index()]);
+						++this->index();
+					} // end if
+				} // end method nextPosition
+
+				void prevPosition()
+				{
+					if(this->index() > 0)
+					{
+						--this->index();
+						this->xOffset() -= this->fontEngine().charWidth(TextConceptMap::text(*this->pointer())[this->index()]);
+					} // end if
+				} // end method prevPosition
+
+				void firstPosition()
+				{
+					this->index() = 0;
+					this->xOffset() = 0;
+				} // end method firstPosition
+
+				void lastPosition()
+				{
+					this->index() = TextConceptMap::text(*this->pointer()).size();
+					this->xOffset() = this->fontEngine().stringWidth(TextConceptMap::text(*this->pointer()));
+				} // end method lastPosition
+
+			}; // end class ConstIndirectCaretLike
+
+			template<typename BaseType, typename TextConceptMap, typename CharType>
+			class MutIndirectCaretLike : public ConstIndirectCaretLike<BaseType, TextConceptMap, CharType>
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			private:
+				using base = ConstIndirectCaretLike<BaseType, TextConceptMap, CharType>;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				MutIndirectCaretLike() = default;
+
+				using base::base;
+
+				/****************
+				*    Methods    *
+				****************/
+			public:
+				void eraseNext()
+				{
+					TextConceptMap::text(*this->pointer()).erase(this->index(),1);
+				} // end method eraseNext
+
+				void erasePrev()
+				{
+					if(this->index() > 0)
+					{
+						this->prevPosition();
+						this->eraseNext();
+					} // end if
+				} // end method erasePrev
+
+				void insert(CharType character)
+				{
+					TextConceptMap::text(*this->pointer()).insert(this->index(),1,character);
+					this->nextPosition();
+				} // end method insert
+
+			}; // end class MutIndirectCaretLike
+
+			template<typename BaseType, typename TextConceptMap,
+				typename CharType = typename BaseType::char_type>
+			using IndirectCaretLike = typename std::conditional<
+				std::is_const<typename std::pointer_traits<typename BaseType::pointer_type>::element_type>::value,
+				ConstIndirectCaretLike<BaseType, TextConceptMap, CharType>,
+				MutIndirectCaretLike<BaseType, TextConceptMap, CharType>
+			>::type;
 
 		} // end namespace Behavioural
 

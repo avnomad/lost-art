@@ -27,9 +27,6 @@ using namespace DSEL;
 #include "graphene/frames/interface.hpp"
 using Interface::Empty;
 
-#include "graphene/function objects.hpp"
-using FunctionObjects::GlutStrokeFontEngine;
-
 #include "geometry.hpp"
 
 #define BOOST_TEST_MODULE Stateful Frames
@@ -97,91 +94,4 @@ BOOST_AUTO_TEST_CASE(Test_Textual)
 
 	const decltype(t1) t2("42");
 	BOOST_CHECK_EQUAL(t2.text(), "42");
-} // end test case
-
-BOOST_AUTO_TEST_CASE(Test_IndirectCaretLike)
-{
-	int argc = 0;
-	char *argv[] = {nullptr};
-	glutInit(&argc, argv); // GlutStrokeFontEngine requires GLUT to be initialized first:
-
-	// mutable textual
-	FrameStack<
-		Empty,
-		Frame<Textual, std::string>
-	> t1("some string");
-
-	FrameStack<
-		Empty,
-		Frame<Indexing, size_t>,
-		Frame<Pointing, decltype(t1)*>,
-		Frame<Offset, int>,
-		Frame<IndirectCaretLike, FunctionObjects::Textual, GlutStrokeFontEngine, char>
-	> icl1(GlutStrokeFontEngine(GLUT_STROKE_MONO_ROMAN),-2,2,&t1,1);
-	// TODO: IndirectCaretLike constructor shouldn't allow arbitrary offsets, but instead set them based on index.
-	BOOST_CHECK_EQUAL(icl1.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
-	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1.pointer(), &t1);
-	BOOST_CHECK_EQUAL(icl1.index(), 1);
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "some string");
-
-	decltype(icl1) icl1Copy = icl1;
-	BOOST_CHECK_EQUAL(icl1Copy.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
-	BOOST_CHECK_EQUAL(icl1Copy.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1Copy.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1Copy.pointer(), &t1);
-	BOOST_CHECK_EQUAL(icl1Copy.index(), 1);
-	BOOST_CHECK_EQUAL(icl1Copy.pointer()->text(), "some string");
-
-	decltype(icl1) icl1Move = std::move(icl1);
-	BOOST_CHECK_EQUAL(icl1Move.fontEngine().font(), GLUT_STROKE_MONO_ROMAN);
-	BOOST_CHECK_EQUAL(icl1Move.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1Move.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1Move.pointer(), &t1);
-	BOOST_CHECK_EQUAL(icl1Move.index(), 1);
-	BOOST_CHECK_EQUAL(icl1Move.pointer()->text(), "some string");
-
-	icl1.nextPosition();
-	icl1.prevPosition();
-	BOOST_CHECK_EQUAL(icl1.xOffset(), -2);
-	BOOST_CHECK_EQUAL(icl1.yOffset(), 2);
-	BOOST_CHECK_EQUAL(icl1.index(), 1);
-
-	icl1.firstPosition();
-	BOOST_CHECK_EQUAL(icl1.xOffset(), 0);
-	BOOST_CHECK_EQUAL(icl1.yOffset(), 2); // unchanged
-	BOOST_CHECK_EQUAL(icl1.index(), 0);
-	icl1.eraseNext();
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome string");
-	icl1.lastPosition();
-	icl1.erasePrev();
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome strin");
-
-	icl1.insert('-');
-	BOOST_CHECK_EQUAL(icl1.pointer()->text(), "ome strin-");
-
-	// constant textual
-	const decltype(t1) t2("42");
-
-	FrameStack<
-		Empty,
-		Frame<Indexing, size_t>,
-		Frame<Pointing, decltype(t2)*>,
-		Frame<Offset, float>,
-		Frame<IndirectCaretLike, FunctionObjects::Textual, GlutStrokeFontEngine, char>
-	> icl2(1.0f,0.0f,&t2,1);
-	BOOST_CHECK_EQUAL(icl2.fontEngine().font(), GLUT_STROKE_ROMAN);
-	BOOST_CHECK_EQUAL(icl2.xOffset(), 1.0f);
-	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(icl2.pointer(), &t2);
-	BOOST_CHECK_EQUAL(icl2.index(), 1);
-	BOOST_CHECK_EQUAL(icl2.pointer()->text(), "42");
-
-	icl2.firstPosition();
-	icl2.nextPosition();
-	icl2.prevPosition();
-	BOOST_CHECK_EQUAL(icl2.xOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(icl2.yOffset(), 0.0f);
-	BOOST_CHECK_EQUAL(icl2.index(), 0);
 } // end test case

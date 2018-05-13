@@ -24,6 +24,9 @@ using namespace Frames::EventHandling;
 #include "graphene/frames/stateful.hpp"
 using namespace Frames::Stateful;
 
+#include "graphene/frames/behavioural.hpp"
+using namespace Frames::Behavioural;
+
 #include "graphene/dsel.hpp"
 using namespace DSEL;
 
@@ -87,7 +90,8 @@ BOOST_AUTO_TEST_CASE(Test_CaretLike)
 		Frame<Indexing, size_t>,
 		Frame<Pointing, decltype(t1)*>,
 		Frame<Offset, int>,
-		Frame<IndirectCaretLike, FunctionObjects::Textual, GlutStrokeFontEngine, char>,
+		Frame<FontEngined, GlutStrokeFontEngine>,
+		Frame<IndirectCaretLike, FunctionObjects::Textual, char>,
 		Frame<CaretLike>
 	> ehcl1(-2,2,&t1,1);
 	BOOST_CHECK_EQUAL(ehcl1.fontEngine().font(), GLUT_STROKE_ROMAN);
@@ -113,7 +117,8 @@ BOOST_AUTO_TEST_CASE(Test_CaretLike)
 		Frame<Indexing, size_t>,
 		Frame<Pointing, decltype(t2)*>,
 		Frame<Offset, float>,
-		Frame<IndirectCaretLike, FunctionObjects::Textual, GlutStrokeFontEngine, char>,
+		Frame<FontEngined, GlutStrokeFontEngine>,
+		Frame<IndirectCaretLike, FunctionObjects::Textual, char>,
 		Frame<CaretLike>
 	> ehcl2(1.0f,0.0f,&t2,1);
 	BOOST_CHECK_EQUAL(ehcl2.fontEngine().font(), GLUT_STROKE_ROMAN);

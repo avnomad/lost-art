@@ -92,9 +92,10 @@ namespace GUIModel
 		using Caret = graphene::DSEL::FrameStack<
 			ICaret<CoordinateType,Const,CharType>,
 			graphene::DSEL::Frame<graphene::Frames::Stateful::Indexing, size_t>,
-			graphene::DSEL::Frame<graphene::Frames::Stateful::Offset>,
 			graphene::DSEL::Frame<graphene::Frames::Stateful::Pointing, PointerType>,
-			graphene::DSEL::Frame<graphene::Frames::Stateful::IndirectCaretLike, TextConceptMap, graphene::FunctionObjects::GlutStrokeFontEngine>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Offset>,
+			graphene::DSEL::Frame<graphene::Frames::Stateful::FontEngined, graphene::FunctionObjects::GlutStrokeFontEngine>,
+			graphene::DSEL::Frame<graphene::Frames::Behavioural::IndirectCaretLike, TextConceptMap>,
 			graphene::DSEL::Frame<graphene::Frames::EventHandling::KeyboardAndMouseStub>, // TODO: remove...
 			graphene::DSEL::Frame<graphene::Frames::EventHandling::CaretLike>, // ...and handle in parent
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::IndirectCaret, TextConceptMap, Width>
