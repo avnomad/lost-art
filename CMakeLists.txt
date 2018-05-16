@@ -76,3 +76,8 @@ configure_file(source/geometry.hpp binaries/ COPYONLY)
 
 # Run target
 add_custom_target(run COMMAND lost-art WORKING_DIRECTORY binaries USES_TERMINAL)
+
+# Distclean target
+add_custom_target(distclean COMMAND ${CMAKE_COMMAND} --build . --target clean
+							COMMAND ${CMAKE_COMMAND} -E remove_directory binaries
+							COMMAND ${CMAKE_COMMAND} -E remove_directory tests VERBATIM)
