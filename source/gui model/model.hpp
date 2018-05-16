@@ -139,9 +139,9 @@ namespace GUIModel
 			button_iterator highlightedButton;
 			button_iterator pressedButton;
 
-			typename control_container_type::reverse_iterator highlightedControl;
-			typename control_container_type::reverse_iterator selectedControl;
-			typename control_container_type::reverse_iterator focusedControl;
+			control_iterator highlightedControl;
+			control_iterator selectedControl;
+			control_iterator focusedControl;
 
 			constraint_iterator highlightedConstraint;
 			constraint_iterator selectedConstraint;
@@ -208,7 +208,7 @@ namespace GUIModel
 			// TODO: remove when converted to use std::list
 			void clearControlIterators()
 			{
-				highlightedControl = selectedControl = focusedControl = controls.rend();
+				highlightedControl = selectedControl = focusedControl = controls.end();
 			} // end method clearControlIterators
 
 			void clearConstraintIterators()
@@ -259,10 +259,10 @@ namespace GUIModel
 					highlightedButton->first.dehighlight();
 					highlightedButton = buttons.end();
 				} // end if
-				if(highlightedControl != controls.rend())
+				if(highlightedControl != controls.end())
 				{
 					highlightedControl->dehighlight();
-					highlightedControl = controls.rend();
+					highlightedControl = controls.end();
 				} // end if
 				if(highlightedConstraint != constraints.end())
 				{
@@ -278,10 +278,10 @@ namespace GUIModel
 					selectedConstraint->deselect();
 					selectedConstraint = constraints.end();
 				} // end if
-				if(selectedControl != controls.rend())
+				if(selectedControl != controls.end())
 				{
 					selectedControl->deselect();
-					selectedControl = controls.rend();
+					selectedControl = controls.end();
 				} // end if
 				selectedPart = nullptr;
 			} // end method deselectAll
@@ -293,10 +293,10 @@ namespace GUIModel
 					focusedConstraint->unfocus();
 					focusedConstraint = constraints.end();
 				} // end if
-				if(focusedControl != controls.rend())
+				if(focusedControl != controls.end())
 				{
 					focusedControl->unfocus();
-					focusedControl = controls.rend();
+					focusedControl = controls.end();
 				} // end if
 				tbFileName.unfocus();
 				caret = nullptr;
@@ -538,9 +538,9 @@ namespace GUIModel
 						clearConstraintIterators();
 						selectedPart = nullptr;
 					}
-					else if(selectedControl != controls.rend() && selectedControl != controls.rend()-1)
+					else if(selectedControl != controls.end() && selectedControl != controls.begin()) // not screen
 					{
-						eraseControl(selectedControl.base()-1);
+						eraseControl(selectedControl);
 						clearControlIterators();
 						clearConstraintIterators();
 						// assumes more invalidations than actually happen but will fix when I switch to std::list
@@ -571,10 +571,10 @@ namespace GUIModel
 					{
 						if(inConstraintAddMode)
 						{
-							if(highlightedControl != controls.rend())
+							if(highlightedControl != controls.end())
 							{
 								endPoint1 = highlightedControl->partUnderPoint(x,y);
-								control1 = highlightedControl.base()-1 - controls.begin();
+								control1 = highlightedControl - controls.begin();
 								// Currently partUnderPoint returns a 'left' object if (x,y) is really left (where left < right),
 								// not on the LEFT side of the object.
 								// TODO: investigate if this is what we want.
@@ -600,7 +600,7 @@ namespace GUIModel
 																				 : (endPoint1->bottom() + endPoint1->top() + endPoint2->bottom() + endPoint2->top())/4.0;
 										constraints.emplace_back(&controls,control1,side1,control2,side2,avg-0.5*constraintThickness,avg+0.5*constraintThickness,"",constraintTextHeight);
 										highlightedConstraint = constraints.end();
-										(selectedConstraint = focusedConstraint = constraints.end()-1)->select().focus(); // no constraint was highlighted
+										(selectedConstraint = focusedConstraint = --constraints.end())->select().focus(); // no constraint was highlighted
 										caret = focusedConstraint->charAtIndex(focusedConstraint->text().size());
 
 										endPoint1 = nullptr;
@@ -617,7 +617,7 @@ namespace GUIModel
 						}
 						else
 						{
-							assert(highlightedButton == buttons.end() || highlightedControl == controls.rend() || !tbFileName.highlighted());
+							assert(highlightedButton == buttons.end() || highlightedControl == controls.end() || !tbFileName.highlighted());
 
 							if(highlightedButton != buttons.end())
 							{
@@ -634,18 +634,18 @@ namespace GUIModel
 								deselectAll();
 							} // end else
 
-							if(highlightedControl != controls.rend())
+							if(highlightedControl != controls.end())
 							{
 								// TODO: bring to front
 								selectedPart = (selectedControl = highlightedControl)->select().partUnderPoint(x,y);
 
 								// TODO: consider representing screen with a different control type and encapsulate special case in part selection code.
 								if(selectedPart && selectedPart->left() == selectedControl->left() && selectedPart->bottom() == selectedControl->bottom()
-									&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.rend()-1)
+									&& selectedPart->right() == selectedControl->right() && selectedPart->top() == selectedControl->top() && selectedControl == controls.begin())
 								{ // deselect screen central area (effectively make it transparent to mouse clicks)
 									selectedPart = nullptr;
 									selectedControl->deselect();
-									selectedControl = controls.rend();
+									selectedControl = controls.end();
 								}
 								else
 								{
@@ -661,7 +661,7 @@ namespace GUIModel
 								caret = (focusedConstraint = highlightedConstraint)->focus().charUnderPoint(x,y);
 							} // end if
 
-							if(pressedButton == buttons.end() && selectedControl == controls.rend() && !tbFileName.highlighted() && selectedConstraint == constraints.end())
+							if(pressedButton == buttons.end() && selectedControl == controls.end() && !tbFileName.highlighted() && selectedConstraint == constraints.end())
 								createOnMove = true;
 
 							lastX = x;
@@ -701,10 +701,10 @@ namespace GUIModel
 						// create new control
 						// TODO: push at front
 						unfocusAll();
-						if(highlightedControl != controls.rend())
+						if(highlightedControl != controls.end())
 							highlightedControl->dehighlight();
 						controls.emplace_back(controlTextHeight,"control"+std::to_string(controlIndex++),borderSize,x,y,x,y);
-						(focusedControl = highlightedControl = selectedControl = controls.rbegin())->highlight().select().focus();
+						(focusedControl = highlightedControl = selectedControl = --controls.end())->highlight().select().focus();
 						selectedPart = selectedControl->partUnderPoint(x,y); // TODO: guarantee this will be a corner
 						caret = focusedControl->charUnderPoint(x,y);
 
@@ -749,7 +749,7 @@ namespace GUIModel
 							for(auto control = controls.rbegin() ; control < controls.rend() ; ++control) // TODO: restore front to back iteration when screen-at-front issue fixed
 								if(control->contains(x,y))
 								{
-									(highlightedControl = control)->highlight();
+									(highlightedControl = --control.base())->highlight();
 									break;
 								} // end if
 					} // end else
