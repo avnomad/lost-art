@@ -45,14 +45,12 @@ namespace GUIModel
 					graphene::DSEL::FrameStack<
 						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>,
 						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>>>,
-				graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
-					graphene::DSEL::Sequence<
+				graphene::DSEL::Sequence<
+					graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
 						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, std::ratio<0>>,
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>,
-					graphene::DSEL::Sequence<
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>,
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>
-				>
+						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>
+					>,
+					graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>
 			>
 		>;
 
@@ -136,14 +134,12 @@ namespace GUIModel
 							graphene::DSEL::FrameStack<
 								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Named>,
 								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>>>,
-						graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
-							graphene::DSEL::Sequence<
+						graphene::DSEL::Sequence<
+							graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
 								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, std::ratio<0>>,
-								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Named>>,
-							graphene::DSEL::Sequence<
-								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>,
-								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Named>>
-						>
+								graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>
+							>,
+							graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Named>>
 					>,
 					graphene::DSEL::Condition<graphene::FunctionObjects::Focused,
 						graphene::DSEL::FrameStack<
@@ -242,14 +238,12 @@ namespace GUIModel
 					graphene::DSEL::FrameStack<
 						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>,
 						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>>>,
-				graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
-					graphene::DSEL::Sequence<
+				graphene::DSEL::Sequence<
+					graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
 						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, std::ratio<0>>,
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>,
-					graphene::DSEL::Sequence<
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>,
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>
-				>
+						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>
+					>,
+					graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>
 			>
 		>;
 

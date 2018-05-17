@@ -161,11 +161,17 @@ namespace GUIModel
 				size_t>,
 			graphene::DSEL::Sequence<
 				graphene::DSEL::Condition<graphene::FunctionObjects::Selected,
-					graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::FilledRectangle>,
-					graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>,
-						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, std::ratio<0>>
-					>
+					graphene::DSEL::Sequence<
+						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::FilledRectangle>,
+						graphene::DSEL::FrameStack<
+							graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>,
+							graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>>>,
+					graphene::DSEL::Sequence<
+						graphene::DSEL::Condition<graphene::FunctionObjects::Highlighted,
+							graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, BorderSize>,
+							graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BorderedRectangle, std::ratio<0>>
+						>,
+						graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::BoxedText, graphene::FunctionObjects::Textual>>
 				>,
 				graphene::DSEL::Condition<graphene::FunctionObjects::Focused,
 					graphene::DSEL::FrameStack<
@@ -492,14 +498,15 @@ namespace GUIModel
 
 			void render() const
 			{
-				// TODO: remove text rendering code and use available frames for same effect.
-				graphene::FunctionObjects::GlutStrokeFontEngine fontEngine;
-
 				if(isHorizontal())
 					base_type::render();
 				else
 				{
+					// TODO: simplify transformations.
 					glPushMatrix();
+						glTranslated(this->top(),0,0);
+						glScaled(-1,1,1);
+						glTranslated(-this->bottom(),0,0);
 						glScaled(-1,1,1);
 						glRotated(90,0,0,1); // 90 degrees
 						base_type::render();
@@ -533,18 +540,10 @@ namespace GUIModel
 								glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
 						} // end if
 
-						// text
 						coordinate_type effectiveTextWidth,effectiveTextHeight;
 						std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
 						coordinate_type textLeft = this->left() + (this->width() - effectiveTextWidth) / 2;
 						coordinate_type textBottom = this->bottom() + (this->height() - effectiveTextHeight) / 2;
-
-						glPushMatrix();
-							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
-							glScaled(effectiveTextWidth / fontEngine.stringWidth(this->text()) , effectiveTextHeight / fontEngine.fontHeight() , 1);
-							glTranslated(0,fontEngine.fontBelowBaseLine(),0);
-							fontEngine.render(this->text());
-						glPopMatrix();
 
 						// left horizontal
 						glRect(this->left(),((2*this->bottom() + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textLeft,((2*this->bottom() + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
@@ -580,19 +579,10 @@ namespace GUIModel
 								glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
 						} // end if
 
-						// text
 						coordinate_type effectiveTextWidth,effectiveTextHeight;
 						std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
 						coordinate_type textLeft = this->bottom() + (this->height() - effectiveTextHeight) / 2;
 						coordinate_type textBottom = this->left() + (this->width() - effectiveTextWidth) / 2;
-
-						glPushMatrix();
-							glTranslated(textLeft,textBottom,0); // center text in inner rectangle
-							glScaled(effectiveTextHeight / fontEngine.fontHeight() , effectiveTextWidth / fontEngine.stringWidth(this->text()) , 1);
-							glRotated(90,0,0,1); // rotate by 90 degrees
-							glTranslated(0,-fontEngine.fontAboveBaseLine(),0);
-							fontEngine.render(this->text());
-						glPopMatrix();
 
 						// bottom vertical
 						glRect(((2*this->bottom() + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),this->left(),((2*this->bottom() + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),textBottom);
