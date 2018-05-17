@@ -19,6 +19,7 @@
 #ifndef RENDERABLE_H
 #define RENDERABLE_H
 
+#include <utility>
 #include <algorithm>
 #include <type_traits>
 
@@ -28,6 +29,24 @@
 
 namespace graphene
 {
+	namespace Introspection
+	{
+		/**
+		 * Return object.borderSize() if the method exists, otherwise defaultValue.
+		 */
+		template<typename Class, typename DefaultValueType>
+		auto optionalBorderSize(Class &&object, DefaultValueType &&)->decltype(std::declval<Class &&>().borderSize())
+		{
+			return object.borderSize();
+		}
+
+		template<typename Class, typename DefaultValueType, typename... Dummy>
+		DefaultValueType &&optionalBorderSize(Class &&, DefaultValueType &&defaultValue, Dummy &&...)
+		{
+			return std::forward<DefaultValueType>(defaultValue);
+		}
+	} // end namespace Introspection
+
 	namespace Frames
 	{
 		namespace Renderable
@@ -90,7 +109,8 @@ namespace graphene
 					{
 						glPushAttrib(GL_POLYGON_BIT);
 							glPolygonMode(GL_FRONT,GL_FILL);
-							auto bSize = (CTRational::den * this->borderSize() + CTRational::num) / CTRational::den;
+							auto borderSize = Introspection::optionalBorderSize(*this, typename BaseType::coordinate_type());
+							auto bSize = (CTRational::den * borderSize + CTRational::num) / CTRational::den;
 							auto minX = std::min(this->left(),this->right());
 							auto maxX = std::max(this->left(),this->right());
 							auto minY = std::min(this->bottom(),this->top());
@@ -294,6 +314,7 @@ namespace graphene
 						auto bottom = std::min(this->pointer()->bottom(),this->pointer()->top());
 						auto right  = std::max(this->pointer()->left(),this->pointer()->right());
 						auto top    = std::max(this->pointer()->bottom(),this->pointer()->top());
+						auto borderSize = Introspection::optionalBorderSize(*this->pointer(),0);
 
 						auto textLeft = left + (this->pointer()->width() - TextConceptMap::effectiveTextSize(*this->pointer()).first)/2;
 						auto caretMiddle = textLeft + (TextConceptMap::text(*this->pointer()).empty() ? 0 :
@@ -305,11 +326,11 @@ namespace graphene
 							glGetFloatv(GL_COLOR_CLEAR_VALUE,bgColor);
 
 							glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
-							glRect((caretMiddle*2*width::den - width::num)/(2*width::den),bottom+this->pointer()->borderSize(),
-									(caretMiddle*2*width::den + width::num)/(2*width::den),top-this->pointer()->borderSize());
+							glRect((caretMiddle*2*width::den - width::num)/(2*width::den),bottom+borderSize,
+									(caretMiddle*2*width::den + width::num)/(2*width::den),top-borderSize);
 							glColor4fv(fgColor);
-							glRect((caretMiddle*6*width::den - width::num)/(6*width::den),((bottom+this->pointer()->borderSize())*3*width::den + width::num)/(3*width::den),
-									(caretMiddle*6*width::den + width::num)/(6*width::den),((top-this->pointer()->borderSize())*3*width::den - width::num)/(3*width::den));
+							glRect((caretMiddle*6*width::den - width::num)/(6*width::den),((bottom+borderSize)*3*width::den + width::num)/(3*width::den),
+									(caretMiddle*6*width::den + width::num)/(6*width::den),((top-borderSize)*3*width::den - width::num)/(3*width::den));
 						glPopAttrib();
 					} // end method render
 				}; // end class IndirectCaret

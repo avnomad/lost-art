@@ -145,7 +145,6 @@ namespace GUIModel
 		using ConstraintBase =
 		graphene::DSEL::FrameStack<
 			RectangleType,
-			graphene::DSEL::Frame<graphene::Frames::Stateful::UniformlyBordered, typename RectangleType::coordinate_type>,
 			graphene::DSEL::Frame<graphene::Frames::Stateful::Selectable, Constraint<RectangleType,ControlContainerType,BorderSize, LineWidth, CaretWidth, TextType>>,
 			graphene::DSEL::Frame<graphene::Frames::Stateful::Highlightable>,
 			graphene::DSEL::Frame<graphene::Frames::Stateful::Focusable>,
@@ -232,7 +231,7 @@ namespace GUIModel
 			/** Construct a Constraint with the specified sides.
 			 */
 			Constraint(const EndPoint &endPoint1, const EndPoint &endPoint2, coordinate_type localSide1, coordinate_type localSide2,
-				TextType text, coordinate_type textHeight, coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
+				TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0] = endPoint1;
 				endPoints()[1] = endPoint2;
@@ -240,7 +239,6 @@ namespace GUIModel
 				localSides()[1] = std::move(localSide2);
 				this->text() = std::move(text);
 				this->textHeight() = textHeight;
-				this->borderSize() = borderSize;
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 				this->focused() = focused;
@@ -249,7 +247,7 @@ namespace GUIModel
 			} // end Control constructor
 
 			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, coordinate_type localSide1, coordinate_type localSide2,
-				TextType text, coordinate_type textHeight, coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
+				TextType text, coordinate_type textHeight, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0].container() = container;
 				endPoints()[0].control = control1;
@@ -261,7 +259,6 @@ namespace GUIModel
 				localSides()[1] = std::move(localSide2);
 				this->text() = std::move(text);
 				this->textHeight() = textHeight;
-				this->borderSize() = borderSize;
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 				this->focused() = focused;
@@ -270,7 +267,7 @@ namespace GUIModel
 			} // end Control constructor
 
 			// TODO: consider deserializing selected and other user interaction states.
-			Constraint(const property_tree_type &tree, ControlContainerType *container,	coordinate_type borderSize = 0, bool selected = false, bool highlighted = false, bool focused = false)
+			Constraint(const property_tree_type &tree, ControlContainerType *container, bool selected = false, bool highlighted = false, bool focused = false)
 			{
 				endPoints()[0] = EndPoint(tree.get_child("first-end-point"),container);
 				endPoints()[1] = EndPoint(tree.get_child("second-end-point"),container);
@@ -278,7 +275,6 @@ namespace GUIModel
 				localSides()[1] = tree.get<coordinate_type>("second-local-side");
 				this->text() = tree.get<TextType>("text");
 				this->textHeight() = tree.get<coordinate_type>("text-height");
-				this->borderSize() = borderSize;
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 				this->focused() = focused;
