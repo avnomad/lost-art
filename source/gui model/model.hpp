@@ -723,6 +723,9 @@ namespace GUIModel
 						selectedPart->move(x-lastX,y-lastY);
 						lastX = x;
 						lastY = y;
+
+						for(auto &constraint : constraints) // TODO: detect and update only the affected constraints.
+							constraint.updateSides();
 					}
 					else // if dropping an object on another makes sence, then highlighting should be done regardless of selectedPart
 					{

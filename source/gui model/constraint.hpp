@@ -215,6 +215,11 @@ namespace GUIModel
 		private:
 			EndPoint iEndPoints[2];
 			coordinate_type iLocalSides[2];
+			coordinate_type outerLeft, outerRight;
+			coordinate_type leftControlLeft, leftControlBottom, leftControlRight, leftControlTop;
+			coordinate_type rightControlLeft, rightControlBottom, rightControlRight, rightControlTop;
+			coordinate_type bottomControlLeft, bottomControlBottom, bottomControlRight, bottomControlTop;
+			coordinate_type topControlLeft, topControlBottom, topControlRight, topControlTop;
 
 			/*********************
 			*    Constructors    *
@@ -239,6 +244,8 @@ namespace GUIModel
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 				this->focused() = focused;
+
+				updateSides();
 			} // end Control constructor
 
 			Constraint(ControlContainerType *container, size_t control1, side_type side1, size_t control2, side_type side2, coordinate_type localSide1, coordinate_type localSide2,
@@ -258,6 +265,8 @@ namespace GUIModel
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 				this->focused() = focused;
+
+				updateSides();
 			} // end Control constructor
 
 			// TODO: consider deserializing selected and other user interaction states.
@@ -273,6 +282,8 @@ namespace GUIModel
 				this->selected() = selected;
 				this->highlighted() = highlighted;
 				this->focused() = focused;
+
+				updateSides();
 			} // end Constraint conversion constructor
 
 			/*************************
@@ -418,6 +429,71 @@ namespace GUIModel
 				} // end else
 			} // end method charAtIndex
 
+			void updateSides()
+			{
+				if(isHorizontal())
+				{
+					coordinate_type left   = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+					coordinate_type bottom = std::min(localSides()[0],localSides()[1]);
+					coordinate_type right  = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+					coordinate_type top    = std::max(localSides()[0],localSides()[1]);
+
+					auto leftEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+					auto rightEndPoint = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+
+
+					std::tie(leftControlLeft,leftControlRight) = std::minmax(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right());
+					std::tie(leftControlBottom,leftControlTop) = std::minmax(leftEndPoint.referredControl().bottom(),leftEndPoint.referredControl().top());
+					std::tie(rightControlLeft,rightControlRight) = std::minmax(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right());
+					std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
+
+					// render lines consistent with control borders (borders are rendered inside the controls)
+					coordinate_type innerLeft  = leftControlLeft == leftEndPoint.referredSide() ?
+													(left *LineWidth::den + LineWidth::num) / LineWidth::den : (left *LineWidth::den - LineWidth::num) / LineWidth::den;
+					coordinate_type innerRight = rightControlLeft == rightEndPoint.referredSide() ?
+													(right*LineWidth::den + LineWidth::num) / LineWidth::den : (right*LineWidth::den - LineWidth::num) / LineWidth::den;
+					std::tie(left,innerLeft) = std::pair<coordinate_type,coordinate_type>(std::minmax(left,innerLeft)); // won't work without creating a copy...
+					std::tie(innerRight,right) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
+
+					this->left()   = innerLeft;
+					this->bottom() = bottom;
+					this->right()  = innerRight;
+					this->top()    = top;
+					outerLeft  = left;
+					outerRight = right;
+				}
+				else
+				{
+					coordinate_type left   = std::min(localSides()[0],localSides()[1]);
+					coordinate_type bottom = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+					coordinate_type right  = std::max(localSides()[0],localSides()[1]);
+					coordinate_type top    = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
+
+					auto bottomEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+					auto topEndPoint     = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
+
+					std::tie(bottomControlLeft,bottomControlRight) = std::minmax(bottomEndPoint.referredControl().left(),bottomEndPoint.referredControl().right());
+					std::tie(bottomControlBottom,bottomControlTop) = std::minmax(bottomEndPoint.referredControl().bottom(),bottomEndPoint.referredControl().top());
+					std::tie(topControlLeft,topControlRight) = std::minmax(topEndPoint.referredControl().left(),topEndPoint.referredControl().right());
+					std::tie(topControlBottom,topControlTop) = std::minmax(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top());
+
+					// render lines consistent with control borders (borders are rendered inside the controls)
+					coordinate_type innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ?
+													(bottom *LineWidth::den + LineWidth::num) / LineWidth::den : (bottom *LineWidth::den - LineWidth::num) / LineWidth::den;
+					coordinate_type innerTop = topControlBottom == topEndPoint.referredSide() ?
+													(top*LineWidth::den + LineWidth::num) / LineWidth::den : (top*LineWidth::den - LineWidth::num) / LineWidth::den;
+					std::tie(bottom,innerBottom) = std::pair<coordinate_type,coordinate_type>(std::minmax(bottom,innerBottom)); // won't work without creating a copy...
+					std::tie(innerTop,top) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerTop,top)); // one of the variables will get overriden before used.
+
+					this->left()   = innerBottom;
+					this->bottom() = left;
+					this->right()  = innerTop;
+					this->top()    = right;
+					outerLeft  = bottom;
+					outerRight = top;
+				} // end else
+			} // end method updateSides
+
 			void render() const
 			{
 				// TODO: remove text rendering code and use available frames for same effect.
@@ -439,39 +515,17 @@ namespace GUIModel
 					glMatrixMode(GL_MODELVIEW);
 					if(isHorizontal())
 					{
-						coordinate_type left   = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-						coordinate_type bottom = std::min(localSides()[0],localSides()[1]);
-						coordinate_type right  = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-						coordinate_type top    = std::max(localSides()[0],localSides()[1]);
-
-						auto leftEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
-						auto rightEndPoint = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
-
-						coordinate_type leftControlLeft, leftControlBottom, leftControlRight, leftControlTop, rightControlLeft, rightControlBottom, rightControlRight, rightControlTop;
-						std::tie(leftControlLeft,leftControlRight) = std::minmax(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right());
-						std::tie(leftControlBottom,leftControlTop) = std::minmax(leftEndPoint.referredControl().bottom(),leftEndPoint.referredControl().top());
-						std::tie(rightControlLeft,rightControlRight) = std::minmax(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right());
-						std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
-
-						// render lines consistent with control borders (borders are rendered inside the controls)
-						coordinate_type innerLeft  = leftControlLeft == leftEndPoint.referredSide() ?
-														(left *LineWidth::den + LineWidth::num) / LineWidth::den : (left *LineWidth::den - LineWidth::num) / LineWidth::den;
-						coordinate_type innerRight = rightControlLeft == rightEndPoint.referredSide() ?
-														(right*LineWidth::den + LineWidth::num) / LineWidth::den : (right*LineWidth::den - LineWidth::num) / LineWidth::den;
-						std::tie(left,innerLeft) = std::pair<coordinate_type,coordinate_type>(std::minmax(left,innerLeft)); // won't work without creating a copy...
-						std::tie(innerRight,right) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
-
 						// left vertical
-						if(top > leftControlTop)
-							glRect(left,leftControlTop,innerLeft,top);
-						if(bottom < leftControlBottom)
-							glRect(left,bottom,innerLeft,leftControlBottom);
+						if(this->top() > leftControlTop)
+							glRect(outerLeft,leftControlTop,this->left(),this->top());
+						if(this->bottom() < leftControlBottom)
+							glRect(outerLeft,this->bottom(),this->left(),leftControlBottom);
 
 						// right vertical
-						if(top > rightControlTop)
-							glRect(innerRight,rightControlTop,right,top);
-						if(bottom < rightControlBottom)
-							glRect(innerRight,bottom,right,rightControlBottom);
+						if(this->top() > rightControlTop)
+							glRect(this->right(),rightControlTop,outerRight,this->top());
+						if(this->bottom() < rightControlBottom)
+							glRect(this->right(),this->bottom(),outerRight,rightControlBottom);
 
 						if(this->selected())
 						{
@@ -484,11 +538,6 @@ namespace GUIModel
 						} // end if
 
 						// text
-						// TODO: remove this monstrosity!
-						const_cast<coordinate_type&>(this->left())   = innerLeft;
-						const_cast<coordinate_type&>(this->bottom()) = bottom;
-						const_cast<coordinate_type&>(this->right())  = innerRight;
-						const_cast<coordinate_type&>(this->top())    = top;
 						coordinate_type effectiveTextWidth,effectiveTextHeight;
 						std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
 						coordinate_type textLeft = this->left() + (this->width() - effectiveTextWidth) / 2;
@@ -502,50 +551,28 @@ namespace GUIModel
 						glPopMatrix();
 
 						// left horizontal
-						glRect(innerLeft,((2*bottom + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textLeft,((2*bottom + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+						glRect(this->left(),((2*this->bottom() + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textLeft,((2*this->bottom() + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
 
 						// right horizontal
 						auto textRight = this->right() - (this->width() - effectiveTextWidth) / 2;
-						glRect(textRight,((2*bottom + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerRight,((2*bottom + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
+						glRect(textRight,((2*this->bottom() + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),this->right(),((2*this->bottom() + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den));
 
 						if(this->selected())
 							glPopAttrib();
 					}
 					else
 					{
-						coordinate_type left   = std::min(localSides()[0],localSides()[1]);
-						coordinate_type bottom = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-						coordinate_type right  = std::max(localSides()[0],localSides()[1]);
-						coordinate_type top    = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-
-						auto bottomEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
-						auto topEndPoint     = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
-
-						coordinate_type bottomControlLeft, bottomControlBottom, bottomControlRight, bottomControlTop, topControlLeft, topControlBottom, topControlRight, topControlTop;
-						std::tie(bottomControlLeft,bottomControlRight) = std::minmax(bottomEndPoint.referredControl().left(),bottomEndPoint.referredControl().right());
-						std::tie(bottomControlBottom,bottomControlTop) = std::minmax(bottomEndPoint.referredControl().bottom(),bottomEndPoint.referredControl().top());
-						std::tie(topControlLeft,topControlRight) = std::minmax(topEndPoint.referredControl().left(),topEndPoint.referredControl().right());
-						std::tie(topControlBottom,topControlTop) = std::minmax(topEndPoint.referredControl().bottom(),topEndPoint.referredControl().top());
-
-						// render lines consistent with control borders (borders are rendered inside the controls)
-						coordinate_type innerBottom  = bottomControlBottom == bottomEndPoint.referredSide() ?
-														(bottom *LineWidth::den + LineWidth::num) / LineWidth::den : (bottom *LineWidth::den - LineWidth::num) / LineWidth::den;
-						coordinate_type innerTop = topControlBottom == topEndPoint.referredSide() ?
-														(top*LineWidth::den + LineWidth::num) / LineWidth::den : (top*LineWidth::den - LineWidth::num) / LineWidth::den;
-						std::tie(bottom,innerBottom) = std::pair<coordinate_type,coordinate_type>(std::minmax(bottom,innerBottom)); // won't work without creating a copy...
-						std::tie(innerTop,top) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerTop,top)); // one of the variables will get overriden before used.
-
 						// bottom horizontal
-						if(right > bottomControlRight)
-							glRect(bottomControlRight,bottom,right,innerBottom);
-						if(left < bottomControlLeft)
-							glRect(left,bottom,bottomControlLeft,innerBottom);
+						if(this->top() > bottomControlRight)
+							glRect(bottomControlRight,outerLeft,this->top(),this->left());
+						if(this->bottom() < bottomControlLeft)
+							glRect(this->bottom(),outerLeft,bottomControlLeft,this->left());
 
 						// top horizontal
-						if(right > topControlRight)
-							glRect(topControlRight,innerTop,right,top);
-						if(left < topControlLeft)
-							glRect(left,innerTop,topControlLeft,top);
+						if(this->top() > topControlRight)
+							glRect(topControlRight,this->right(),this->top(),outerRight);
+						if(this->bottom() < topControlLeft)
+							glRect(this->bottom(),this->right(),topControlLeft,outerRight);
 
 						if(this->selected())
 						{
@@ -558,11 +585,6 @@ namespace GUIModel
 						} // end if
 
 						// text
-						// TODO: remove this monstrosity!
-						const_cast<coordinate_type&>(this->left())   = innerBottom;
-						const_cast<coordinate_type&>(this->bottom()) = left;
-						const_cast<coordinate_type&>(this->right())  = innerTop;
-						const_cast<coordinate_type&>(this->top())    = right;
 						coordinate_type effectiveTextWidth,effectiveTextHeight;
 						std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
 						coordinate_type textLeft = this->bottom() + (this->height() - effectiveTextHeight) / 2;
@@ -577,11 +599,11 @@ namespace GUIModel
 						glPopMatrix();
 
 						// bottom vertical
-						glRect(((2*left + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),innerBottom,((2*left + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),textBottom);
+						glRect(((2*this->bottom() + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),this->left(),((2*this->bottom() + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),textBottom);
 
 						// top vertical
 						auto textTop = this->right() - (this->width() - effectiveTextWidth) / 2;
-						glRect(((2*left + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*left + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),innerTop);
+						glRect(((2*this->bottom() + this->height())*LineWidth::den - LineWidth::num)/(2*LineWidth::den),textTop,((2*this->bottom() + this->height())*LineWidth::den + LineWidth::num)/(2*LineWidth::den),this->right());
 
 						if(this->selected())
 							glPopAttrib();
