@@ -34,6 +34,10 @@ BOOST_AUTO_TEST_CASE(Test_RectangleSize)
 	BOOST_CHECK(!isVertical(RectangleSide::BOTTOM));
 	BOOST_CHECK(isVertical(RectangleSide::RIGHT));
 	BOOST_CHECK(!isVertical(RectangleSide::TOP));
+	BOOST_CHECK_EQUAL(opposite(RectangleSide::LEFT), RectangleSide::RIGHT);
+	BOOST_CHECK_EQUAL(opposite(RectangleSide::RIGHT), RectangleSide::LEFT);
+	BOOST_CHECK_EQUAL(opposite(RectangleSide::TOP), RectangleSide::BOTTOM);
+	BOOST_CHECK_EQUAL(opposite(RectangleSide::BOTTOM), RectangleSide::TOP);
 } // end test case
 
 BOOST_AUTO_TEST_CASE(Test_Rectangle)

@@ -20,6 +20,7 @@
 #define GEOMETRY_H
 
 #include <string>
+#include <iostream>
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
@@ -38,6 +39,19 @@ namespace geometry
 	{
 		return side == RectangleSide::LEFT || side == RectangleSide::RIGHT;
 	} // end function isVertical
+
+	inline RectangleSide opposite(RectangleSide side)
+	{
+		static constexpr RectangleSide oppositeSides[4] = {RectangleSide::RIGHT, RectangleSide::TOP,
+															RectangleSide::LEFT, RectangleSide::BOTTOM};
+		return oppositeSides[size_t(side)];
+	} // end function opposite
+
+	inline std::ostream &operator<<(std::ostream &output, RectangleSide side)
+	{
+		static const char *sideNames[4] = {"LEFT","BOTTOM","RIGHT","TOP"};
+		return output << sideNames[size_t(side)];
+	} // end operator<<
 
 } // end namespace geometry
 

@@ -128,6 +128,16 @@ namespace GUIModel
 				return (*iContainer)[control].side(side);
 			} // end method referredSide
 
+			decltype(auto) oppositeSide()
+			{
+				return (*iContainer)[control].side(geometry::opposite(side));
+			} // end method oppositeSide
+
+			decltype(auto) oppositeSide() const
+			{
+				return (*iContainer)[control].side(geometry::opposite(side));
+			} // end method oppositeSide
+
 			decltype(auto) referredControl()
 			{
 				return (*iContainer)[control];
@@ -221,8 +231,8 @@ namespace GUIModel
 			EndPoint iEndPoints[2];
 			coordinate_type iLocalSides[2];
 			coordinate_type outerLeft, outerRight;
-			coordinate_type leftControlLeft, leftControlBottom, leftControlRight, leftControlTop;
-			coordinate_type rightControlLeft, rightControlBottom, rightControlRight, rightControlTop;
+			coordinate_type leftControlBottom, leftControlTop;
+			coordinate_type rightControlBottom, rightControlTop;
 
 			/*********************
 			*    Constructors    *
@@ -348,11 +358,10 @@ namespace GUIModel
 			 */
 			bool contains(coordinate_type x, coordinate_type y) const
 			{
-				auto left   = isHorizontal() ? std::min(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::min(iLocalSides[0],iLocalSides[1]);
-				auto bottom = isVertical()   ? std::min(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::min(iLocalSides[0],iLocalSides[1]);
-				auto right  = isHorizontal() ? std::max(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::max(iLocalSides[0],iLocalSides[1]);
-				auto top    = isVertical()   ? std::max(iEndPoints[0].referredSide(),iEndPoints[1].referredSide()) : std::max(iLocalSides[0],iLocalSides[1]);
-				return left <= x && x <= right && bottom <= y && y <= top;
+				if(isHorizontal())
+					return base_type::contains(x,y);
+				else
+					return base_type::contains(y,x);
 			} // end method contains
 
 			PartType partUnderPoint(coordinate_type x, coordinate_type y)
@@ -434,38 +443,35 @@ namespace GUIModel
 				// Code is almost identical for horizontal and vertical constraints, so I maintain a common code base.
 				// Variable names have been chosen to make sense for horizontal constraints. Reasonable names for
 				// vertical constraints can be obtained by substituting left<->bottom and right<->top.
-				coordinate_type left   = std::min(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-				coordinate_type bottom = std::min(localSides()[0],localSides()[1]);
-				coordinate_type right  = std::max(endPoints()[0].referredSide(),endPoints()[1].referredSide());
-				coordinate_type top    = std::max(localSides()[0],localSides()[1]);
-
 				auto leftEndPoint  = endPoints()[0].referredSide() <  endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 				auto rightEndPoint = endPoints()[0].referredSide() >= endPoints()[1].referredSide() ? endPoints()[0] : endPoints()[1];
 
-				std::tie(leftControlLeft,leftControlRight) = std::minmax(leftEndPoint.referredControl().left(),leftEndPoint.referredControl().right());
-				std::tie(leftControlBottom,leftControlTop) = std::minmax(leftEndPoint.referredControl().bottom(),leftEndPoint.referredControl().top());
-				std::tie(rightControlLeft,rightControlRight) = std::minmax(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right());
-				std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
+				outerLeft      = leftEndPoint.referredSide();
+				this->bottom() = std::min(localSides()[0],localSides()[1]);
+				outerRight     = rightEndPoint.referredSide();
+				this->top()    = std::max(localSides()[0],localSides()[1]);
+
+				if(isHorizontal())
+				{
+					std::tie( leftControlBottom, leftControlTop) = std::minmax( leftEndPoint.referredControl().bottom(), leftEndPoint.referredControl().top());
+					std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().bottom(),rightEndPoint.referredControl().top());
+				}
+				else
+				{
+					std::tie( leftControlBottom, leftControlTop) = std::minmax( leftEndPoint.referredControl().left(), leftEndPoint.referredControl().right());
+					std::tie(rightControlBottom,rightControlTop) = std::minmax(rightEndPoint.referredControl().left(),rightEndPoint.referredControl().right());
+				} // end else
 
 				// render lines consistent with control borders (borders are rendered inside the controls so lines will too)
-				coordinate_type innerLeft  = (isHorizontal() ? leftControlLeft : leftControlBottom)
-					== leftEndPoint.referredSide()
-					? (left *LineWidth::den + LineWidth::num) / LineWidth::den
-					: (left *LineWidth::den - LineWidth::num) / LineWidth::den;
-				coordinate_type innerRight = (isHorizontal() ? rightControlLeft : rightControlBottom)
-					== rightEndPoint.referredSide()
-					? (right*LineWidth::den + LineWidth::num) / LineWidth::den
-					: (right*LineWidth::den - LineWidth::num) / LineWidth::den;
+				this->left() = leftEndPoint.referredSide() <= leftEndPoint.oppositeSide() // innerLeft
+							 ? (outerLeft *LineWidth::den + LineWidth::num) / LineWidth::den
+							 : (outerLeft *LineWidth::den - LineWidth::num) / LineWidth::den;
+				this->right() = rightEndPoint.referredSide() <= rightEndPoint.oppositeSide() // innerRight
+							  ? (outerRight*LineWidth::den + LineWidth::num) / LineWidth::den
+							  : (outerRight*LineWidth::den - LineWidth::num) / LineWidth::den;
 
-				std::tie(left,innerLeft) = std::pair<coordinate_type,coordinate_type>(std::minmax(left,innerLeft)); // won't work without creating a copy...
-				std::tie(innerRight,right) = std::pair<coordinate_type,coordinate_type>(std::minmax(innerRight,right)); // one of the variables will get overriden before used.
-
-				this->left()   = innerLeft;
-				this->bottom() = bottom;
-				this->right()  = innerRight;
-				this->top()    = top;
-				outerLeft  = left;
-				outerRight = right;
+				std::tie(outerLeft,this->left()) = std::pair<coordinate_type,coordinate_type>(std::minmax(outerLeft,this->left())); // won't work without creating a copy...
+				std::tie(this->right(),outerRight) = std::pair<coordinate_type,coordinate_type>(std::minmax(this->right(),outerRight)); // one of the variables will get overriden before used.
 			} // end method updateSides
 
 			void render() const
@@ -498,22 +504,17 @@ namespace GUIModel
 							glRotated(90,0,0,1); // 90 degrees
 					} // end if
 
-						const coordinate_type  leftControlHigh = isHorizontal() ?  leftControlTop    :  leftControlRight;
-						const coordinate_type  leftControlLow  = isHorizontal() ?  leftControlBottom :  leftControlLeft ;
-						const coordinate_type rightControlHigh = isHorizontal() ? rightControlTop    : rightControlRight;
-						const coordinate_type rightControlLow  = isHorizontal() ? rightControlBottom : rightControlLeft ;
-
 						// left vertical
-						if(this->top() > leftControlHigh)
-							glRect(outerLeft,leftControlHigh,this->left(),this->top());
-						if(this->bottom() < leftControlLow)
-							glRect(outerLeft,this->bottom(),this->left(),leftControlLow);
+						if(this->top() > leftControlTop)
+							glRect(outerLeft,leftControlTop,this->left(),this->top());
+						if(this->bottom() < leftControlBottom)
+							glRect(outerLeft,this->bottom(),this->left(),leftControlBottom);
 
 						// right vertical
-						if(this->top() > rightControlHigh)
-							glRect(this->right(),rightControlHigh,outerRight,this->top());
-						if(this->bottom() < rightControlLow)
-							glRect(this->right(),this->bottom(),outerRight,rightControlLow);
+						if(this->top() > rightControlTop)
+							glRect(this->right(),rightControlTop,outerRight,this->top());
+						if(this->bottom() < rightControlBottom)
+							glRect(this->right(),this->bottom(),outerRight,rightControlBottom);
 
 						if(this->selected())
 						{
@@ -525,8 +526,7 @@ namespace GUIModel
 								glColor4f(bgColor[0],bgColor[1],bgColor[2],fgColor[3]);
 						} // end if
 
-							coordinate_type effectiveTextWidth,effectiveTextHeight;
-							std::tie(effectiveTextWidth,effectiveTextHeight) = this->effectiveTextSize();
+							const coordinate_type effectiveTextWidth = this->effectiveTextSize().first;
 							const coordinate_type textLeft = this->left() + (this->width() - effectiveTextWidth) / 2;
 							const coordinate_type textRight = this->right() - (this->width() - effectiveTextWidth) / 2;
 
