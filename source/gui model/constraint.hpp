@@ -368,9 +368,9 @@ namespace GUIModel
 			{
 				if(contains(x,y))
 					if(isHorizontal())
-						return PartType(new ControlPart<coordinate_type,std::false_type,std::true_type,false,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
+						return PartType(new ControlPart<coordinate_type,std::false_type,std::true_type,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
 					else
-						return PartType(new ControlPart<coordinate_type,std::true_type,std::false_type,false,true,false,true,false>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
+						return PartType(new ControlPart<coordinate_type,std::true_type,std::false_type,true,false,true,false>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
 				else
 					return nullptr;
 			} // end method partUnderPoint
@@ -379,9 +379,9 @@ namespace GUIModel
 			{
 				if(contains(x,y))
 					if(isHorizontal())
-						return ConstPartType(new const ControlPart<coordinate_type,std::false_type,std::true_type,true,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
+						return ConstPartType(new const ControlPart<const coordinate_type,std::false_type,std::true_type,true,true,true,true>(iEndPoints[0].referredSide(),iLocalSides[0],iEndPoints[1].referredSide(),iLocalSides[1]));
 					else
-						return ConstPartType(new const ControlPart<coordinate_type,std::true_type,std::false_type,true,true,true,true,true>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
+						return ConstPartType(new const ControlPart<const coordinate_type,std::true_type,std::false_type,true,true,true,true>(iLocalSides[0],iEndPoints[0].referredSide(),iLocalSides[1],iEndPoints[1].referredSide()));
 				else
 					return nullptr;
 			} // end method partUnderPoint

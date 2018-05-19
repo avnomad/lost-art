@@ -66,6 +66,25 @@ namespace graphene
 				} // end method move
 			}; // end class Movable
 
+			template<typename BaseType, typename CoordinateType>
+			class Movable<BaseType, const CoordinateType> : public BaseType
+			{
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				using base_type = BaseType;
+				using coordinate_type = const CoordinateType;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				Movable() = default;
+
+				using BaseType::BaseType;
+			}; // end class Movable
+
 			/**
 			 * The base type should be Movable
 			 */
@@ -104,6 +123,34 @@ namespace graphene
 				{
 					BaseType::move(allowHorizontal()?xOffset:0 , allowVertical()?yOffset:0);
 				} // end method move
+			}; // end class HVMovable
+
+			template<typename BaseType, typename allowHorizontal, typename allowVertical, typename CoordinateType>
+			class HVMovable<BaseType, allowHorizontal, allowVertical, const CoordinateType> : public BaseType
+			{
+				/***********************
+				*    Concept Checks    *
+				***********************/
+
+				static_assert(std::is_same<allowHorizontal, std::true_type>() || std::is_same<allowHorizontal, std::false_type>(),
+					"allowHorizontal must be either std::true_type or std::false_type!");
+				static_assert(std::is_same<allowVertical, std::true_type>() || std::is_same<allowVertical, std::false_type>(),
+					"allowVertical must be either std::true_type or std::false_type!");
+
+				/*********************
+				*    Member Types    *
+				*********************/
+			public:
+				using base_type = BaseType;
+				using coordinate_type = const CoordinateType;
+
+				/*********************
+				*    Constructors    *
+				*********************/
+			public:
+				HVMovable() = default;
+
+				using BaseType::BaseType;
 			}; // end class HVMovable
 
 #define boxedAdaptableSizeMacro(ClassAffix, methodAffix) \
@@ -171,29 +218,29 @@ namespace graphene
 			boxedAdaptableSizeMacro(Name, name)
 #undef boxedAdaptableSizeMacro
 
-			template<template<typename ConcretePartCoordinateType, typename horizontal, typename vertical, bool constant,
+			template<template<typename ConcretePartCoordinateType, typename horizontal, typename vertical,
 								bool leftRef, bool bottomRef, bool rightRef, bool topRef> class ConcretePartTemplate,
 					typename CoordinateType>
 			struct ConcreteReturnTypesBuilder
 			{
-				using       bottom_left  =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true,false,false>;
-				using const_bottom_left  = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true,false,false>;
-				using       left         =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false, true,false,false,false>;
-				using const_left         = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true, true,false,false,false>;
-				using       top_left     =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true,false,false, true>;
-				using const_top_left     = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true,false,false, true>;
-				using       bottom       =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false, true,false,false>;
-				using const_bottom       = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false, true,false,false>;
-				using       center       =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false, true, true, true, true>;
-				using const_center       = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true, true, true, true, true>;
-				using       top          =       ConcretePartTemplate<CoordinateType,std::false_type, std::true_type,false,false,false,false, true>;
-				using const_top          = const ConcretePartTemplate<CoordinateType,std::false_type, std::true_type, true,false,false,false, true>;
-				using       bottom_right =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false, true, true,false>;
-				using const_bottom_right = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false, true, true,false>;
-				using       right        =       ConcretePartTemplate<CoordinateType, std::true_type,std::false_type,false,false,false, true,false>;
-				using const_right        = const ConcretePartTemplate<CoordinateType, std::true_type,std::false_type, true,false,false, true,false>;
-				using       top_right    =       ConcretePartTemplate<CoordinateType, std::true_type, std::true_type,false,false,false, true, true>;
-				using const_top_right    = const ConcretePartTemplate<CoordinateType, std::true_type, std::true_type, true,false,false, true, true>;
+				using       bottom_left  =       ConcretePartTemplate<      CoordinateType, std::true_type, std::true_type, true, true,false,false>;
+				using const_bottom_left  = const ConcretePartTemplate<const CoordinateType, std::true_type, std::true_type, true, true,false,false>;
+				using       left         =       ConcretePartTemplate<      CoordinateType, std::true_type,std::false_type, true,false,false,false>;
+				using const_left         = const ConcretePartTemplate<const CoordinateType, std::true_type,std::false_type, true,false,false,false>;
+				using       top_left     =       ConcretePartTemplate<      CoordinateType, std::true_type, std::true_type, true,false,false, true>;
+				using const_top_left     = const ConcretePartTemplate<const CoordinateType, std::true_type, std::true_type, true,false,false, true>;
+				using       bottom       =       ConcretePartTemplate<      CoordinateType,std::false_type, std::true_type,false, true,false,false>;
+				using const_bottom       = const ConcretePartTemplate<const CoordinateType,std::false_type, std::true_type,false, true,false,false>;
+				using       center       =       ConcretePartTemplate<      CoordinateType, std::true_type, std::true_type, true, true, true, true>;
+				using const_center       = const ConcretePartTemplate<const CoordinateType, std::true_type, std::true_type, true, true, true, true>;
+				using       top          =       ConcretePartTemplate<      CoordinateType,std::false_type, std::true_type,false,false,false, true>;
+				using const_top          = const ConcretePartTemplate<const CoordinateType,std::false_type, std::true_type,false,false,false, true>;
+				using       bottom_right =       ConcretePartTemplate<      CoordinateType, std::true_type, std::true_type,false, true, true,false>;
+				using const_bottom_right = const ConcretePartTemplate<const CoordinateType, std::true_type, std::true_type,false, true, true,false>;
+				using       right        =       ConcretePartTemplate<      CoordinateType, std::true_type,std::false_type,false,false, true,false>;
+				using const_right        = const ConcretePartTemplate<const CoordinateType, std::true_type,std::false_type,false,false, true,false>;
+				using       top_right    =       ConcretePartTemplate<      CoordinateType, std::true_type, std::true_type,false,false, true, true>;
+				using const_top_right    = const ConcretePartTemplate<const CoordinateType, std::true_type, std::true_type,false,false, true, true>;
 			}; // end struct ConcreteReturnTypesBuilder
 
 			/**

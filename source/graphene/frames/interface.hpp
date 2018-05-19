@@ -75,6 +75,18 @@ namespace graphene
 				virtual void move(CoordinateType xOffset, CoordinateType yOffset) = 0;
 			}; // end struct Movable
 
+			template<typename BaseType, typename CoordinateType>
+			struct Movable<BaseType, const CoordinateType> : BaseType
+			{
+				// Member Types
+				using base_type = BaseType;
+				using coordinate_type = const CoordinateType;
+
+				// Constructors
+				Movable() = default;
+				using BaseType::BaseType;
+			}; // end struct Movable
+
 			template<typename BaseType, typename CoordinateType = typename BaseType::coordinate_type>
 			struct Rectangular : BaseType
 			{

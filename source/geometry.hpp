@@ -191,10 +191,8 @@ namespace geometry
 	// Use properties?
 	/** This rectangled type can capture a designated subset of its coordinates by reference.
 	 *	In which case, it should not outlive the objects it refers to.
-	 *	Note: there does not seem to be a way to implement transitive constness in C++ so const instances
-	 *	should have constant == true while non-const instances should have constant == false.
 	 */
-	template<typename CoordinateType, bool constant = false, bool leftRef = false, bool bottomRef = false, bool rightRef = false, bool topRef = false>
+	template<typename CoordinateType, bool leftRef = false, bool bottomRef = false, bool rightRef = false, bool topRef = false>
 	struct RefRectangle
 	{
 		/*********************
@@ -203,12 +201,11 @@ namespace geometry
 
 		using Side = RectangleSide;
 		using coordinate_type = CoordinateType;
-		using effective_coordinate_type = typename std::conditional<constant,typename std::add_const<coordinate_type>::type,coordinate_type>::type;
-		using effective_coordinate_reference_type = typename std::add_lvalue_reference<effective_coordinate_type>::type;
-		using left_type = typename std::conditional<leftRef,effective_coordinate_reference_type,effective_coordinate_type>::type;
-		using bottom_type = typename std::conditional<bottomRef,effective_coordinate_reference_type,effective_coordinate_type>::type;
-		using right_type = typename std::conditional<rightRef,effective_coordinate_reference_type,effective_coordinate_type>::type;
-		using top_type = typename std::conditional<topRef,effective_coordinate_reference_type,effective_coordinate_type>::type;
+		using coordinate_reference_type = typename std::add_lvalue_reference<coordinate_type>::type;
+		using left_type = typename std::conditional<leftRef,coordinate_reference_type,coordinate_type>::type;
+		using bottom_type = typename std::conditional<bottomRef,coordinate_reference_type,coordinate_type>::type;
+		using right_type = typename std::conditional<rightRef,coordinate_reference_type,coordinate_type>::type;
+		using top_type = typename std::conditional<topRef,coordinate_reference_type,coordinate_type>::type;
 
 	private:
 		/***************
@@ -245,9 +242,7 @@ namespace geometry
 #define accessor(name,iName) \
 		CoordinateType &name()\
 		{\
-			if(constant)\
-				throw std::logic_error("Incorrect instantiation of RefRectangle template: constant==true should only be used with const objects!");\
-			return const_cast<CoordinateType &>(iName);\
+			return iName;\
 		} /* end method name */\
 		\
 		const CoordinateType &name() const\
@@ -263,19 +258,16 @@ namespace geometry
 
 		CoordinateType &side(Side sideName)
 		{
-			if(constant)
-				throw std::logic_error("Incorrect instantiation of RefRectangle template: constant==true should only be used with const objects!");
-
 			switch(sideName)
 			{
 			case Side::LEFT:
-				return const_cast<CoordinateType &>(iLeft);
+				return iLeft;
 			case Side::BOTTOM:
-				return const_cast<CoordinateType &>(iBottom);
+				return iBottom;
 			case Side::RIGHT:
-				return const_cast<CoordinateType &>(iRight);
+				return iRight;
 			case Side::TOP:
-				return const_cast<CoordinateType &>(iTop);
+				return iTop;
 			default:
 				throw std::invalid_argument("Invalid enum value!");
 			} // end switch

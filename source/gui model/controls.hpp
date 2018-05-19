@@ -66,7 +66,7 @@ namespace GUIModel
 
 		/** Const instances should be constant and non-const instances should be non-constant
 		 */
-		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+		template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 		using ControlPart = graphene::DSEL::FrameStack<
 			IShapePart<CoordinateType>,
 			graphene::DSEL::Frame<graphene::Frames::Behavioural::Movable>,
@@ -74,7 +74,7 @@ namespace GUIModel
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::FilledRectangle>,
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Stippled>,
 			graphene::DSEL::Frame<graphene::Frames::Renderable::Colorblind::InversedColor>,
-			graphene::DSEL::Frame<graphene::Frames::Stateful::Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
+			graphene::DSEL::Frame<graphene::Frames::Stateful::Rectangular, geometry::RefRectangle<CoordinateType, leftRef, bottomRef, rightRef, topRef>>
 		>;
 
 		template<typename CoordinateType, typename Const, typename CharType>
@@ -124,8 +124,8 @@ namespace GUIModel
 				graphene::DSEL::Frame<
 					graphene::Frames::Behavioural::MultiPartBorderedRectangle,
 					graphene::Frames::Behavioural::ConcreteReturnTypesBuilder<ControlPart, typename RectangleType::coordinate_type>,
-					std::unique_ptr<      IShapePart<typename RectangleType::coordinate_type>>,
-					std::unique_ptr<const IShapePart<typename RectangleType::coordinate_type>>
+					std::unique_ptr<      IShapePart<      typename RectangleType::coordinate_type>>,
+					std::unique_ptr<const IShapePart<const typename RectangleType::coordinate_type>>
 				>,
 				graphene::DSEL::Sequence<
 					graphene::DSEL::Condition<graphene::FunctionObjects::Selected,

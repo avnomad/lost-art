@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(Test_Rectangle)
 BOOST_AUTO_TEST_CASE(Test_RefRectangle)
 {
 	int x = -1, y = 7;
-	RefRectangle<int,false,true,false,false,true> refrecti(x,5,3,y);
+	RefRectangle<int,true,false,false,true> refrecti(x,5,3,y);
 	BOOST_CHECK_EQUAL(refrecti.left(), -1);
 	BOOST_CHECK_EQUAL(refrecti.right(), 3);
 	BOOST_CHECK_EQUAL(refrecti.bottom(), 5);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(Test_RefRectangle)
 	BOOST_CHECK_EQUAL(y, 7);
 	BOOST_CHECK_EQUAL(refrecti.width(), 1);
 	BOOST_CHECK_EQUAL(refrecti.height(), 2);
-	refrecti.side(RefRectangle<int,false,true,false,false,true>::Side::BOTTOM) = 4;
+	refrecti.side(RefRectangle<int,true,false,false,true>::Side::BOTTOM) = 4;
 	BOOST_CHECK_EQUAL(refrecti.bottom(), 4);
 	BOOST_CHECK_EQUAL(x, -1);
 	BOOST_CHECK_EQUAL(y, 7);

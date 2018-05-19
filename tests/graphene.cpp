@@ -71,7 +71,7 @@ using IShapePart = FrameStack<
 
 /** Const instances should be constant and non-const instances should be non constant
  */
-template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool constant, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
+template<typename CoordinateType, typename horizontallyMovable, typename verticallyMovable, bool leftRef, bool bottomRef, bool rightRef, bool topRef>
 using ControlPart = FrameStack<
 	IShapePart<CoordinateType>,
 	Frame<Interface::Rectangular>,
@@ -80,7 +80,7 @@ using ControlPart = FrameStack<
 	Frame<Colorblind::FilledRectangle>,
 	Frame<Stippled>,
 	Frame<Colorblind::InversedColor>,
-	Frame<Rectangular, geometry::RefRectangle<CoordinateType, constant, leftRef, bottomRef, rightRef, topRef>>
+	Frame<Rectangular, geometry::RefRectangle<CoordinateType, leftRef, bottomRef, rightRef, topRef>>
 >;
 
 template<typename CoordinateType, typename TextType = std::string>
@@ -95,8 +95,8 @@ using IControl = FrameStack<
 	Frame<Interface::SizedText>,
 	Frame<Interface::Selectable>,
 	Frame<Interface::Highlightable>,
-	Frame<Interface::MultiPart, std::unique_ptr<      IShapePart<CoordinateType>>,
-							std::unique_ptr<const IShapePart<CoordinateType>>>,
+	Frame<Interface::MultiPart, std::unique_ptr<      IShapePart<      CoordinateType>>,
+								std::unique_ptr<const IShapePart<const CoordinateType>>>,
 	Frame<Interface::Renderable>
 >;
 
