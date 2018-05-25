@@ -38,7 +38,8 @@ endif()
 
 
 # Locate dependencies
-find_package(Boost REQUIRED)
+find_package(Boost 1.56.0 REQUIRED) # In 1.55.0 xml_writer_make_settings
+									# needs to be called in a different way.
 find_package(Eigen3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
@@ -46,7 +47,7 @@ find_package(GLUT 2.8.1 REQUIRED) # freeglut 2.8.0 had a problem with reported
 								  # mouse coordinates and window size.
 add_definitions(${EIGEN3_DEFINITIONS})
 
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR}
 	${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLUT_INCLUDE_DIR})
 link_libraries(${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${GLUT_glut_LIBRARY})
 include_directories("source")
