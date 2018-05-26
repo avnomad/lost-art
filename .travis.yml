@@ -20,6 +20,10 @@ language: cpp
 dist: trusty # Ubuntu 14.04 LTS (Trusty Tahr)
 sudo: false
 
+branches:
+  only:
+    - default
+
 # Test against both supported toolchains.
 compiler:
   - clang
@@ -37,7 +41,8 @@ addons:
       - freeglut3-dev
       - libeigen3-dev
 
-before_install: # Download and extract Boost.
+before_install: # Install cpp-coveralls. Then download and extract Boost.
+  - pip install --user cpp-coveralls
   - wget 'https://sourceforge.net/projects/boost/files/boost/1.56.0/boost_1_56_0.tar.bz2/download' -O boost_1_56_0.tar.bz2
   - bzip2 -d boost_1_56_0.tar.bz2
   - tar --extract --file boost_1_56_0.tar
@@ -52,9 +57,15 @@ before_script: # Configure CMake project.
   - if [ "$CXX" = "g++" ]; then export CXX="g++-5"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.6"; fi
   - cmake -E make_directory build
-  - cmake -E chdir build cmake .. -DCMAKE_MODULE_PATH=/usr/share/cmake-2.8/Modules/ -DBOOST_ROOT=boost_installation
+  - cmake -E chdir build cmake .. -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_MODULE_PATH=/usr/share/cmake-2.8/Modules/ -DBOOST_ROOT=boost_installation
 # Module path for FindEigen3.cmake was found by looking at https://packages.ubuntu.com/trusty/all/libeigen3-dev/filelist.
 
 script: # Build LostArt and run tests.
   - cmake -E chdir build cmake --build .
   - xvfb-run cmake -E chdir build cmake --build . --target unit-tests # xvfb-run is needed by one test that calls glutInit.
+
+after_success:
+  - if [ "$CXX" = "g++-5" ];
+    then
+        cpp-coveralls --gcov /usr/bin/gcov-5 --gcov-options "\-lpr \-s \"$TRAVIS_BUILD_DIR\"" --include source;
+    fi
