@@ -1,0 +1,60 @@
+# Copyright (C) 2014, 2018 Vaptistis Anogeianakis <nomad@cornercase.gr>
+#
+# This file is part of LostArt.
+#
+# LostArt is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# LostArt is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with LostArt.  If not, see <http://www.gnu.org/licenses/>.
+
+# Travis CI configuration
+language: cpp
+dist: trusty # Ubuntu 14.04 LTS (Trusty Tahr)
+sudo: false
+
+# Test against both supported toolchains.
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
+    packages:
+      - g++-5 # Minimum version available on Travis CI that will compile the project.
+      - clang-3.6 # Same as above. Newer versions are tested locally.
+      - libglew-dev
+      - freeglut3-dev
+      - libeigen3-dev
+
+before_install: # Download and extract Boost.
+  - wget 'https://sourceforge.net/projects/boost/files/boost/1.56.0/boost_1_56_0.tar.bz2/download' -O boost_1_56_0.tar.bz2
+  - bzip2 -d boost_1_56_0.tar.bz2
+  - tar --extract --file boost_1_56_0.tar
+
+install: # Build and install Boost. ppa:boost-latest only goes up to 1.55 for which I've dropped support.
+  - cd boost_1_56_0
+  - ./bootstrap.sh --with-libraries=test --prefix=../boost_installation # Only header-only libraries are used.
+  - ./b2 -d0 --build-dir=../boost_build install # Output is too long for Travis CI without -d0.
+  - cd ..
+
+before_script: # Configure CMake project.
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-5"; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.6"; fi
+  - cmake -E make_directory build
+  - cmake -E chdir build cmake .. -DCMAKE_MODULE_PATH=/usr/share/cmake-2.8/Modules/ -DBOOST_ROOT=boost_installation
+# Module path for FindEigen3.cmake was found by looking at https://packages.ubuntu.com/trusty/all/libeigen3-dev/filelist.
+
+script: # Build LostArt and run tests.
+  - cmake -E chdir build cmake --build .
+  - xvfb-run cmake -E chdir build cmake --build . --target unit-tests # xvfb-run is needed by one test that calls glutInit.
