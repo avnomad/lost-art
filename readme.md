@@ -78,26 +78,23 @@ objects with each other.
 
 ## Related work
 
-There has been a lot of research around the use of constraints — both linear [3,
-4, 7] and multi-way [1, 2] — in user interface development in the 90s and later.
-Some require a solver to be present in the execution environment [3, 5, 6],
-while others compile constraints in a stand-alone application [4]. Some goes
-beyond user interface construction and into web [5] and window [6] layout.
+There has been a lot of research around the use of constraints — both linear
+\[[3][r3], [4][r4], [7][r7]\] and multi-way \[[1][r1], [2][r2]\] — in user
+interface development in the 90s and later. Some require a solver to be present
+in the execution environment \[[3][r3], [5][r5], [6][r6]\], while others compile
+constraints in a stand-alone application \[[4][r4]\]. Some goes beyond user
+interface construction and into web \[[5][r5]\] and window \[[6][r6]\] layout.
 
 1. [Multi-way versus One-way Constraints in User Interfaces Experience with the
-	DeltaBlue Algorithm (1993)](http://doi.wiley.com/10.1002/spe.4380230507)
+	DeltaBlue Algorithm (1993)][r1]
 2. [Skyblue: a multi-way local propagation constraint solver for user interface
-	construction (1994)](http://dl.acm.org/citation.cfm?id=192426.192485)
+	construction (1994)][r2]
 3. [Solving Linear Arithmetic Constraints for User Interface Applications
-	(1997)](http://portal.acm.org/citation.cfm?doid=263407.263518)
-4. [Compiling Constraint Solving using Projection (1997)](
-	http://link.springer.com/10.1007/BFb0017462)
-5. [Constraint-Based Document Layout for the Web (2000)](
-	http://link.springer.com/10.1007/s005300000043)
-6. [Scwm - An Extensible Constraint-Enabled Window Manager (2001)](
-	http://www.usenix.org/events/usenix01/freenix01/badros.html)
-7. [Domain Specific High-Level Constraints for User Interface Layout (2008)](
-	http://link.springer.com/10.1007/s10601-008-9043-2)
+	(1997)][r3]
+4. [Compiling Constraint Solving using Projection (1997)][r4]
+5. [Constraint-Based Document Layout for the Web (2000)][r5]
+6. [Scwm - An Extensible Constraint-Enabled Window Manager (2001)][r6]
+7. [Domain Specific High-Level Constraints for User Interface Layout (2008)][r7]
 
 LostArt adopts the compilation approach, but attempts to create a visual
 language where constraints can be added and edited directly on the UI canvas
@@ -108,6 +105,14 @@ constraint hierarchies (at least not in the way the aforementioned projects did)
 and in the context of multi-way constraints that may mean that the direction in
 which information will flow is known beforehand and better complexity guarantees
 can be achieved.
+
+[r1]: http://doi.wiley.com/10.1002/spe.4380230507
+[r2]: http://dl.acm.org/citation.cfm?id=192426.192485
+[r3]: http://portal.acm.org/citation.cfm?doid=263407.263518
+[r4]: http://link.springer.com/10.1007/BFb0017462
+[r5]: http://link.springer.com/10.1007/s005300000043
+[r6]: http://www.usenix.org/events/usenix01/freenix01/badros.html
+[r7]: http://link.springer.com/10.1007/s10601-008-9043-2
 
 ## Prerequisites
 
@@ -205,21 +210,21 @@ The interaction is relatively simple. Below all clicks are left-clicks:
 LostArt's interface has a single text box at the top that contains the relative
 or absolute path to an XML file describing a UI.
 
-Clicking "Load" will replace the interface currently being edited with the file
+Clicking `Load` will replace the interface currently being edited with the file
 contents. An error will be printed if the file doesn't exist.
 
-Clicking "Save" will replace the file contents with the interface currently
+Clicking `Save` will replace the file contents with the interface currently
 being edited, or create a new file if one doesn't exist.
 
 ### Compiling and Running a UI
 
-Clicking "Compile" will check the current interface specification and print
+Clicking `Compile` will check the current interface specification and print
 error and/or warning messages as needed. If there are no errors, it will proceed
 to create an `application customization.hpp` header in the working directory and
 build it. The latter header will contain an implementation of the specified
 interface.
 
-Clicking "Run" will invoke the generated application, so one can interact with
+Clicking `Run` will invoke the generated application, so one can interact with
 it and verify it behaves as expected when resized.
 
 Note that currently LostArt expects to find a few files in its working directory
@@ -236,7 +241,7 @@ If you are not satisfied with CMake's default choices of compiler/generator or
 CMake is unable to locate where you've installed the required libraries, you
 must create a 'build' directory manually in LostArt's working directory and
 preconfigure the CMake project accordingly before attempting to click the
-"Compile" button in LostArt's interface.
+`Compile` button in LostArt's interface.
 
 ## Examples
 
