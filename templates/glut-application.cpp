@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 {
 	// glut initialization
 	glutInit(&argc,argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_MULTISAMPLE);
 	glutInitWindowSize(500,500);
 	glutInitWindowPosition(700,160);
 	glutCreateWindow("Untitled Application");
@@ -76,10 +76,9 @@ int main(int argc, char **argv)
 	glColor3f(1.0,0.75,0.0);	// gold
 	glPolygonMode(GL_FRONT,GL_FILL);
 	glPolygonMode(GL_BACK,GL_LINE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // consider adding alpha planes to framebuffer
-	glEnable(GL_BLEND); // and change factors for optimum polygon antialiasing.
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glEnable(GL_MULTISAMPLE);
 
 	// application initialization
 	pixelWidth = (float)glutGet(GLUT_SCREEN_WIDTH_MM) / glutGet(GLUT_SCREEN_WIDTH);
